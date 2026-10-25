@@ -139,7 +139,7 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 
 		var move = Input.AnalogMove;
 		Player.Controller.WishVelocity = Vector3.Zero;
-		_grabOffset = _rotation.Rotate( Player.EyeTransform.Rotation, move, true );
+		_grabOffset = _rotation.Rotate( Player.AimTransform.Rotation, move, true );
 	}
 
 	void BlockAttack()
@@ -174,7 +174,7 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 	/// </summary>
 	Rigidbody FindTarget()
 	{
-		var eye = Player.EyeTransform;
+		var eye = Player.AimTransform;
 		var reach = Player.Controller.ReachLength;
 
 		// Widen the ray a little if it misses, so small things aren't fiddly to grab
@@ -238,7 +238,7 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 
 		Held = body.GameObject;
 
-		_grabOffset = Player.EyeTransform.Rotation.Inverse * body.WorldRotation;
+		_grabOffset = Player.AimTransform.Rotation.Inverse * body.WorldRotation;
 		_rotation.Reset( _grabOffset );
 		_holdTarget = GetHoldTarget();
 		_timeSincePickup = 0;
@@ -300,7 +300,7 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 	{
 		if ( IsProxy || !IsCarrying ) return;
 
-		ThrowBody( HeldBody, Player.EyeTransform.Forward * ThrowSpeed );
+		ThrowBody( HeldBody, Player.AimTransform.Forward * ThrowSpeed );
 		Drop();
 	}
 
@@ -319,7 +319,7 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 
 	Transform GetHoldTarget()
 	{
-		var eye = Player.EyeTransform;
+		var eye = Player.AimTransform;
 		var body = HeldBody;
 		var center = body.PhysicsBody.MassCenter;
 
@@ -373,7 +373,7 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 	/// </summary>
 	bool IsInReach( Rigidbody body )
 	{
-		var eye = Player.EyeTransform.Position;
+		var eye = Player.AimTransform.Position;
 		var closest = body.FindClosestPoint( eye );
 		if ( closest.Distance( eye ) > Player.Controller.ReachLength + 32.0f ) return false;
 
@@ -393,7 +393,7 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 
 	Transform ClampToReach( Transform target )
 	{
-		var eye = Player.EyeTransform.Position;
+		var eye = Player.AimTransform.Position;
 		return target.WithPosition( eye + (target.Position - eye).ClampLength( MaxReach ) );
 	}
 

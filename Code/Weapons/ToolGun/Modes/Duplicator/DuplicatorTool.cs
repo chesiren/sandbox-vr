@@ -116,7 +116,7 @@ public sealed partial class DuplicatorTool : ToolMode
 				return;
 			}
 
-			var selectionAngle = new Transform( select.WorldPosition(), Player.EyeTransform.Rotation.Angles().WithPitch( 0 ) );
+			var selectionAngle = new Transform( select.WorldPosition(), Player.AimTransform.Rotation.Angles().WithPitch( 0 ) );
 			Copy( select.GameObject, selectionAngle, Input.Down( "run" ) );
 
 			ShootEffects( select );
@@ -204,7 +204,7 @@ public sealed partial class DuplicatorTool : ToolMode
 
 	Transform GetPlacement( SelectionPoint select )
 	{
-		var eyeRotation = Player.EyeTransform.Rotation;
+		var eyeRotation = Player.AimTransform.Rotation;
 		var up = AlignToSurface ? select.WorldTransform().Rotation.Forward : Vector3.Up;
 
 		// Face the view direction projected onto the surface, falling back to view up when looking straight at it.

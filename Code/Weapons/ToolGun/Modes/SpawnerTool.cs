@@ -236,7 +236,7 @@ public sealed class SpawnerTool : ToolMode
 
 	private SceneTraceResult GetPlacementInfo()
 	{
-		return Scene.Trace.Ray( Player.EyeTransform.ForwardRay, 4096 )
+		return Scene.Trace.Ray( Player.AimTransform.ForwardRay, 4096 )
 			.IgnoreGameObjectHierarchy( Player.GameObject )
 			.WithoutTags( "player" )
 			.Run();
@@ -245,7 +245,7 @@ public sealed class SpawnerTool : ToolMode
 	private Transform GetSpawnTransform( SceneTraceResult trace )
 	{
 		var up = trace.Normal;
-		var backward = -Player.EyeTransform.Forward;
+		var backward = -Player.AimTransform.Forward;
 		var right = Vector3.Cross( up, backward ).Normal;
 		var forward = Vector3.Cross( right, up ).Normal;
 		var facingAngle = Rotation.LookAt( forward, up );

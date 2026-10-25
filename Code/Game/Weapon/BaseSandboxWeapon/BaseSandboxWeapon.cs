@@ -75,6 +75,21 @@ public partial class BaseSandboxWeapon : Sandbox.BaseCombatWeapon, IKillIcon, IP
 	}
 
 	/// <summary>
+	/// Held by a VR player, the weapon fires where their hand points rather than where they look.
+	/// </summary>
+	public override Ray AimRay => VRPlayer.Get( Owner ) is { } vr ? vr.Aim.ForwardRay : base.AimRay;
+
+	/// <summary>
+	/// No view model in VR - the world model in the player's hand is what they see.
+	/// </summary>
+	protected override void CreateViewModel()
+	{
+		if ( VRMode.IsActive && Owner.IsValid() && Owner.IsLocalPlayer ) return;
+
+		base.CreateViewModel();
+	}
+
+	/// <summary>
 	/// Roughly chest height - most of the way from the feet up to the eyes, so it follows crouching.
 	/// </summary>
 	private static Vector3 GetChestPosition( GameObject target )
@@ -320,7 +335,7 @@ public partial class BaseSandboxWeapon : Sandbox.BaseCombatWeapon, IKillIcon, IP
 
 		if ( player.IsValid() )
 		{
-			var eye = player.EyeTransform;
+			var eye = player.AimTransform;
 			var velocity = (player.Controller.IsValid() ? player.Controller.Velocity : Vector3.Zero)
 				+ eye.Forward * 200f + Vector3.Up * 100f;
 

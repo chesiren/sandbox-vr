@@ -29,7 +29,7 @@
     "StartupScene": "scenes/sandbox.scene",
     "ControlModes": {
       "Keyboard": true,
-      "VR": false,
+      "VR": true,
       "Gamepad": true
     },
     "LaunchMode": "Launcher",

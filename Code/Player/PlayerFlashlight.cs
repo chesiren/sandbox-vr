@@ -44,7 +44,7 @@ public sealed class PlayerFlashlight : Component
 			}
 		}
 
-		var eye = _player.EyeTransform;
+		var eye = _player.AimTransform;
 		WorldTransform = eye.ToWorld( _localOffset );
 
 		if ( IsOn && FillLight.IsValid() )

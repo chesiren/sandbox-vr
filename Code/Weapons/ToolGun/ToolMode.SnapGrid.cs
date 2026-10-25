@@ -66,7 +66,7 @@ public abstract partial class ToolMode
 		UpdateSnapTarget();
 
 		var desiredAngles = _hasSnapTarget
-			? Rotation.LookAt( SnapGrid.LastSnapWorldPos - player.EyeTransform.Position ).Angles()
+			? Rotation.LookAt( SnapGrid.LastSnapWorldPos - player.AimTransform.Position ).Angles()
 			: freeAim;
 
 		angles = desiredAngles - currentAngles;
@@ -81,9 +81,9 @@ public abstract partial class ToolMode
 		if ( !player.IsValid() ) return default;
 
 		if ( _snapFreeAim is not { } freeAim )
-			return TraceFromRay( player.EyeTransform.ForwardRay, 4096, player.GameObject );
+			return TraceFromRay( player.AimTransform.ForwardRay, 4096, player.GameObject );
 
-		var ray = new Ray( player.EyeTransform.Position, freeAim.Forward );
+		var ray = new Ray( player.AimTransform.Position, freeAim.Forward );
 		return TraceFromRay( ray, 4096, player.GameObject );
 	}
 
@@ -126,13 +126,13 @@ public abstract partial class ToolMode
 			var player = Toolgun?.Owner;
 			if ( !player.IsValid() ) return;
 			var plane = _lockedSnapPlane.WorldTransform();
-			var direction = _snapFreeAim?.Forward ?? player.EyeTransform.Forward;
+			var direction = _snapFreeAim?.Forward ?? player.AimTransform.Forward;
 			var denominator = Vector3.Dot( direction, plane.Rotation.Forward );
 			if ( _snapAimDirty && MathF.Abs( denominator ) > 0.0001f )
 			{
-				var distance = Vector3.Dot( plane.Position - player.EyeTransform.Position, plane.Rotation.Forward ) / denominator;
+				var distance = Vector3.Dot( plane.Position - player.AimTransform.Position, plane.Rotation.Forward ) / denominator;
 				if ( distance >= 0 && distance <= 4096 )
-					_lockedAimLocal = preview.GameObject.WorldTransform.PointToLocal( player.EyeTransform.Position + direction * distance );
+					_lockedAimLocal = preview.GameObject.WorldTransform.PointToLocal( player.AimTransform.Position + direction * distance );
 			}
 			_snapAimDirty = false;
 			var local = preview.LocalTransform;

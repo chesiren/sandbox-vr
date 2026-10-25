@@ -95,7 +95,8 @@ public class MeleeWeapon : BaseSandboxWeapon
 			shot.Surface.SoundCollection.ImpactHard ?? shot.Surface.GetBaseSurface()?.SoundCollection.ImpactHard ?? HitSound,
 			shot.HitObject.WorldTransform.PointToLocal( shot.HitPosition ) );
 
-		ImpactPrefab( shot.HitObject, shot.Surface, shot.HitPosition, shot.Normal, GetShotDirection( shot ) );
+		// The installed engine's ImpactPrefab has no shot direction parameter yet
+		ImpactPrefab( shot.HitObject, shot.Surface, shot.HitPosition, shot.Normal );
 	}
 
 	/// <summary>
