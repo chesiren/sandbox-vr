@@ -159,7 +159,7 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "RightHandIkOffset": "0,0,-90",
+        "RightHandIkOffset": "0,0,90",
         "ShiftDuration": 0.15,
         "TeleportArcSpeed": 700
       },

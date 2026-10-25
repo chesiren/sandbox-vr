@@ -10,17 +10,17 @@ public sealed class VRHud : Component
 	/// <summary>
 	/// How far in front of the eyes the HUD floats.
 	/// </summary>
-	[Property] public float Distance { get; set; } = 45f;
+	[Property] public float Distance { get; set; } = 32f;
 
 	/// <summary>
 	/// How far below the eyes the HUD sits, so it isn't in the way of looking around.
 	/// </summary>
-	[Property] public float Drop { get; set; } = 8f;
+	[Property] public float Drop { get; set; } = 6f;
 
 	/// <summary>
-	/// Scale of the HUD panel. At 0.15 it is about 1.5 metres across.
+	/// Scale of the HUD panel. At 0.12 it is about 1.2 metres across.
 	/// </summary>
-	[Property] public float Scale { get; set; } = 0.15f;
+	[Property] public float Scale { get; set; } = 0.12f;
 
 	/// <summary>
 	/// How quickly the HUD catches up with where you look. Higher is snappier.
