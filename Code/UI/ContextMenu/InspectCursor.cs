@@ -9,12 +9,16 @@ public static class InspectCursor
 	const float DragThreshold = 4f;
 
 	static Vector2 _pressPosition;
+	static Vector3 _pressDirection;
 	static bool _pressed;
 	static bool _dragging;
 	static bool _freezeRequested;
 
 	public static bool IsOpen => Game.ActiveScene?.Camera.IsValid() == true && SpawnMenuHost.IsOpen && SpawnMenuHost.GetActiveMode() is ContextMenuHost;
-	public static Ray Ray => Game.ActiveScene.Camera.ScreenPixelToRay( Mouse.Position );
+	/// <summary>
+	/// Under the mouse, or along the dominant hand in VR
+	/// </summary>
+	public static Ray Ray => VRPlayer.Local is { } vr ? vr.Aim.ForwardRay : Game.ActiveScene.Camera.ScreenPixelToRay( Mouse.Position );
 	public static bool IsDragging => _dragging && IsOpen;
 	public static Ray DragRay { get; private set; }
 
@@ -25,6 +29,7 @@ public static class InspectCursor
 		if ( !HasPhysgunOut ) return;
 
 		_pressPosition = Mouse.Position;
+		_pressDirection = Ray.Forward;
 		_pressed = true;
 	}
 
@@ -52,6 +57,13 @@ public static class InspectCursor
 		return requested;
 	}
 
+	/// <summary>
+	/// The cursor moved far enough with the button held to count as a drag. A VR laser has no pixels, so it goes by angle
+	/// </summary>
+	static bool MovedSincePress => VRMode.IsActive
+		? Vector3.GetAngle( _pressDirection, Ray.Forward ) > 1.5f
+		: Mouse.Position.Distance( _pressPosition ) > DragThreshold;
+
 	internal static void Update( bool buttonHeld )
 	{
 		if ( !IsOpen || _pressed && (!buttonHeld || !HasPhysgunOut) )
@@ -60,7 +72,7 @@ public static class InspectCursor
 			return;
 		}
 
-		if ( _pressed && !_dragging && Mouse.Position.Distance( _pressPosition ) > DragThreshold )
+		if ( _pressed && !_dragging && MovedSincePress )
 		{
 			_dragging = true;
 		}

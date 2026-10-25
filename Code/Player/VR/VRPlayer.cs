@@ -88,6 +88,8 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 
 		if ( Scene.Camera.IsValid() )
 			Scene.Camera.TargetEye = StereoTargetEye.Both;
+
+		_ = VRHud.Enable( Scene );
 	}
 
 	protected override void OnDestroy()

@@ -395,6 +395,10 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 			ConsoleSystem.Run( "undo" );
 		}
 
+		// In VR the trigger is clicking a menu - the weapon and hands shouldn't act on it
+		if ( VR?.PointingAtUI ?? false )
+			return;
+
 		// Before the weapon, so carrying something can keep attack from it
 		GetComponent<PlayerCarry>()?.OnControl();
 
