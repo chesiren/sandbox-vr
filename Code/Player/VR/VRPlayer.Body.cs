@@ -15,7 +15,39 @@ public sealed partial class VRPlayer
 	/// </summary>
 	[Property, Group( "VR Body" )] public Vector3 HandIkPositionOffset { get; set; } = new( -3, 0, -1 );
 
+	/// <summary>
+	/// Eye height of the body model standing at scale 1.
+	/// </summary>
+	[Property, Group( "VR Body" )] public float ModelEyeHeight { get; set; } = 63.7f;
+
+	/// <summary>
+	/// How far the model's eyes are in front of its feet, plus a little so its head stays behind the headset.
+	/// </summary>
+	[Property, Group( "VR Body" )] public float ModelEyeForward { get; set; } = 8.5f;
+
+	/// <summary>
+	/// The body is scaled so its eyes are at the player's real standing eye height.
+	/// </summary>
+	[Sync] public float BodyScale { get; private set; } = 1f;
+
+	/// <summary>
+	/// Highest the headset has been above the floor - the player's standing eye height.
+	/// </summary>
+	float _standingHeight;
+
 	bool _ikApplied;
+
+	void UpdateBodyScale()
+	{
+		var headHeight = Head.Position.z - WorldPosition.z;
+
+		// Ignore the first moments, when the headset may still be on a desk or in someone's hands
+		if ( headHeight > 30f )
+			_standingHeight = MathF.Max( _standingHeight, headHeight );
+
+		if ( _standingHeight > 0f )
+			BodyScale = (_standingHeight / ModelEyeHeight).Clamp( 0.6f, 1.2f );
+	}
 
 	/// <summary>
 	/// On every peer, pins the body's hands to the synced controller poses, so everyone sees the VR player's
@@ -32,6 +64,8 @@ public sealed partial class VRPlayer
 			{
 				renderer.ClearIk( "hand_left" );
 				renderer.ClearIk( "hand_right" );
+				ReleaseFingers();
+				renderer.LocalScale = 1f;
 				_ikApplied = false;
 			}
 
@@ -40,10 +74,28 @@ public sealed partial class VRPlayer
 
 		renderer.SetIk( "hand_left", HandTarget( LeftHand, LeftHandIkOffset ) );
 		renderer.SetIk( "hand_right", HandTarget( RightHand, RightHandIkOffset ) );
+		UpdateFingers( renderer );
 		_ikApplied = true;
 
 		if ( IsLocalVR && !_headHidden )
 			HideOwnHead( renderer );
+	}
+
+	/// <summary>
+	/// After the controller has placed the body for the frame: size it to the player and step it back so its eyes,
+	/// not its feet, are under the headset - otherwise the camera ends up in its neck and shoulders.
+	/// </summary>
+	protected override void OnPreRender()
+	{
+		if ( !IsVR ) return;
+
+		var renderer = Controller.IsValid() ? Controller.Renderer : null;
+		if ( !renderer.IsValid() ) return;
+
+		renderer.LocalScale = BodyScale;
+
+		var forward = renderer.WorldRotation.Forward.WithZ( 0 ).Normal;
+		renderer.WorldPosition -= forward * ModelEyeForward * BodyScale;
 	}
 
 	bool _headHidden;

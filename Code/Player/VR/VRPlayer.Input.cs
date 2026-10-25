@@ -25,6 +25,10 @@ public sealed partial class VRPlayer
 		var main = VRMode.DominantHand;
 		var off = VRMode.OffHand;
 
+		// SteamVR also drives the engine's gamepad bindings from the controllers (turning the stick pressed the
+		// d-pad weapon cycling), so start from nothing and press only what's mapped below
+		Input.ClearActions();
+
 		// The view never turns from look input in VR, so look input is free to carry the hand's twist: the physgun
 		// and tools rotate what they hold with it, exactly as they do with the mouse.
 		Input.AnalogLook = HandLookDelta( main );
@@ -125,7 +129,7 @@ public sealed partial class VRPlayer
 			if ( _crouchToggled ) return true;
 
 			var settings = VRSettings.Current;
-			var standingEye = Controller.BodyHeight - _defaultEyeDistance;
+			var standingEye = _standingHeight > 0f ? _standingHeight : Controller.BodyHeight - _defaultEyeDistance;
 			var headHeight = Head.Position.z - WorldPosition.z;
 			return headHeight < standingEye * settings.PhysicalCrouchFraction;
 		}

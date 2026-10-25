@@ -23,15 +23,16 @@ public sealed class VRHud : Component
 	[Property] public float Scale { get; set; } = 0.15f;
 
 	/// <summary>
-	/// Degrees the head can turn away before the HUD swings back in front.
+	/// How quickly the HUD catches up with where you look. Higher is snappier.
 	/// </summary>
-	[Property] public float FollowAngle { get; set; } = 35f;
+	[Property] public float FollowSpeed { get; set; } = 12f;
 
 	GameObject _pointer;
 	WorldInput _input;
 	LineRenderer _laser;
 
-	float _yaw;
+	float _yaw = float.NaN;
+	float _pitch;
 	bool _wasMenuOpen;
 
 	/// <summary>
@@ -112,19 +113,31 @@ public sealed class VRHud : Component
 
 	void PlacePanel( Transform head, bool menuOpen )
 	{
-		var headYaw = head.Rotation.Yaw();
+		var look = head.Rotation.Angles();
+		var pitch = look.pitch.Clamp( -60f, 60f );
 
-		// A menu opens straight ahead and stays put while it's used; the HUD lazily follows the head
-		if ( float.IsNaN( _yaw ) || (menuOpen && !_wasMenuOpen) || MathF.Abs( Angles.NormalizeAngle( headYaw - _yaw ) ) > FollowAngle && !menuOpen )
-			_yaw = headYaw;
+		if ( float.IsNaN( _yaw ) || (menuOpen && !_wasMenuOpen) )
+		{
+			// A menu opens straight ahead
+			_yaw = look.yaw;
+			_pitch = pitch;
+		}
+		else if ( !menuOpen )
+		{
+			// ...and stays put while it's used; the HUD follows the view, just softened
+			var t = 1f - MathF.Exp( -FollowSpeed * Time.Delta );
+			_yaw += Angles.NormalizeAngle( look.yaw - _yaw ) * t;
+			_pitch += (pitch - _pitch) * t;
+		}
 
 		_wasMenuOpen = menuOpen;
 
-		var forward = Rotation.FromYaw( _yaw ).Forward;
-		var position = head.Position + forward * Distance + Vector3.Down * (menuOpen ? 0f : Drop);
+		var rotation = Rotation.From( _pitch, _yaw, 0 );
+		var forward = rotation.Forward;
+		var position = head.Position + forward * Distance + rotation.Down * (menuOpen ? 0f : Drop);
 
 		WorldPosition = position;
-		WorldRotation = Rotation.LookAt( -forward, Vector3.Up );
+		WorldRotation = Rotation.LookAt( -forward, rotation.Up );
 		WorldScale = Scale;
 	}
 
