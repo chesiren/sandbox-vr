@@ -42,5 +42,8 @@
 
         [Property, Title( "Crouch Height" ), Description( "Crouch when your head drops below this fraction of your standing height" ), Range( 0.4f, 0.9f ), Step( 0.05f ), Order( 6 )]
         public float PhysicalCrouchFraction { get => S.PhysicalCrouchFraction; set { S.PhysicalCrouchFraction = value; S.Save(); } }
+
+        [Button( "Recalibrate Height" ), Description( "Stand up straight and press this to size your body to you" ), Order( 7 )]
+        public void RecalibrateHeight() => VRPlayer.RecalibrateHeight();
     }
 }

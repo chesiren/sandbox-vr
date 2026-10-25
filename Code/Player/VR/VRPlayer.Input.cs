@@ -25,10 +25,6 @@ public sealed partial class VRPlayer
 		var main = VRMode.DominantHand;
 		var off = VRMode.OffHand;
 
-		// SteamVR also drives the engine's gamepad bindings from the controllers (turning the stick pressed the
-		// d-pad weapon cycling), so start from nothing and press only what's mapped below
-		Input.ClearActions();
-
 		// The view never turns from look input in VR, so look input is free to carry the hand's twist: the physgun
 		// and tools rotate what they hold with it, exactly as they do with the mouse.
 		Input.AnalogLook = HandLookDelta( main );
@@ -61,6 +57,12 @@ public sealed partial class VRPlayer
 		Press( "undo", _offTriggerDown );
 		Press( "noclip", main.JoystickPress.IsPressed && off.JoystickPress.IsPressed );
 
+		// SteamVR also presses the engine's gamepad bindings from the controllers - pushing the stick to turn hit
+		// the d-pad weapon cycling. Hold those up.
+		Press( "slotprev", false );
+		Press( "view", false );
+		Press( "duck", false );
+
 		UpdateTurning( main.Joystick.Value );
 		UpdateJumpAndCrouch( main.Joystick.Value );
 		UpdateLocomotionInput( off );
@@ -82,9 +84,20 @@ public sealed partial class VRPlayer
 		return new Angles( angles.pitch - last.pitch, Angles.NormalizeAngle( angles.yaw - last.yaw ), 0 );
 	}
 
-	static void Press( string action, bool down )
+	readonly HashSet<string> _actionsDown = new( StringComparer.OrdinalIgnoreCase );
+
+	/// <summary>
+	/// Sets an action down or up for this frame, along with what it was last frame. SetAction alone reports the
+	/// action as freshly pressed every frame it's set, so holding a button cycled weapons, refired semi-auto
+	/// guns and toggled carrying every frame.
+	/// </summary>
+	void Press( string action, bool down )
 	{
-		if ( down ) Input.SetAction( action, true );
+		Input.SetLastAction( action, _actionsDown.Contains( action ) );
+		Input.SetAction( action, down );
+
+		if ( down ) _actionsDown.Add( action );
+		else _actionsDown.Remove( action );
 	}
 
 	bool _stickUpLatched;
@@ -93,20 +106,20 @@ public sealed partial class VRPlayer
 
 	void UpdateJumpAndCrouch( Vector2 stick )
 	{
-		// Stick y is up-positive; latch so holding it doesn't repeat
+		// Stick y is up-positive; jump is held while the stick is up, so it only jumps once per push
 		if ( stick.y > 0.7f && MathF.Abs( stick.x ) < 0.5f )
 		{
-			if ( !_stickUpLatched )
-				Input.SetAction( "jump", true );
-
+			Press( "jump", !_stickUpLatched || _actionsDown.Contains( "jump" ) );
 			_stickUpLatched = true;
 		}
-		else if ( stick.y < 0.3f )
+		else
 		{
-			_stickUpLatched = false;
+			Press( "jump", false );
+			if ( stick.y < 0.3f ) _stickUpLatched = false;
 		}
 
-		if ( stick.y < -0.7f && MathF.Abs( stick.x ) < 0.5f )
+		// A firm push down, not the wobble of clicking the stick to change weapon
+		if ( stick.y < -0.85f && MathF.Abs( stick.x ) < 0.4f && !VRMode.DominantHand.JoystickPress.IsPressed )
 		{
 			if ( !_stickDownLatched )
 				_crouchToggled = !_crouchToggled;

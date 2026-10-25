@@ -37,12 +37,27 @@ public sealed partial class VRPlayer
 
 	bool _ikApplied;
 
+	float _lastHeadHeight;
+
+	/// <summary>
+	/// Takes the current head height as standing height, for the local VR player.
+	/// </summary>
+	public static void RecalibrateHeight()
+	{
+		if ( Local is not { } vr ) return;
+
+		vr._standingHeight = vr.Head.Position.z - vr.WorldPosition.z;
+	}
+
 	void UpdateBodyScale()
 	{
 		var headHeight = Head.Position.z - WorldPosition.z;
+		var headSpeed = MathF.Abs( headHeight - _lastHeadHeight ) / MathF.Max( Time.Delta, 0.001f );
+		_lastHeadHeight = headHeight;
 
-		// Ignore the first moments, when the headset may still be on a desk or in someone's hands
-		if ( headHeight > 30f )
+		// Only trust a steady, plausible head height - not the headset on a desk, or lifted over the head while
+		// putting it on. A height that's too tall makes looking down count as crouching.
+		if ( headHeight > 30f && headHeight < 80f && headSpeed < 10f )
 			_standingHeight = MathF.Max( _standingHeight, headHeight );
 
 		if ( _standingHeight > 0f )
