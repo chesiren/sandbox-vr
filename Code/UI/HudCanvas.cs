@@ -81,11 +81,18 @@ public sealed class HudCanvas : Panel, IPanelDraw
 		{
 			if ( _paintRecorded ) _paintCommands.Reset();
 			_paintRecorded = false;
+			Style.BackgroundImage = null;
 			return;
 		}
 
 		PaintTarget();
+
+		// The composite shader works in screen pixels over the frame behind it, which a world panel (the VR HUD)
+		// doesn't have - show the painted target as a plain image there instead, without glow or scanlines
+		Style.BackgroundImage = IsInWorld ? _target : null;
 	}
+
+	bool IsInWorld => FindRootPanel()?.IsWorldPanel ?? false;
 
 	void PaintTarget()
 	{
@@ -168,7 +175,7 @@ public sealed class HudCanvas : Panel, IPanelDraw
 
 	void IPanelDraw.Draw( CommandList commands )
 	{
-		if ( !Layer.IsValid() || _regions.Count == 0 || _target is null || _glowB is null ) return;
+		if ( !Layer.IsValid() || _regions.Count == 0 || _target is null || _glowB is null || IsInWorld ) return;
 
 		_material ??= Material.FromShader( "shaders/hud_composite.shader" );
 

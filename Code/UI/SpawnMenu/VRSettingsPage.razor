@@ -1,0 +1,46 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits UtilityPage
+@namespace Sandbox
+@attribute [Icon( "🥽" )]
+@attribute [Title( "VR" )]
+@attribute [Group( "#spawnmenu.utility.group.utilities" )]
+@attribute [Order( 0 )]
+
+<root class="page">
+    <UISheet Target="@Settings" PropertyFilter="@UISheet.PropertiesAndButtons" />
+</root>
+
+@code
+{
+    public override bool IsPageVisible() => VRMode.IsActive;
+
+    readonly VRSettingsSheet Settings = new();
+
+    // Saved as soon as anything changes, so there's no apply button to forget
+    sealed class VRSettingsSheet
+    {
+        static VRSettings S => VRSettings.Current;
+
+        [Property, Title( "Movement" ), Description( "Continuous walks with the stick, Teleport and Shift aim an arc and go there, Arm Swinger walks while you hold A and swing your arms" ), Order( 0 )]
+        public VRSettings.MovementType Movement { get => S.Movement; set { S.Movement = value; S.Save(); } }
+
+        [Property, Title( "Move Direction" ), Description( "Walk where you look, or where your movement hand points" ), Order( 1 )]
+        public VRSettings.DirectionType Direction { get => S.Direction; set { S.Direction = value; S.Save(); } }
+
+        [Property, Title( "Turning" ), Order( 2 )]
+        public VRSettings.TurnType Turn { get => S.Turn; set { S.Turn = value; S.Save(); } }
+
+        [Property, Title( "Snap Angle" ), Range( 15, 90 ), Step( 15 ), Order( 3 )]
+        public float SnapAngle { get => S.SnapAngle; set { S.SnapAngle = value; S.Save(); } }
+
+        [Property, Title( "Smooth Turn Speed" ), Range( 30, 360 ), Step( 10 ), Order( 4 )]
+        public float SmoothTurnSpeed { get => S.SmoothTurnSpeed; set { S.SmoothTurnSpeed = value; S.Save(); } }
+
+        [Property, Title( "Left Handed" ), Description( "Hold weapons in your left hand and move with your right" ), Order( 5 )]
+        public bool LeftHanded { get => S.LeftHanded; set { S.LeftHanded = value; S.Save(); } }
+
+        [Property, Title( "Crouch Height" ), Description( "Crouch when your head drops below this fraction of your standing height" ), Range( 0.4f, 0.9f ), Step( 0.05f ), Order( 6 )]
+        public float PhysicalCrouchFraction { get => S.PhysicalCrouchFraction; set { S.PhysicalCrouchFraction = value; S.Save(); } }
+    }
+}

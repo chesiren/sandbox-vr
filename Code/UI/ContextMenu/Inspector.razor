@@ -55,8 +55,7 @@
 
     void UpdateCursor()
     {
-        var cursorPos = Mouse.Position;
-        var screenRay = Scene.Camera.ScreenPixelToRay( cursorPos );
+        var screenRay = InspectCursor.Ray;
         var tr = Scene.Trace.Ray( screenRay, 4096 )
                             .IgnoreGameObjectHierarchy( Player.FindLocalPlayer()?.GameObject )
                             .Run();

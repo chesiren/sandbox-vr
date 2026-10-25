@@ -3,9 +3,9 @@ using Sandbox.VR;
 public sealed partial class VRPlayer
 {
 	/// <summary>
-	/// While true, the dominant trigger clicks UI instead of firing (a world panel is under the laser).
+	/// While true, the dominant trigger clicks UI instead of firing: a menu is open or the laser is on the HUD.
 	/// </summary>
-	public bool PointingAtUI { get; set; }
+	public bool PointingAtUI => IsLocalVR && (VRHud.IsPointing || SpawnMenuHost.IsOpen);
 
 	bool _triggerDown;
 	bool _offTriggerDown;
@@ -25,19 +25,27 @@ public sealed partial class VRPlayer
 		var main = VRMode.DominantHand;
 		var off = VRMode.OffHand;
 
-		// Nothing else reads the mouse or the analog sticks in VR
-		Input.AnalogLook = default;
+		// The view never turns from look input in VR, so look input is free to carry the hand's twist: the physgun
+		// and tools rotate what they hold with it, exactly as they do with the mouse.
+		Input.AnalogLook = HandLookDelta( main );
 		Input.AnalogMove = default;
 		Input.MouseWheel = default;
 
 		_triggerDown = Hysteresis( _triggerDown, main.Trigger.Value );
+
+		// Holding the trigger, the stick pushes and pulls (the scroll wheel) instead of jumping and crouching
+		if ( _triggerDown )
+		{
+			if ( MathF.Abs( main.Joystick.Value.y ) > 0.3f )
+				Input.MouseWheel = new Vector2( 0, main.Joystick.Value.y * Time.Delta * 10f );
+
+			_stickUpLatched = _stickDownLatched = true;
+		}
 		_offTriggerDown = Hysteresis( _offTriggerDown, off.Trigger.Value );
 
-		if ( !PointingAtUI )
-		{
-			Press( "attack1", _triggerDown );
-			Press( "attack2", main.ButtonB.IsPressed );
-		}
+		// The HUD's laser clicks with these too, Player keeps them from the weapon while it's on the UI
+		Press( "attack1", _triggerDown );
+		Press( "attack2", main.ButtonB.IsPressed );
 
 		Press( "reload", main.ButtonA.IsPressed );
 		Press( "use", main.Grip.Value > 0.6f || off.Grip.Value > 0.6f );
@@ -55,6 +63,20 @@ public sealed partial class VRPlayer
 	}
 
 	static bool Hysteresis( bool down, float value ) => down ? value > 0.4f : value > 0.6f;
+
+	Angles? _lastHandAngles;
+
+	/// <summary>
+	/// How much the hand turned since last frame, in the play area's space so turning the player doesn't count.
+	/// </summary>
+	Angles HandLookDelta( VRController hand )
+	{
+		var angles = Input.VR.Anchor.ToLocal( hand.AimTransform ).Rotation.Angles();
+		var last = _lastHandAngles ?? angles;
+		_lastHandAngles = angles;
+
+		return new Angles( angles.pitch - last.pitch, Angles.NormalizeAngle( angles.yaw - last.yaw ), 0 );
+	}
 
 	static void Press( string action, bool down )
 	{
