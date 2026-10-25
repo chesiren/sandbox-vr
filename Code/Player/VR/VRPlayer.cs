@@ -113,7 +113,11 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 		UpdateFingerPose();
 		UpdateBodyScale();
 		UpdateEyes();
-		MapInput();
+
+		// VRInputSystem maps the controllers at the start of the frame; a scene loaded before it existed
+		// (hotloading it in) doesn't have one, so map here instead
+		if ( Scene.GetSystem<VRInputSystem>() is null )
+			MapInput();
 	}
 
 	/// <summary>

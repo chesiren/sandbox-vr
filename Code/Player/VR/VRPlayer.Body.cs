@@ -8,7 +8,7 @@ public sealed partial class VRPlayer
 	/// <summary>
 	/// Rotation from a controller's grip pose to the body's right hand bone.
 	/// </summary>
-	[Property, Group( "VR Body" )] public Angles RightHandIkOffset { get; set; } = new( 0, 0, -90 );
+	[Property, Group( "VR Body" )] public Angles RightHandIkOffset { get; set; } = new( 0, 0, 90 );
 
 	/// <summary>
 	/// Where the hand bone sits relative to the grip pose, in the grip's space.

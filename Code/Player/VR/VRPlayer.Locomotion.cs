@@ -83,12 +83,6 @@ public sealed partial class VRPlayer
 
 		Controller.UpdateDucking( WantsDuck );
 
-		if ( Input.Pressed( "jump" ) && Controller.IsOnGround )
-		{
-			Controller.Jump( Vector3.Up * Controller.JumpSpeed );
-			Controller.OnJumped();
-		}
-
 		if ( _shifting )
 		{
 			var t = (_shiftTime / ShiftDuration).Clamp( 0f, 1f );

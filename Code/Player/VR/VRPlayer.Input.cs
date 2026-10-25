@@ -20,8 +20,10 @@ public sealed partial class VRPlayer
 	/// B holds the inspect menu, trigger undoes. Both stick clicks together toggle noclip.</item>
 	/// </list>
 	/// </summary>
-	void MapInput()
+	internal void MapInput()
 	{
+		if ( !IsLocalVR ) return;
+
 		var main = VRMode.DominantHand;
 		var off = VRMode.OffHand;
 
@@ -65,6 +67,12 @@ public sealed partial class VRPlayer
 
 		UpdateTurning( main.Joystick.Value );
 		UpdateJumpAndCrouch( main.Joystick.Value );
+
+		if ( Input.Pressed( "jump" ) && Controller.IsOnGround && !Player.IsNoclipping )
+		{
+			Controller.Jump( Vector3.Up * Controller.JumpSpeed );
+			Controller.OnJumped();
+		}
 		UpdateLocomotionInput( off );
 	}
 
