@@ -71,8 +71,11 @@ public sealed partial class VRPlayer
 					var go = renderer.GetBoneObject( name );
 					if ( bone is null || !go.IsValid() ) continue;
 
+					// Bone.LocalTransform is the bind pose in model space - the bone object needs it relative to its parent
+					var rest = bone.Parent is null ? bone.LocalTransform : bone.Parent.LocalTransform.ToLocal( bone.LocalTransform );
+
 					go.Flags |= GameObjectFlags.ProceduralBone;
-					_joints.Add( new FingerJoint( go, bone.LocalTransform, finger, bends[segment], side ) );
+					_joints.Add( new FingerJoint( go, rest, finger, bends[segment], side ) );
 				}
 			}
 		}
