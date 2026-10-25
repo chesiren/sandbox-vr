@@ -146,6 +146,24 @@
         "ThrowSpeed": 700
       },
       {
+        "__type": "VRPlayer",
+        "__guid": "4f6c2a1e-9b7d-4e35-a8c1-2d5e7f9b3c60",
+        "__enabled": true,
+        "Flags": 0,
+        "ArmSwingScale": 2.5,
+        "HandIkPositionOffset": "-3,0,-1",
+        "LeftHandIkOffset": "0,0,90",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "RightHandIkOffset": "0,0,-90",
+        "ShiftDuration": 0.15,
+        "TeleportArcSpeed": 700
+      },
+      {
         "__type": "PlayerDamageIndicators",
         "__guid": "2382a8ba-4fb4-4180-853a-0d4a45e13d37",
         "__enabled": true,
