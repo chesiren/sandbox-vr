@@ -3,17 +3,22 @@ public sealed partial class VRPlayer
 	/// <summary>
 	/// Rotation from a controller's grip pose to the body's left hand bone.
 	/// </summary>
-	[Property, Group( "VR Body" )] public Angles LeftHandIkOffset { get; set; } = new( 0, 0, 90 );
+	[Property, Group( "VR Body" )] public Angles LeftHandIkOffset { get; set; } = new( 80.10f, -60.74f, 19.47f );
 
 	/// <summary>
 	/// Rotation from a controller's grip pose to the body's right hand bone.
 	/// </summary>
-	[Property, Group( "VR Body" )] public Angles RightHandIkOffset { get; set; } = new( 0, 0, 90 );
+	[Property, Group( "VR Body" )] public Angles RightHandIkOffset { get; set; } = new( 80.10f, 60.74f, 160.53f );
 
 	/// <summary>
-	/// Where the hand bone sits relative to the grip pose, in the grip's space.
+	/// Where the left hand bone sits relative to the grip pose, in the grip's space.
 	/// </summary>
-	[Property, Group( "VR Body" )] public Vector3 HandIkPositionOffset { get; set; } = new( -3, 0, -1 );
+	[Property, Group( "VR Body" )] public Vector3 LeftHandIkPositionOffset { get; set; } = new( -3.47f, 2.11f, 7.47f );
+
+	/// <summary>
+	/// Where the right hand bone sits relative to the grip pose, in the grip's space.
+	/// </summary>
+	[Property, Group( "VR Body" )] public Vector3 RightHandIkPositionOffset { get; set; } = new( -3.47f, -2.11f, 7.47f );
 
 	/// <summary>
 	/// Eye height of the body model standing at scale 1.
@@ -87,8 +92,8 @@ public sealed partial class VRPlayer
 			return;
 		}
 
-		renderer.SetIk( "hand_left", HandTarget( LeftHand, LeftHandIkOffset ) );
-		renderer.SetIk( "hand_right", HandTarget( RightHand, RightHandIkOffset ) );
+		renderer.SetIk( "hand_left", HandTarget( LeftHand, LeftHandIkOffset, LeftHandIkPositionOffset ) );
+		renderer.SetIk( "hand_right", HandTarget( RightHand, RightHandIkOffset, RightHandIkPositionOffset ) );
 		UpdateFingers( renderer );
 		_ikApplied = true;
 
@@ -111,6 +116,21 @@ public sealed partial class VRPlayer
 
 		var forward = renderer.WorldRotation.Forward.WithZ( 0 ).Normal;
 		renderer.WorldPosition -= forward * ModelEyeForward * BodyScale;
+
+		PlaceHeldWeapon();
+	}
+
+	/// <summary>
+	/// The world model hangs off the hand's hold bone, which the animation moves around per hold type - so with the
+	/// hand on the controller it pointed anywhere. Put it straight on the controller instead: grip in the palm,
+	/// barrel along where the controller aims, which is also where it shoots.
+	/// </summary>
+	void PlaceHeldWeapon()
+	{
+		var weapon = Player.GetComponent<PlayerInventory>()?.ActiveWeapon;
+		if ( !weapon.IsValid() || !weapon.WorldModel.IsValid() ) return;
+
+		weapon.WorldModel.WorldTransform = new Transform( DominantHand.Position, Aim.Rotation );
 	}
 
 	bool _headHidden;
@@ -131,9 +151,13 @@ public sealed partial class VRPlayer
 		_headHidden = true;
 	}
 
-	Transform HandTarget( Transform grip, Angles offset )
+	/// <summary>
+	/// The hand bone for a controller grip. The offsets put the hand's hold bone - what weapons hang off - in the palm,
+	/// pointing where the controller aims.
+	/// </summary>
+	Transform HandTarget( Transform grip, Angles rotationOffset, Vector3 positionOffset )
 	{
-		var rotation = grip.Rotation * offset.ToRotation();
-		return new Transform( grip.Position + grip.Rotation * HandIkPositionOffset, rotation );
+		var rotation = grip.Rotation * rotationOffset.ToRotation();
+		return new Transform( grip.Position + grip.Rotation * positionOffset * BodyScale, rotation );
 	}
 }
