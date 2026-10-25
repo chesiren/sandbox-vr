@@ -71,6 +71,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 	float _rigYaw;
 	Vector3 _rigPosition;
 	bool _rigInitialized;
+	Vector3 _lastBodyPosition;
 	float _defaultEyeDistance;
 
 	protected override void OnStart()
@@ -120,7 +121,9 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 	void UpdateRig()
 	{
 		var vr = Input.VR;
-		var headLocal = vr.Head;
+
+		// The headset in the play area's space. Input.VR.Head is already in world space, through the current anchor
+		var headLocal = vr.Anchor.ToLocal( vr.Head );
 
 		if ( !_rigInitialized )
 		{
@@ -129,6 +132,11 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 			// Face the way the player spawned, with the headset over the player's feet
 			_rigYaw = Controller.EyeAngles.yaw - headLocal.Rotation.Yaw();
 			_rigPosition = WorldPosition - (Rotation.FromYaw( _rigYaw ) * headLocal.Position).WithZ( 0 );
+		}
+		else
+		{
+			// The body moved on its own (stick, teleport, physics, getting pushed) - the play area comes with it
+			_rigPosition += WorldPosition - _lastBodyPosition;
 		}
 
 		var seated = Player.IsSeated;
@@ -167,6 +175,8 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 
 		_rigPosition.z = WorldPosition.z;
 		vr.Anchor = new Transform( _rigPosition, rigRotation );
+
+		_lastBodyPosition = WorldPosition;
 	}
 
 	/// <summary>
@@ -174,7 +184,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 	/// </summary>
 	public void Turn( float degrees )
 	{
-		var head = Input.VR.Anchor.ToWorld( Input.VR.Head ).Position;
+		var head = Input.VR.Head.Position;
 		var turned = new Transform( _rigPosition, Rotation.FromYaw( _rigYaw ) ).RotateAround( head, Rotation.FromYaw( degrees ) );
 
 		_rigYaw += degrees;
@@ -183,16 +193,12 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 	}
 
 	/// <summary>
-	/// Moves the player and the play area together - teleporting, dashing, respawning.
+	/// Moves the player - teleporting, dashing. The play area follows on the next rig update.
 	/// </summary>
 	public void MoveTo( Vector3 position )
 	{
-		var offset = position - WorldPosition;
 		WorldPosition = position;
 		Transform.ClearInterpolation();
-
-		_rigPosition += offset;
-		Input.VR.Anchor = new Transform( _rigPosition, Rotation.FromYaw( _rigYaw ) );
 	}
 
 	void UpdatePose()
@@ -200,7 +206,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 		var vr = Input.VR;
 		var root = WorldTransform;
 
-		HeadLocal = root.ToLocal( vr.Anchor.ToWorld( vr.Head ) );
+		HeadLocal = root.ToLocal( vr.Head );
 		LeftHandLocal = root.ToLocal( vr.LeftHand.Transform );
 		RightHandLocal = root.ToLocal( vr.RightHand.Transform );
 		AimLocal = root.ToLocal( VRMode.DominantHand.AimTransform );
@@ -230,7 +236,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 	{
 		if ( !IsLocalVR || Scene.Camera != camera ) return;
 
-		var head = Input.VR.Anchor.ToWorld( Input.VR.Head );
+		var head = Input.VR.Head;
 		view.Position = head.Position;
 		view.Rotation = head.Rotation;
 
