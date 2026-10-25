@@ -101,7 +101,7 @@ public sealed class VRHud : Component
 	{
 		if ( !VRMode.IsActive || !_pointer.IsValid() ) return;
 
-		var head = Input.VR.Anchor.ToWorld( Input.VR.Head );
+		var head = Input.VR.Head;
 		var menuOpen = SpawnMenuHost.IsOpen || IsScoreboardOpen;
 
 		PlacePanel( head, menuOpen );

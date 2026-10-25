@@ -41,6 +41,27 @@ public sealed partial class VRPlayer
 		renderer.SetIk( "hand_left", HandTarget( LeftHand, LeftHandIkOffset ) );
 		renderer.SetIk( "hand_right", HandTarget( RightHand, RightHandIkOffset ) );
 		_ikApplied = true;
+
+		if ( IsLocalVR && !_headHidden )
+			HideOwnHead( renderer );
+	}
+
+	bool _headHidden;
+
+	/// <summary>
+	/// Our own head (and the hats and hair hanging off it) would sit right in front of the headset. The model has no
+	/// headless body group, so shrink the head bone away - only on our side, everyone else still sees it.
+	/// </summary>
+	void HideOwnHead( SkinnedModelRenderer renderer )
+	{
+		renderer.CreateBoneObjects = true;
+
+		var head = renderer.GetBoneObject( "head" );
+		if ( !head.IsValid() ) return;
+
+		head.Flags |= GameObjectFlags.ProceduralBone;
+		head.LocalScale = 0.01f;
+		_headHidden = true;
 	}
 
 	Transform HandTarget( Transform grip, Angles offset )
