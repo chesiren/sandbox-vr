@@ -110,6 +110,8 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 
 		UpdateRig();
 		UpdatePose();
+		UpdateFingerPose();
+		UpdateBodyScale();
 		UpdateEyes();
 		MapInput();
 	}
