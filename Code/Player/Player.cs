@@ -9,6 +9,12 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 	[RequireComponent]
 	public PlayerController Controller { get; set; }
 
+	/// <summary>
+	/// Headset and controller state. Always present, only active for players in VR.
+	/// </summary>
+	[RequireComponent]
+	public VRPlayer VR { get; set; }
+
 	[Property]
 	public GameObject Body { get; internal set; }
 
@@ -39,6 +45,11 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 			return Controller.EyeTransform;
 		}
 	}
+
+	/// <summary>
+	/// Where the player aims weapons and tools from: the dominant hand in VR, the eyes otherwise.
+	/// </summary>
+	public Transform AimTransform => VRPlayer.Get( this ) is { } vr ? vr.Aim : EyeTransform;
 
 	public bool IsLocalPlayer => !IsProxy;
 
@@ -346,10 +357,14 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 
 	void OnControl()
 	{
+		// First, so everything below sees the headset's eyes and the controllers' actions
+		VR?.OnControl();
+
 		var allowMovement = true;
 		Local.IPlayerEvents.Post( x => x.OnMove( ref allowMovement ) );
 
-		Controller.UseInputControls = allowMovement;
+		// In VR the movement comes from VRPlayer, not the engine's keyboard/stick input
+		Controller.UseInputControls = allowMovement && !(VR?.IsLocalVR ?? false);
 
 		if ( Input.Pressed( "die" ) )
 		{

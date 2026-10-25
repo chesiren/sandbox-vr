@@ -30,7 +30,7 @@ public sealed partial class GameManager
 		var player = Player.FindForConnection( Rpc.Caller );
 		if ( player is null ) return;
 
-		var eyes = player.EyeTransform;
+		var eyes = player.AimTransform;
 
 		var trace = Game.SceneTrace.Ray( eyes.Position, eyes.Position + eyes.Forward * 2048 )
 			.IgnoreGameObject( player.GameObject )

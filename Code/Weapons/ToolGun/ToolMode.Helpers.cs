@@ -93,7 +93,7 @@
 		var player = Toolgun?.Owner;
 		if ( !player.IsValid() ) return default;
 
-		return TraceFromRay( player.EyeTransform.ForwardRay, 4096, player.GameObject );
+		return TraceFromRay( player.AimTransform.ForwardRay, 4096, player.GameObject );
 	}
 
 	/// <summary>

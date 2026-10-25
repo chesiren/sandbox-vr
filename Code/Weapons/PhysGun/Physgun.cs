@@ -246,14 +246,14 @@ public partial class Physgun : Local.IPlayerEvents
 	{
 		get
 		{
-			if ( IsProxy || !_cursorAim ) return Owner.EyeTransform;
+			if ( IsProxy || !_cursorAim ) return Owner.AimTransform;
 
 			var ray = InspectCursor.DragRay;
 			return new Transform( ray.Position, Rotation.LookAt( ray.Forward ) );
 		}
 	}
 
-	Rotation FrameRotation => HasOwner ? Owner.EyeTransform.Rotation : _lastAimTransform.Rotation;
+	Rotation FrameRotation => HasOwner ? Owner.AimTransform.Rotation : _lastAimTransform.Rotation;
 
 	bool _preventReselect = false;
 
@@ -417,7 +417,7 @@ public partial class Physgun : Local.IPlayerEvents
 			{
 				if ( Input.Pressed( "attack1" ) )
 				{
-					var force = player.EyeTransform.Rotation.Forward * LaunchForce;
+					var force = player.AimTransform.Rotation.Forward * LaunchForce;
 					Launch( _state.Body, force );
 					PlayGravityLaunchSound();
 
@@ -527,7 +527,7 @@ public partial class Physgun : Local.IPlayerEvents
 		{
 			ViewModel?.RunEvent<ViewModel>( x => x.OnAttack() );
 
-			var muzzle = WeaponModel?.MuzzleGameObject?.WorldTransform ?? player.EyeTransform;
+			var muzzle = WeaponModel?.MuzzleGameObject?.WorldTransform ?? player.AimTransform;
 
 			_state = _stateHovered with { Active = true, Pulling = false };
 

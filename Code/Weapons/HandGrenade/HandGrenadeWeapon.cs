@@ -159,7 +159,7 @@ public sealed class HandGrenadeWeapon : BaseSandboxWeapon
 			return;
 		}
 
-		var direction = overrideDirection ?? player.EyeTransform.Rotation.Forward;
+		var direction = overrideDirection ?? player.AimTransform.Rotation.Forward;
 
 		if ( !overrideDirection.HasValue && CurrentThrowType == ThrowType.Near )
 		{
@@ -183,7 +183,7 @@ public sealed class HandGrenadeWeapon : BaseSandboxWeapon
 
 	Vector3 GetThrowPosition( Player player, Vector3 direction )
 	{
-		var eye = player.EyeTransform;
+		var eye = player.AimTransform;
 		var right = eye.Rotation.Right;
 		var forward = direction;
 
@@ -273,7 +273,7 @@ public sealed class HandGrenadeWeapon : BaseSandboxWeapon
 		if ( !explosionPrefab.IsValid() )
 			return;
 
-		var explosionPos = Owner.IsValid() ? Owner.EyeTransform.Position : WorldPosition;
+		var explosionPos = Owner.IsValid() ? Owner.AimTransform.Position : WorldPosition;
 		var explosion = GameObject.Clone( explosionPrefab, new CloneConfig { Transform = new Transform( explosionPos ), StartEnabled = false } );
 		if ( !explosion.IsValid() )
 			return;

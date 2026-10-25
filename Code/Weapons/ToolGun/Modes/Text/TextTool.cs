@@ -175,7 +175,7 @@ public sealed class TextTool : ToolMode
 
 		if ( MathF.Abs( normal.z ) > 0.99f )
 		{
-			var eye = Toolgun.Owner.EyeTransform.Rotation;
+			var eye = Toolgun.Owner.AimTransform.Rotation;
 			up = eye.Forward.WithZ( 0 );
 			if ( up.IsNearZeroLength ) up = eye.Up.WithZ( 0 );
 		}
