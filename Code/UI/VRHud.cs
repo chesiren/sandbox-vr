@@ -23,9 +23,9 @@ public sealed class VRHud : Component
 	[Property] public float Scale { get; set; } = 0.15f;
 
 	/// <summary>
-	/// How far away menus open, a little further than the HUD so the whole menu fits in view.
+	/// How far away menus open. Closer than the HUD, so they're big enough to read and point at.
 	/// </summary>
-	[Property] public float MenuDistance { get; set; } = 42f;
+	[Property] public float MenuDistance { get; set; } = 26f;
 
 	/// <summary>
 	/// How quickly the HUD catches up with where you look. Higher is snappier.
@@ -35,6 +35,7 @@ public sealed class VRHud : Component
 	GameObject _pointer;
 	WorldInput _input;
 	LineRenderer _laser;
+	LineRenderer _dot;
 
 	float _yaw = float.NaN;
 	float _pitch;
@@ -135,9 +136,9 @@ public sealed class VRHud : Component
 
 		if ( float.IsNaN( _yaw ) || (menuOpen && !_wasMenuOpen) )
 		{
-			// A menu opens straight ahead at eye level, wherever you were looking (likely down at the controller)
+			// A menu opens where you're looking
 			_yaw = look.yaw;
-			_pitch = menuOpen ? 0f : pitch;
+			_pitch = pitch;
 		}
 		else if ( !menuOpen )
 		{
@@ -160,8 +161,29 @@ public sealed class VRHud : Component
 		WorldScale = Scale;
 	}
 
+	/// <summary>
+	/// Where the laser meets the panel: a very short, wide, round-capped line is a dot.
+	/// </summary>
+	LineRenderer CreateDot()
+	{
+		var dot = new GameObject( true, "VR Pointer Dot" );
+		dot.Flags |= GameObjectFlags.NotNetworked | GameObjectFlags.NotSaved;
+		dot.SetParent( _pointer );
+
+		var line = dot.AddComponent<LineRenderer>();
+		line.UseVectorPoints = true;
+		line.Width = 0.6f;
+		line.StartCap = SceneLineObject.CapStyle.Rounded;
+		line.EndCap = SceneLineObject.CapStyle.Rounded;
+		line.Color = Color.White;
+		line.CastShadows = false;
+		return line;
+	}
+
 	void UpdatePointer( bool menuOpen )
 	{
+		if ( !_dot.IsValid() ) _dot = CreateDot();
+
 		var aim = VRMode.DominantHand.AimTransform;
 		_pointer.WorldTransform = aim;
 
@@ -170,10 +192,35 @@ public sealed class VRHud : Component
 		var showLaser = menuOpen || IsPointing;
 		_laser.Enabled = showLaser;
 
-		if ( showLaser )
+		// Only stop on the panel over actual UI - the plane goes on forever past the menu's edges
+		var hit = IsPointing ? HitPanel( aim.ForwardRay ) : null;
+		_dot.Enabled = hit.HasValue;
+
+		if ( !showLaser ) return;
+
+		// The laser stops on the panel, with a dot where it touches
+		var end = hit ?? aim.Position + aim.Forward * MenuDistance * 1.5f;
+		_laser.VectorPoints = new List<Vector3> { aim.Position, end };
+
+		if ( hit is { } point )
 		{
-			var length = Distance * 1.5f;
-			_laser.VectorPoints = new List<Vector3> { aim.Position, aim.Position + aim.Forward * length };
+			var towardsViewer = WorldRotation.Forward * 0.1f;
+			_dot.VectorPoints = new List<Vector3> { point + towardsViewer, point + towardsViewer * 1.5f };
 		}
+	}
+
+	/// <summary>
+	/// Where a ray crosses the panel's plane, in front of the hand.
+	/// </summary>
+	Vector3? HitPanel( Ray ray )
+	{
+		var normal = WorldRotation.Forward;
+		var denominator = Vector3.Dot( ray.Forward, normal );
+		if ( MathF.Abs( denominator ) < 0.0001f ) return null;
+
+		var distance = Vector3.Dot( WorldPosition - ray.Position, normal ) / denominator;
+		if ( distance <= 0f || distance > MenuDistance * 3f ) return null;
+
+		return ray.Position + ray.Forward * distance;
 	}
 }
