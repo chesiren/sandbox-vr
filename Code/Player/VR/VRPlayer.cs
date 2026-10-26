@@ -246,6 +246,11 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 		view.Position = head.Position;
 		view.Rotation = head.Rotation;
 
+		// The view alone doesn't move the camera object, and the audio listener sits on it - without this every
+		// sound was heard from wherever the camera was left
+		camera.WorldPosition = head.Position;
+		camera.WorldRotation = head.Rotation;
+
 		camera.TargetEye = StereoTargetEye.Both;
 		camera.RenderExcludeTags.Remove( "firstperson" );
 
