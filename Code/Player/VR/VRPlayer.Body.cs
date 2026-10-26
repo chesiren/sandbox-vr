@@ -128,9 +128,41 @@ public sealed partial class VRPlayer
 	void PlaceHeldWeapon()
 	{
 		var weapon = Player.GetComponent<PlayerInventory>()?.ActiveWeapon;
-		if ( !weapon.IsValid() || !weapon.WorldModel.IsValid() ) return;
+		if ( !weapon.IsValid() || !weapon.WorldModel.IsValid() )
+		{
+			ShowHiddenWeaponParts();
+			return;
+		}
 
 		weapon.WorldModel.WorldTransform = new Transform( DominantHand.Position, Aim.Rotation );
+
+		// With a menu up the gun is just in the way of the laser - hide it on our side only
+		var hide = IsLocalVR && SpawnMenuHost.IsOpen;
+		if ( hide && _hiddenWeaponParts.Count == 0 )
+		{
+			foreach ( var model in weapon.WorldModel.GetComponentsInChildren<ModelRenderer>() )
+			{
+				model.Enabled = false;
+				_hiddenWeaponParts.Add( model );
+			}
+		}
+		else if ( !hide )
+		{
+			ShowHiddenWeaponParts();
+		}
+	}
+
+	// Only what we hid comes back - some weapons keep parts of their model switched off on purpose
+	readonly List<ModelRenderer> _hiddenWeaponParts = new();
+
+	void ShowHiddenWeaponParts()
+	{
+		foreach ( var model in _hiddenWeaponParts )
+		{
+			if ( model.IsValid() ) model.Enabled = true;
+		}
+
+		_hiddenWeaponParts.Clear();
 	}
 
 	bool _headHidden;
