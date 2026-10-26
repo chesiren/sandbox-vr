@@ -30,7 +30,8 @@ public sealed partial class GameManager
 		var player = Player.FindForConnection( Rpc.Caller );
 		if ( player is null ) return;
 
-		var eyes = player.AimTransform;
+		// Spawn where the player looks, which for a VR player is the headset rather than the hand
+		var eyes = player.ViewTransform;
 
 		var trace = Game.SceneTrace.Ray( eyes.Position, eyes.Position + eyes.Forward * 2048 )
 			.IgnoreGameObject( player.GameObject )

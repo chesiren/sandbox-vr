@@ -51,6 +51,11 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 	/// </summary>
 	public Transform AimTransform => VRPlayer.Get( this ) is { } vr ? vr.Aim : EyeTransform;
 
+	/// <summary>
+	/// Where the player is looking from: the headset in VR, the eyes otherwise.
+	/// </summary>
+	public Transform ViewTransform => VRPlayer.Get( this ) is { } vr ? vr.Head : EyeTransform;
+
 	public bool IsLocalPlayer => !IsProxy;
 
 	string IKillSource.DisplayName => Network.Owner?.DisplayName ?? "Unknown";
