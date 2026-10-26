@@ -18,9 +18,14 @@ public sealed class VRHud : Component
 	[Property] public float Drop { get; set; } = 6f;
 
 	/// <summary>
-	/// Scale of the HUD panel. At 0.12 it is about 1.2 metres across.
+	/// Scale of the HUD panel. At 0.15 it is about 1.5 metres across.
 	/// </summary>
-	[Property] public float Scale { get; set; } = 0.12f;
+	[Property] public float Scale { get; set; } = 0.15f;
+
+	/// <summary>
+	/// How far away menus open, a little further than the HUD so the whole menu fits in view.
+	/// </summary>
+	[Property] public float MenuDistance { get; set; } = 42f;
 
 	/// <summary>
 	/// How quickly the HUD catches up with where you look. Higher is snappier.
@@ -69,6 +74,18 @@ public sealed class VRHud : Component
 		// Rebuild every panel under the HUD against the world panel
 		hud.Enabled = false;
 		hud.Enabled = true;
+		await System.Threading.Tasks.Task.Yield();
+
+		// The panels built against the screen got moved onto the world panel too - only keep the rebuilt ones
+		var root = panel.GetPanel();
+		if ( root is not null )
+		{
+			foreach ( var child in root.Children.ToList() )
+			{
+				if ( child != layer.Panel )
+					child.Delete( true );
+			}
+		}
 
 		hud.AddComponent<VRHud>();
 	}
@@ -118,9 +135,9 @@ public sealed class VRHud : Component
 
 		if ( float.IsNaN( _yaw ) || (menuOpen && !_wasMenuOpen) )
 		{
-			// A menu opens straight ahead
+			// A menu opens straight ahead at eye level, wherever you were looking (likely down at the controller)
 			_yaw = look.yaw;
-			_pitch = pitch;
+			_pitch = menuOpen ? 0f : pitch;
 		}
 		else if ( !menuOpen )
 		{
@@ -134,7 +151,9 @@ public sealed class VRHud : Component
 
 		var rotation = Rotation.From( _pitch, _yaw, 0 );
 		var forward = rotation.Forward;
-		var position = head.Position + forward * Distance + rotation.Down * (menuOpen ? 0f : Drop);
+		var position = menuOpen
+			? head.Position + forward * MenuDistance
+			: head.Position + forward * Distance + rotation.Down * Drop;
 
 		WorldPosition = position;
 		WorldRotation = Rotation.LookAt( -forward, rotation.Up );
