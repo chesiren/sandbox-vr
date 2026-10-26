@@ -140,10 +140,13 @@ public sealed partial class VRPlayer
 		var hide = IsLocalVR && SpawnMenuHost.IsOpen;
 		if ( hide && _hiddenWeaponParts.Count == 0 )
 		{
-			foreach ( var model in weapon.WorldModel.GetComponentsInChildren<ModelRenderer>() )
+			// Models, but also glows, particles and lights (the physgun's glow)
+			foreach ( var part in weapon.WorldModel.GetComponentsInChildren<Component>() )
 			{
-				model.Enabled = false;
-				_hiddenWeaponParts.Add( model );
+				if ( part is not (Renderer or Light) ) continue;
+
+				part.Enabled = false;
+				_hiddenWeaponParts.Add( part );
 			}
 		}
 		else if ( !hide )
@@ -153,7 +156,7 @@ public sealed partial class VRPlayer
 	}
 
 	// Only what we hid comes back - some weapons keep parts of their model switched off on purpose
-	readonly List<ModelRenderer> _hiddenWeaponParts = new();
+	readonly List<Component> _hiddenWeaponParts = new();
 
 	void ShowHiddenWeaponParts()
 	{

@@ -80,6 +80,23 @@ public partial class BaseSandboxWeapon : Sandbox.BaseCombatWeapon, IKillIcon, IP
 	public override Ray AimRay => VRPlayer.Get( Owner ) is { } vr ? vr.Aim.ForwardRay : base.AimRay;
 
 	/// <summary>
+	/// In VR the engine's crosshair would be painted onto the camera's screen overlay, stuck in front of the eyes
+	/// (and over menus) - aiming is with the hand, so keep the body animation and skip the crosshair.
+	/// </summary>
+	protected override void OnUpdate()
+	{
+		if ( VRMode.IsActive && Owner.IsValid() && Owner.IsLocalPlayer )
+		{
+			if ( Owner.Controller.IsValid() && Owner.Controller.Renderer.IsValid() )
+				UpdateBodyAnimations( Owner.Controller.Renderer );
+
+			return;
+		}
+
+		base.OnUpdate();
+	}
+
+	/// <summary>
 	/// No view model in VR - the world model in the player's hand is what they see.
 	/// </summary>
 	protected override void CreateViewModel()
