@@ -13,6 +13,10 @@ public sealed class ButtonTool : ToolMode
 	[Property, ResourceSelect( Extension = "btndef", AllowPackages = true ), Title( "#tool.name.button" )]
 	public string Definition { get; set; } = "entities/button/basic.btndef";
 
+	// the same settings as ButtonEntity, put on the placed button
+	[Property, Group( "#tool.setting.group.behavior" ), Title( "#tool.setting.mode" ), Order( 0 )]
+	public ButtonMode Mode { get; set; } = ButtonMode.Hold;
+
 	public override string Description => "#tool.hint.buttontool.description";
 
 	protected override void OnStart()
@@ -34,7 +38,7 @@ public sealed class ButtonTool : ToolMode
 		if ( definition?.Prefab is null ) return;
 
 		var transform = GetPlacementTransform( select );
-		Spawn( select, definition.Prefab, transform, noWeld );
+		Spawn( select, definition.Prefab, transform, noWeld, WriteConfiguration<ButtonEntity>() );
 		ShootEffects( select );
 	}
 
@@ -57,15 +61,19 @@ public sealed class ButtonTool : ToolMode
 		DebugOverlay.GameObject( scene, transform: GetPlacementTransform( select ), castShadows: true, color: Color.White.WithAlpha( 0.9f ) );
 	}
 
-	[Rpc.Host]
-	public void Spawn( SelectionPoint point, PrefabFile buttonPrefab, Transform transform, bool noWeld )
+	[Rpc.Host( NetFlags.OwnerOnly )]
+	public void Spawn( SelectionPoint point, PrefabFile buttonPrefab, Transform transform, bool noWeld, string configuration )
 	{
+		if ( !FireToolAction( noWeld ? ToolInput.Secondary : ToolInput.Primary ) ) return;
+
 		if ( buttonPrefab?.GetScene() is not Scene scene ) return;
 
 		var button = scene.Clone( new CloneConfig { StartEnabled = false } );
 		button.Tags.Add( "removable" );
 		button.Tags.Add( "constraint" );
 		button.WorldTransform = transform;
+
+		ApplyConfiguration( button.GetComponentInChildren<ButtonEntity>( true ), configuration );
 
 		if ( !noWeld )
 		{
@@ -89,5 +97,7 @@ public sealed class ButtonTool : ToolMode
 		undo.Add( button );
 
 		CheckContraptionStats( point.GameObject );
+
+		FirePostToolAction( noWeld ? ToolInput.Secondary : ToolInput.Primary );
 	}
 }

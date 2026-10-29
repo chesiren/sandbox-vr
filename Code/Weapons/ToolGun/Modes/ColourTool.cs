@@ -13,33 +13,32 @@ public sealed class ColourTool : ToolMode
 	{
 		base.OnStart();
 
-		RegisterAction( ToolInput.Primary, () => "#tool.hint.colour.apply", () => OnColour( Colour ) );
-		RegisterAction( ToolInput.Secondary, () => "#tool.hint.colour.reset", () => OnColour( Color.White ) );
+		RegisterAction( ToolInput.Primary, () => "#tool.hint.colour.apply", () => OnColour( Colour, ToolInput.Primary ) );
+		RegisterAction( ToolInput.Secondary, () => "#tool.hint.colour.reset", () => OnColour( Color.White, ToolInput.Secondary ) );
 	}
 
-	void OnColour( Color colour )
+	void OnColour( Color colour, ToolInput input )
 	{
 		var select = TraceSelect();
 		IsValidState = select.IsValid() && !select.IsWorld && !select.IsPlayer;
 		if ( !IsValidState ) return;
 
-		SetColour( select.GameObject, colour );
+		SetColour( select.GameObject, colour, input );
 		ShootEffects( select );
 	}
 
 	[Rpc.Host( NetFlags.OwnerOnly )]
-	public void SetColour( GameObject target, Color colour )
+	public void SetColour( GameObject target, Color colour, ToolInput input )
 	{
+		if ( !FireToolAction( input ) ) return;
+
 		if ( !target.IsValid() ) return;
 
 		var root = target.Network?.RootGameObject ?? target;
 		if ( root.IsProxy || root.Tags.Has( "world" ) || root.Tags.Has( "player" ) ) return;
-		if ( !root.HasAccess( Rpc.Caller ) || !target.HasAccess( Rpc.Caller ) ) return;
 
 		foreach ( var renderer in root.GetComponentsInChildren<ModelRenderer>() )
 		{
-			if ( !renderer.GameObject.HasAccess( Rpc.Caller ) ) continue;
-
 			var prop = renderer.GetComponent<Prop>();
 			if ( prop.IsValid() )
 				prop.Tint = colour;
@@ -48,5 +47,7 @@ public sealed class ColourTool : ToolMode
 
 			renderer.GameObject.Network?.Refresh();
 		}
+
+		FirePostToolAction( input );
 	}
 }

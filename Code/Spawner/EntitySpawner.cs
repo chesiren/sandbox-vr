@@ -22,6 +22,18 @@ public sealed class EntitySpawner : ISpawner
 		Loading = LoadAsync();
 	}
 
+	/// <summary>
+	/// Wrap an entity that's already loaded.
+	/// </summary>
+	public EntitySpawner( ScriptedEntity entity )
+	{
+		Path = entity.ResourcePath;
+		Entity = entity;
+		DisplayName = entity.Title ?? System.IO.Path.GetFileNameWithoutExtension( Path );
+		Bounds = SceneUtility.GetPrefabScene( entity.Prefab ).GetLocalBounds();
+		Loading = Task.FromResult( true );
+	}
+
 	private async Task<bool> LoadAsync()
 	{
 		// Try local/installed first, then fall back to cloud
@@ -86,6 +98,10 @@ public sealed class EntitySpawner : ISpawner
 
 		var go = GameObject.Clone( Entity.Prefab, new CloneConfig { Transform = transform, StartEnabled = false } );
 		go.Tags.Add( "removable" );
+
+		// armed NPCs carry the weapon the player picked in the NPC tab
+		foreach ( var npc in go.GetComponentsInChildren<Sandbox.Npcs.CombatNpc.CombatNpc>( true ) )
+			npc.ArmWithPicked( player );
 
 		Ownable.Set( go, player.Network.Owner );
 		go.NetworkSpawn( true, null );

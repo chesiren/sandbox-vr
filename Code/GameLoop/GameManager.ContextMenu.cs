@@ -12,6 +12,12 @@ public sealed partial class GameManager : IContextMenuEvent
 		var isPlayer = target.Tags.Has( "player" );
 		var prop = target.GetComponent<Prop>();
 
+		var localPlayer = Player.FindLocalPlayer();
+		if ( localPlayer.IsValid() && !localPlayer.IsSeated && Player.CanDrive( target, Connection.Local ) )
+		{
+			e.AddOption( "gamepad", Game.Language.GetPhrase( "spawnmenu.inspect.drive" ), () => localPlayer.Drive( target ), 50, !Player.IsHeld( target ) );
+		}
+
 		if ( IsOnFire( target ) )
 		{
 			e.AddOption( "fire_extinguisher", Game.Language.GetPhrase( "spawnmenu.inspect.extinguish" ), () => ExtinguishInspectedObject( target ), 100 );
@@ -46,9 +52,6 @@ public sealed partial class GameManager : IContextMenuEvent
 	{
 		if ( !go.IsValid() || go.IsProxy ) return;
 		if ( go.Tags.Has( "player" ) ) return;
-
-		// Check ownership if the object has an Ownable component
-		if ( !go.HasAccess( Rpc.Caller ) ) return;
 
 		go.Destroy();
 	}
@@ -111,7 +114,6 @@ public sealed partial class GameManager : IContextMenuEvent
 	internal static void SetAxisLocks( GameObject go, bool pitch, bool yaw, bool roll )
 	{
 		if ( !go.IsValid() || go.IsProxy ) return;
-		if ( !go.HasAccess( Rpc.Caller ) ) return;
 
 		PhysicsLock Change( PhysicsLock locking )
 		{
@@ -192,7 +194,6 @@ public sealed partial class GameManager : IContextMenuEvent
 	internal static void SetCollisions( GameObject go, bool props, bool world )
 	{
 		if ( !go.IsValid() || go.IsProxy ) return;
-		if ( !go.HasAccess( Rpc.Caller ) ) return;
 
 		go.Tags.Set( NoPropCollisionsTag, !props );
 		go.Tags.Set( NoWorldCollisionsTag, !world );
@@ -210,8 +211,6 @@ public sealed partial class GameManager : IContextMenuEvent
 	internal static void BreakInspectedProp( Prop prop )
 	{
 		if ( !prop.IsValid() || prop.IsProxy ) return;
-		// Check ownership if the object has an Ownable component
-		if ( !prop.GameObject.HasAccess( Rpc.Caller ) ) return;
 
 		var damageable = prop.GetComponent<Component.IDamageable>();
 		if ( damageable is null ) return;
@@ -231,7 +230,6 @@ public sealed partial class GameManager : IContextMenuEvent
 	{
 		if ( !go.IsValid() || go.IsProxy ) return;
 		if ( go.Tags.Has( "player" ) ) return;
-		if ( !go.HasAccess( Rpc.Caller ) ) return;
 		if ( IsOnFire( go ) ) return;
 
 		// Props already know how to burn. Prop.IsOnFire is never reset (protected setter), so a prop
@@ -269,7 +267,6 @@ public sealed partial class GameManager : IContextMenuEvent
 	internal static void ExtinguishInspectedObject( GameObject go )
 	{
 		if ( !go.IsValid() || go.IsProxy ) return;
-		if ( !go.HasAccess( Rpc.Caller ) ) return;
 
 		foreach ( var fire in go.GetComponentsInChildren<FireDamage>( true ).ToArray() )
 		{

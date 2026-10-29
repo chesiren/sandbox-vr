@@ -5,6 +5,12 @@
 	protected int Stage = 0;
 
 	public virtual bool CanConstraintToSelf => false;
+
+	/// <summary>
+	/// What <see cref="WriteConstraintConfiguration"/> sent with the constraint, on the host while <see cref="CreateConstraint"/> runs.
+	/// </summary>
+	protected string Configuration { get; private set; }
+
 	public override bool UseSnapGrid => true;
 
 	protected override void OnDisabled()
@@ -29,16 +35,12 @@
 				if ( !UpdateValidity( select, point2 ) )
 					return;
 
-				if ( !FireToolAction( ToolInput.Secondary ) )
-					return;
-
 				Point1 = select;
 				Point2 = point2;
 
-				Create( Point1, Point2 );
+				Create( Point1, Point2, ToolInput.Secondary, WriteConstraintConfiguration() );
 				ShootEffects( select );
 
-				FirePostToolAction( ToolInput.Secondary );
 				OnConstraintSubmitted( Point1, Point2 );
 
 				return;
@@ -54,14 +56,9 @@
 
 		if ( Input.Pressed( "reload" ) )
 		{
-			if ( !FireToolAction( ToolInput.Reload ) )
-				return;
-
 			var go = select.GameObject.Network.RootGameObject ?? select.GameObject;
 			RemoveConstraints( go );
 			ShootEffects( select );
-
-			FirePostToolAction( ToolInput.Reload );
 		}
 
 		IsValidState = true;
@@ -90,18 +87,10 @@
 
 			if ( Stage == 1 )
 			{
-				if ( !FireToolAction( ToolInput.Primary ) )
-				{
-					Stage = 0;
-					return;
-				}
-
 				Point2 = select;
 
-				Create( Point1, Point2 );
+				Create( Point1, Point2, ToolInput.Primary, WriteConstraintConfiguration() );
 				ShootEffects( select );
-
-				FirePostToolAction( ToolInput.Primary );
 				OnConstraintSubmitted( Point1, Point2 );
 			}
 
@@ -135,21 +124,31 @@
 	}
 
 	[Rpc.Host( NetFlags.OwnerOnly )]
-	private void Create( SelectionPoint point1, SelectionPoint point2 )
+	private void Create( SelectionPoint point1, SelectionPoint point2, ToolInput input, string configuration )
 	{
+		if ( !FireToolAction( input ) ) return;
+
 		if ( !UpdateValidity( point1, point2 ) )
 		{
 			Log.Warning( "Tried to create invalid constraint" );
 			return;
 		}
 
+		Configuration = configuration;
 		CreateConstraint( point1, point2 );
+		Configuration = null;
 		CheckContraptionStats( point1.GameObject );
+
+		FirePostToolAction( input );
 	}
 
 	[Rpc.Host( NetFlags.OwnerOnly )]
 	private void RemoveConstraints( GameObject go )
 	{
+		if ( !FireToolAction( ToolInput.Reload ) ) return;
+
+		if ( !go.IsValid() ) return;
+
 		var builder = new LinkedGameObjectBuilder();
 		builder.AddConnected( go );
 
@@ -159,6 +158,8 @@
 
 		foreach ( var host in toRemove )
 			host.Destroy();
+
+		FirePostToolAction( ToolInput.Reload );
 	}
 
 	/// <summary>
@@ -170,6 +171,11 @@
 	protected virtual IEnumerable<GameObject> FindConstraints( GameObject linked, GameObject target ) => [];
 
 	protected abstract void CreateConstraint( SelectionPoint point1, SelectionPoint point2 );
+
+	/// <summary>
+	/// Settings for the entity the constraint carries, sent to the host with it, see <see cref="ToolMode.WriteConfiguration{T}"/>.
+	/// </summary>
+	protected virtual string WriteConstraintConfiguration() => null;
 
 	/// <summary>
 	/// Called on the owning client after a valid constraint creation was submitted to the host.

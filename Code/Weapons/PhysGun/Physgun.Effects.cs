@@ -4,8 +4,6 @@ public partial class Physgun : ScreenWeapon
 {
 	[Property] public LineRenderer BeamRenderer { get; set; }
 	[Property] public GameObject EndPointEffectPrefab { get; set; }
-	[Property] public GameObject FreezeEffectPrefab { get; set; }
-	[Property] public GameObject UnFreezeEffectPrefab { get; set; }
 	[Property] public GameObject GrabEffectPrefab { get; set; }
 
 	// ShootInput and SecondaryInput come from BaseSandboxWeapon's seat control.
@@ -51,12 +49,87 @@ public partial class Physgun : ScreenWeapon
 	GameObject _endPointEffect;
 	GameObject _grabEffect;
 
-	public bool BeamActive => BeamRenderer?.Active == true || _state.Pulling || _stateHovered.Pulling;
+	// whether the beam is in use, drawn or not, so the view model still reacts with beams turned off
+	bool _beamOpen;
+
+	public bool BeamActive => _beamOpen || _state.Pulling || _stateHovered.Pulling;
 	public bool PullActive => _state.Pulling || _stateHovered.Pulling;
+
+	/// <summary>
+	/// The physgun's colours when the holder hasn't picked any, what an empty <see cref="GamePreferences.PhysgunColor"/> stands for
+	/// </summary>
+	public static readonly Color DefaultBeamColor = new( 0.48f, 0.88f, 1f );
+	public static readonly Color DefaultPullColor = new( 1f, 0.8f, 0f );
+
+	/// <summary>
+	/// The holder's colour for the beam, its effects, the glow and the outline - the only place they get their colour from
+	/// </summary>
+	public Color BeamColor => (HasOwner ? GamePreferences.ParseColor( Owner.PhysgunColor ) : null) ?? DefaultBeamColor;
+
+	/// <summary>
+	/// The holder's colour for the glow while gravity pulling
+	/// </summary>
+	public Color PullColor => (HasOwner ? GamePreferences.ParseColor( Owner.PhysgunPullColor ) : null) ?? DefaultPullColor;
+
+	/// <summary>
+	/// A part of the physgun in exactly <paramref name="color"/>. The colour the part has in its prefab only says how bright
+	/// it glows: it stays that bright to the eye in <paramref name="reference"/>, the default, and brighter or darker colours
+	/// scale every part alike.
+	/// </summary>
+	public static Color Tint( Color original, Color color, Color reference )
+	{
+		return (color * (Luminance( original ) / Luminance( reference ))).WithAlpha( original.a );
+	}
+
+	/// <summary>
+	/// <see cref="Tint(Color, Color, Color)"/> for a part in the beam colour
+	/// </summary>
+	public static Color Tint( Color original, Color color ) => Tint( original, color, DefaultBeamColor );
+
+	public static float Luminance( Color color ) => 0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b;
+
+	/// <summary>
+	/// A physgun colour for the screen and crosshair, which show it as it is: HDR ones are brought down to fit
+	/// </summary>
+	static Color FitToScreen( Color color )
+	{
+		var brightness = MathF.Max( 1f, MathF.Max( color.r, MathF.Max( color.g, color.b ) ) );
+		return (color * (1f / brightness)).WithAlpha( 1 );
+	}
+
+	static Vector4 ScreenColor( Color color )
+	{
+		var fit = FitToScreen( color );
+		return new Vector4( fit.r, fit.g, fit.b, 1f );
+	}
+
+	// the beam's gradient as the prefab set it up, for how bright it is along its length
+	Gradient? _beamGradient;
+
+	void UpdateBeamColor()
+	{
+		_beamGradient ??= BeamRenderer.Color;
+
+		var color = BeamColor;
+		var frames = _beamGradient.Value.Colors.Select( x => new Gradient.ColorFrame( x.Time, Tint( x.Value, color ) ) );
+		BeamRenderer.Color = _beamGradient.Value.WithFrames( [.. frames] );
+
+		if ( _grabEffect.IsValid() ) PhysgunEffectColor.Apply( _grabEffect, color );
+		if ( _endPointEffect.IsValid() ) PhysgunEffectColor.Apply( _endPointEffect, color );
+	}
 
 	void UpdateBeam( Transform source, Vector3 aimForward, Vector3 end, Vector3 endNormal, bool grabbed )
 	{
 		if ( !BeamRenderer.IsValid() ) return;
+
+		_beamOpen = true;
+
+		if ( !GamePreferences.PhysgunBeams )
+		{
+			UpdateHighlight( grabbed ? _state.GameObject : null );
+			HideBeam();
+			return;
+		}
 
 		var endTx = new Transform( end, Rotation.LookAt( endNormal ) );
 
@@ -100,6 +173,7 @@ public partial class Physgun : ScreenWeapon
 		}
 
 		UpdateHighlight( grabbed ? _state.GameObject : null );
+		UpdateBeamColor();
 
 		bool justEnabled = !BeamRenderer.GameObject.Enabled;
 
@@ -165,27 +239,27 @@ public partial class Physgun : ScreenWeapon
 	/// </summary>
 	void UpdateHighlight( GameObject target )
 	{
-		if ( IsProxy || !target.IsValid() )
+		if ( IsProxy || !target.IsValid() || !GamePreferences.PhysgunOutline )
 		{
 			BeamHighlight.Hide();
 			return;
 		}
 
-		BeamHighlight.Show( GetHighlightTarget( target ), HighlightStyle.Selected );
-	}
-
-	static GameObject GetHighlightTarget( GameObject go )
-	{
-		var modelPhysics = go.Components.GetInAncestorsOrSelf<ModelPhysics>();
-		if ( !modelPhysics.IsValid() ) return go;
-
-		return modelPhysics.Renderer.IsValid() ? modelPhysics.Renderer.GameObject : modelPhysics.GameObject;
+		BeamHighlight.Show( ObjectHighlight.GetTarget( target ), HighlightStyle.Selected );
 	}
 
 	void CloseBeam()
 	{
+		_beamOpen = false;
 		UpdateHighlight( null );
+		HideBeam();
+	}
 
+	/// <summary>
+	/// Takes the beam and its end effects off screen, leaving the outline alone
+	/// </summary>
+	void HideBeam()
+	{
 		if ( !BeamRenderer.IsValid() ) return;
 
 		BeamRenderer.GameObject.Enabled = false;
@@ -379,8 +453,8 @@ public partial class Physgun : ScreenWeapon
 
 		so.Attributes.Set( "Grid", new Vector4( 16f, 16f, 0.1f, 1.0f ) );
 		so.Attributes.Set( "GraphInfo", new Vector4( GraphSamples, 0f, 0f, 0f ) );
-		so.Attributes.Set( "Ch1Color", new Vector4( 0f, 1f, 1f, 1f ) );
-		so.Attributes.Set( "Ch2Color", new Vector4( 1f, 1f, 0f, 1f ) );
+		so.Attributes.Set( "Ch1Color", ScreenColor( BeamColor ) );
+		so.Attributes.Set( "Ch2Color", ScreenColor( PullColor ) );
 		so.Attributes.Set( "Ch3Color", new Vector4( 1f, 0f, 0f, 0.5f ) );
 		so.Attributes.Set( "Band1", new Vector4( 0.5f, 0.3f, 0f, 0f ) );
 		so.Attributes.Set( "Band2", new Vector4( 0.48f, 0.28f, 0f, 0f ) );

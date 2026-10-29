@@ -40,8 +40,9 @@
 		{
 			if ( mode.IsAbstract ) continue;
 
-			Components.Create( mode, enabled );
-			enabled = false;
+			// the prefab has some already, holding their data
+			var component = Components.Get( mode.TargetType, FindMode.EverythingInSelf ) ?? Components.Create( mode, enabled );
+			enabled &= !component.Enabled;
 		}
 
 		Network.Refresh( GameObject );
@@ -61,10 +62,12 @@
 	}
 
 	/// <summary>
-	/// Draws the active tool mode's HUD.
+	/// Draws the active tool mode's HUD, its crosshair.
 	/// </summary>
 	public override void DrawHud( Painter painter, Vector2 crosshair )
 	{
+		if ( !Hud.IsVisible( HudElement.Crosshair ) ) return;
+
 		var currentMode = GetCurrentMode();
 		currentMode?.DrawHud( painter, crosshair );
 	}

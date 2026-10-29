@@ -3,6 +3,13 @@ using Sandbox.Movement;
 public sealed class NoclipMoveMode : Sandbox.Movement.MoveMode
 {
 	/// <summary>
+	/// Scales <see cref="RunSpeed"/> and <see cref="WalkSpeed"/>. Read on the owner, who moves their own player.
+	/// </summary>
+	[Title( "Noclip Speed" ), Group( "Gameplay" ), ServerSettings.Section( "Players" ), Order( 7 ), Range( 0.1f, 10f ), Step( 0.1f )]
+	[ConVar( "sandbox.noclip_speed", ConVarFlags.Replicated | ConVarFlags.Server | ConVarFlags.GameSetting, Help = "Multiplier on noclip flying speed." )]
+	public static float SpeedScale { get; set; } = 1.0f;
+
+	/// <summary>
 	/// If true, the player will still collide with the world and other players. This probably
 	/// means that the noclip mode is named wrong. But it's cool. It just becomes a fly around mode.
 	/// </summary>
@@ -17,6 +24,10 @@ public sealed class NoclipMoveMode : Sandbox.Movement.MoveMode
 
 	protected override void OnUpdateAnimatorState( SkinnedModelRenderer renderer )
 	{
+		// Seated players keep the sitting animation
+		if ( GetComponentInParent<ISitTarget>( false ) is not null )
+			return;
+
 		renderer.Set( "b_noclip", true );
 		renderer.Set( "duck", 0f );
 	}
@@ -60,7 +71,6 @@ public sealed class NoclipMoveMode : Sandbox.Movement.MoveMode
 	public override void OnModeEnd( MoveMode next )
 	{
 		Controller.IsClimbing = false;
-		Controller.Body.Velocity = Controller.Body.Velocity.ClampLength( Controller.RunSpeed );
 		Controller.Body.Tags.Set( "noclip", false );
 	}
 
@@ -93,6 +103,8 @@ public sealed class NoclipMoveMode : Sandbox.Movement.MoveMode
 
 		// Duck and the walk modifier both slow movement in any direction.
 		if ( Input.Down( "walk" ) || Input.Down( "duck" ) ) velocity = WalkSpeed;
+
+		velocity *= SpeedScale;
 
 		if ( direction.IsNearlyZero( 0.1f ) )
 		{

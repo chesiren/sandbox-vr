@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 /// <summary>
 /// We want to save the properties of this instance as cookies.
@@ -25,6 +24,7 @@ public static class CookieSourceExtensions
 		if ( property.IsStatic ) return false;
 		if ( !property.HasAttribute<PropertyAttribute>() ) return false;
 		if ( property.HasAttribute<JsonIgnoreAttribute>() ) return false;
+		if ( property.HasAttribute<HideAttribute>() ) return false;
 		if ( !property.CanWrite || !property.CanRead ) return false;
 
 		return true;
@@ -52,7 +52,7 @@ public static class CookieSourceExtensions
 
 		/// <summary>
 		/// Saves any instance properties with a <see cref="PropertyAttribute"/>, excluding any
-		/// with <see cref="JsonIgnoreAttribute"/>, into <see cref="Game.Cookies"/>.
+		/// with <see cref="JsonIgnoreAttribute"/> or <see cref="HideAttribute"/>, into <see cref="Game.Cookies"/>.
 		/// </summary>
 		public void SaveCookies()
 		{
@@ -62,7 +62,7 @@ public static class CookieSourceExtensions
 				{
 					var cookieValue = property.GetValue( source );
 
-					Game.Cookies.SetString( cookieName, JsonSerializer.Serialize( cookieValue, property.PropertyType ) );
+					Game.Cookies.SetString( cookieName, Json.ToNode( cookieValue, property.PropertyType )?.ToJsonString() ?? "null" );
 				}
 				catch ( Exception ex )
 				{
@@ -73,7 +73,7 @@ public static class CookieSourceExtensions
 
 		/// <summary>
 		/// Loads any instance properties with a <see cref="PropertyAttribute"/>, excluding any
-		/// with <see cref="JsonIgnoreAttribute"/>, from <see cref="Game.Cookies"/>.
+		/// with <see cref="JsonIgnoreAttribute"/> or <see cref="HideAttribute"/>, from <see cref="Game.Cookies"/>.
 		/// </summary>
 		public void LoadCookies()
 		{
@@ -83,7 +83,7 @@ public static class CookieSourceExtensions
 
 				try
 				{
-					var cookieValue = JsonSerializer.Deserialize( jsonString, property.PropertyType );
+					var cookieValue = Json.Deserialize( jsonString, property.PropertyType );
 
 					property.SetValue( source, cookieValue );
 				}

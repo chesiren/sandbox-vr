@@ -7,6 +7,9 @@ public sealed class PhygunViewmodel : Component, Component.ExecuteInEditor
 	[Property] public Material BottleMaterial { get; set; }
 
 	[Property] public bool BeamActive { get; set; }
+	/// <summary>
+	/// How bright the glow is, while pulling and not. The colour itself comes from the holder's physgun colours, see <see cref="Physgun.Tint(Color, Color, Color)"/>.
+	/// </summary>
 	[Property] public Color GravTint { get; set; }
 	[Property] public Color PhysTint { get; set; }
 
@@ -26,8 +29,11 @@ public sealed class PhygunViewmodel : Component, Component.ExecuteInEditor
 		{
 			BeamActive = physgun.BeamActive;
 
+			var physTint = Physgun.Tint( PhysTint, physgun.BeamColor );
+			var gravTint = Physgun.Tint( GravTint, physgun.PullColor, Physgun.DefaultPullColor );
+
 			if ( BeamActive && SparksEffect.IsValid() )
-				SparksEffect.Tint = physgun.PullActive ? GravTint : PhysTint;
+				SparksEffect.Tint = physgun.PullActive ? gravTint : physTint;
 
 			_tintFrac = MathX.Approach( _tintFrac, physgun.PullActive ? 1 : 0, Time.Delta * 5 );
 			// Steep ease-in-out so the transition rushes through the midpoint
@@ -35,7 +41,7 @@ public sealed class PhygunViewmodel : Component, Component.ExecuteInEditor
 				? 8f * _tintFrac * _tintFrac * _tintFrac * _tintFrac
 				: 1f - 8f * (1f - _tintFrac) * (1f - _tintFrac) * (1f - _tintFrac) * (1f - _tintFrac);
 
-			_effectsTint = Color.Lerp( PhysTint, GravTint, t );
+			_effectsTint = Color.Lerp( physTint, gravTint, t );
 			_glowScale = MathX.Lerp( 1, GravGlowScale, t );
 		}
 		else

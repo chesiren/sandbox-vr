@@ -4,14 +4,23 @@
 public readonly record struct HighlightStyle( Color Color, Color ObscuredColor, float Width = 0.2f )
 {
 	/// <summary>
-	/// Something we're acting on - held by the physgun, or selected in the inspector.
+	/// Something we're acting on - held by the physgun, frozen, or selected in the inspector. In the local player's physgun colour.
 	/// </summary>
-	public static readonly HighlightStyle Selected = new( new Color( 4.7f, 10.1f, 30.6f, 1 ), new Color( 2.2f, 2.3f, 2.9f, 0.1f ) );
+	public static HighlightStyle Selected => WithPreferences( new( Physgun.Tint( new Color( 4.7f, 10.1f, 30.6f, 1 ), GamePreferences.PhysgunColorValue ), new Color( 2.2f, 2.3f, 2.9f ) ) );
 
 	/// <summary>
 	/// Something under the inspector's cursor
 	/// </summary>
-	public static readonly HighlightStyle Hovered = new( new Color( 2.6f, 2.0f, 0.2f, 1 ), new Color( 2.6f, 2.0f, 0.2f, 0.1f ) );
+	public static HighlightStyle Hovered => WithPreferences( new( new Color( 2.6f, 2.0f, 0.2f, 1 ), new Color( 2.6f, 2.0f, 0.2f ) ) );
+
+	/// <summary>
+	/// The local player's outline width and how much of an outline shows through what's in front of it
+	/// </summary>
+	static HighlightStyle WithPreferences( HighlightStyle style ) => style with
+	{
+		Width = GamePreferences.OutlineWidth,
+		ObscuredColor = style.ObscuredColor.WithAlpha( GamePreferences.OutlineObscuredOpacity )
+	};
 }
 
 public static class ObjectHighlight
@@ -97,6 +106,17 @@ public static class ObjectHighlight
 		flash.Duration = duration;
 		flash.Brightness = brightness;
 		flash.Play( outline );
+	}
+
+	/// <summary>
+	/// What to outline for <paramref name="go"/>: the whole ragdoll for one of its bones, otherwise itself.
+	/// </summary>
+	public static GameObject GetTarget( GameObject go )
+	{
+		var modelPhysics = go.Components.GetInAncestorsOrSelf<ModelPhysics>();
+		if ( !modelPhysics.IsValid() ) return go;
+
+		return modelPhysics.Renderer.IsValid() ? modelPhysics.Renderer.GameObject : modelPhysics.GameObject;
 	}
 
 	static void AddRenderers( GameObject o, List<Renderer> renderers )

@@ -905,13 +905,23 @@ public partial class Physgun : Local.IPlayerEvents
 	}
 
 	/// <summary>
-	/// Ask the object if it allows being grabbed (Ownable and others can reject via IPhysgunEvent)
+	/// Ask the object if it allows being grabbed (anything can reject via IPhysgunEvent)
 	/// </summary>
 	bool AllowsGrab( GameObject go )
 	{
 		var grabEvent = new IPhysgunEvent.GrabEvent { Grabber = Network.Owner };
 		go.Root.RunEvent<IPhysgunEvent>( x => x.OnPhysgunGrab( grabEvent ) );
 		return !grabEvent.Cancelled;
+	}
+
+	/// <summary>
+	/// Is this physgun holding <paramref name="root"/> or pulling it in? The grab is synced, so this works everywhere.
+	/// </summary>
+	public bool IsGrabbing( GameObject root )
+	{
+		return Grabs( _state ) || (_stateHovered.Pulling && Grabs( _stateHovered ));
+
+		bool Grabs( GrabState state ) => (state.Active || state.Pulling) && state.GameObject?.Root == root;
 	}
 
 	/// <summary>
@@ -977,7 +987,7 @@ public partial class Physgun : Local.IPlayerEvents
 		return true;
 	}
 
-	[Rpc.Broadcast]
+	[Rpc.Broadcast( NetFlags.OwnerOnly )]
 	void Freeze( Rigidbody body )
 	{
 		if ( !body.IsValid() ) return;
@@ -986,69 +996,53 @@ public partial class Physgun : Local.IPlayerEvents
 		if ( go.Tags.Has( "npc" ) )
 			return;
 
-		var effect = FreezeEffectPrefab.Clone( body.WorldTransform );
-
-		foreach ( var emitter in effect.GetComponentsInChildren<ParticleModelEmitter>() )
-		{
-			emitter.Target = body.GameObject;
-		}
-
-		if ( !IsProxy )
-		{
-			ObjectHighlight.Flash( GetHighlightTarget( body.GameObject ), HighlightStyle.Selected );
-		}
+		FreezeEffect.Play( go, true, IsProxy ? null : [go] );
 
 		if ( body.IsProxy ) return;
 
-		if ( Networking.IsHost )
+		if ( Networking.IsHost && AllowsGrab( go ) )
 		{
 			body.MotionEnabled = false;
 		}
 	}
 
-	[Rpc.Host]
-	void Unfreeze( Rigidbody body )
+	[Rpc.Host( NetFlags.OwnerOnly )]
+	void Unfreeze( Rigidbody body ) => UnfreezeBody( body );
+
+	void UnfreezeBody( Rigidbody body )
 	{
 		if ( !body.IsValid() ) return;
 		if ( body.IsProxy ) return;
+		if ( !AllowsGrab( body.GameObject ) ) return;
 
 		body.MotionEnabled = true;
 	}
 
-	[Rpc.Broadcast]
+	[Rpc.Broadcast( NetFlags.OwnerOnly )]
 	void UnfreezeAll( Rigidbody body )
 	{
 		if ( !body.IsValid() ) return;
 
-		var effect = UnFreezeEffectPrefab.Clone( body.WorldTransform );
-		foreach ( var emitter in effect.GetComponentsInChildren<ParticleModelEmitter>() )
-		{
-			emitter.Target = body.GameObject;
-		}
+		var bodies = new HashSet<Rigidbody>();
+		if ( !IsProxy || !body.IsProxy )
+			PhysicsHold.GetConnectedBodies( body.GameObject, bodies );
+
+		FreezeEffect.Play( body.GameObject, false, IsProxy ? null : bodies.Select( x => x.GameObject ) );
 
 		if ( IsProxy && body.IsProxy ) return;
-
-		var bodies = new HashSet<Rigidbody>();
-		PhysicsHold.GetConnectedBodies( body.GameObject, bodies );
 
 		if ( !IsProxy )
 		{
 			var count = bodies.Select( x => x.GameObject.Root ).Distinct().Count();
 			var phrase = Game.Language.GetPhrase( "physgun.unfrozen", new() { { "count", count.ToString() } } );
 			Sandbox.UI.Notices.AddNotice( "ac_unit", Color.Cyan, phrase );
-
-			// Flash everything that got unfrozen, same as freezing does
-			foreach ( var target in bodies.Select( x => GetHighlightTarget( x.GameObject ) ).Distinct() )
-			{
-				ObjectHighlight.Flash( target, HighlightStyle.Selected );
-			}
 		}
 
-		if ( body.IsProxy ) return;
+		if ( body.IsProxy || !Networking.IsHost ) return;
 
 		foreach ( var rb in bodies )
 		{
-			Unfreeze( rb );
+			UnfreezeBody( rb );
 		}
 
 		var models = bodies
@@ -1062,20 +1056,21 @@ public partial class Physgun : Local.IPlayerEvents
 		}
 	}
 
-	[Rpc.Host]
 	void UnfreezeModelPhysics( ModelPhysics modelPhysics )
 	{
 		if ( !modelPhysics.IsValid() ) return;
 		if ( modelPhysics.IsProxy ) return;
+		if ( !AllowsGrab( modelPhysics.GameObject ) ) return;
 
 		modelPhysics.MotionEnabled = true;
 	}
 
-	[Rpc.Host]
+	[Rpc.Host( NetFlags.OwnerOnly )]
 	void Launch( Rigidbody body, Vector3 force )
 	{
 		if ( !body.IsValid() ) return;
 		if ( body.IsProxy ) return;
+		if ( !AllowsGrab( body.GameObject ) ) return;
 
 		// We already launched.
 		if ( _launched ) return;
