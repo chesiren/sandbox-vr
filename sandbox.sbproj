@@ -1,11 +1,12 @@
 {
-  "Title": "Sandbox",
+  "Title": "Sandbox VR",
   "Type": "game",
-  "Org": "facepunch",
-  "Ident": "sandbox",
+  "Org": "baguette",
+  "Ident": "sandbox-vr",
   "Schema": 1,
   "IncludeSourceFiles": false,
   "Resources": "/fonts/*\n/UI/*.png\n/ui/*.png\n/ui/*\n/ui/weapons/melee/*",
+  "PublishUsedAssetsOnly": false,
   "PackageReferences": [],
   "EditorReferences": null,
   "Mounts": [],
@@ -39,6 +40,14 @@
     "RecommendedMinPlayers": 1,
     "RecommendedMaxPlayers": 64,
     "Coop": true,
-    "Versus": true
+    "Versus": true,
+    "ParentPackage": null,
+    "MapSettings": {
+      "UseCreateGameModal": true,
+      "NeedsMap": true,
+      "ShowChangeMap": true,
+      "DefaultMap": "facepunch.flatgrass",
+      "MapTarget": "*"
+    }
   }
 }
