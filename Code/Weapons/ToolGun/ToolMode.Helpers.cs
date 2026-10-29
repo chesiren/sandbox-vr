@@ -72,7 +72,7 @@
 
 		if ( sp.IsValid() )
 		{
-			// Ask the object if it allows toolgun interaction (Ownable and others can reject via IToolgunEvent)
+			// Ask the object if it allows toolgun interaction (anything can reject via IToolgunEvent)
 			var selectEvent = new IToolgunEvent.SelectEvent { User = Player.Network.Owner };
 			sp.GameObject.Root.RunEvent<IToolgunEvent>( x => x.OnToolgunSelect( selectEvent ) );
 			if ( selectEvent.Cancelled ) return default;

@@ -1,4 +1,6 @@
 
+using Sandbox.Movement;
+
 /// <summary>
 /// Holds player information like health
 /// </summary>
@@ -78,7 +80,12 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 				return HudElement.All;
 
 			var weapon = GetComponent<PlayerInventory>()?.ActiveWeapon;
-			return weapon.IsValid() && weapon.WantsHideHud ? weapon.HiddenHudElements : HudElement.None;
+			var hidden = weapon.IsValid() && weapon.WantsHideHud ? weapon.HiddenHudElements : HudElement.None;
+
+			if ( IsDriving || IsDriveHolding )
+				hidden |= HudElement.Crosshair;
+
+			return hidden;
 		}
 	}
 
@@ -121,6 +128,9 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 		if ( IsLocalPlayer )
 			LocalPlayer = this;
 
+		if ( ServerSettings.KeepPlayerCorpses )
+			return;
+
 		var targets = Scene.GetAllComponents<DeathCameraTarget>()
 			.Where( x => x.Connection == Network.Owner );
 
@@ -150,6 +160,11 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 	/// </summary>
 	[Sync] public NetDictionary<string, float> ActionAmounts { get; set; } = new();
 
+	/// <summary>
+	/// The weapon prefab this player picked for the NPCs they spawn
+	/// </summary>
+	[Sync] public string NpcWeapon { get; private set; }
+
 	/// <summary>Seconds of invulnerability after spawning, to stop spawn-killing. 0 disables it.</summary>
 	[Title( "Spawn Protection" ), Group( "Gameplay" ), ServerSettings.Section( "Players" ), Order( 4 ), Range( 0, 30 ), Step( 1 )]
 	[ConVar( "sandbox.spawnprotection", ConVarFlags.Replicated | ConVarFlags.Server | ConVarFlags.GameSetting | ConVarFlags.Saved, Help = "Seconds of invulnerability after spawning. 0 disables spawn protection." )]
@@ -170,7 +185,8 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 	{
 		if ( Controller.IsValid() && Controller.Renderer.IsValid() )
 		{
-			Controller.Renderer.Set( "b_noclip", IsNoclipping );
+			var seated = GetComponentInParent<ISitTarget>( false ) is not null;
+			Controller.Renderer.Set( "b_noclip", IsNoclipping && !seated );
 
 			// Weapons write their pose while active; empty hands need an explicit reset.
 			if ( GetComponent<PlayerInventory>()?.ActiveWeapon.IsValid() != true )
@@ -180,12 +196,12 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 			}
 		}
 
-		// Seated weapon bookkeeping and HUD paint in the update stage - the camera modifier
-		// (Player.Camera) only composes the view.
 		if ( IsLocalPlayer )
 		{
 			UpdateSeatedWeapons();
 			DrawSeatedWeaponHud();
+			UpdatePhysgunColors();
+			NpcWeapon = GamePreferences.NpcWeapon;
 		}
 	}
 
@@ -313,7 +329,7 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 	/// <summary>
 	/// Called on the host when a player dies
 	/// </summary>
-	void Kill( in DamageInfo d )
+	void Kill( in DamageInfo d, bool createRagdoll = true )
 	{
 		//
 		// Play the flatline sound on the owner
@@ -336,8 +352,11 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 			inventory.ForceHolster();
 		}
 
-		var velocity = RagdollPush.GetVelocity( d, GameObject, 1024, 2048, out var propMass );
-		CreateRagdoll( velocity, d.Origin, propMass );
+		if ( createRagdoll )
+		{
+			var velocity = RagdollPush.GetVelocity( d, GameObject, 1024, 2048, out var propMass );
+			CreateRagdoll( velocity, d.Origin, propMass );
+		}
 
 		//
 		// Ghost and say goodbye to the player
@@ -377,6 +396,9 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 			return;
 		}
 
+		if ( ControlDriving() )
+			return;
+
 		var seated = _cachedSeat is not null;
 
 		if ( seated )
@@ -389,8 +411,8 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 			ToggleNoclip();
 		}
 
-		// noclip was turned off while we were flying
-		if ( IsNoclipping && !ServerSettings.CanNoclip( Network.Owner ) )
+		// noclip was turned off while we were flying, or we sat down in something
+		if ( IsNoclipping && (seated || !ServerSettings.CanNoclip( Network.Owner )) )
 		{
 			SetNoclip( false );
 		}
@@ -581,10 +603,15 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 			// We were hit by a moving physics object, so lets take that damage.
 		}
 
-		// Fire pre-damage event — listeners can modify damage or cancel
-		var damageEvent = new PlayerDamageEvent { Player = this, DamageInfo = dmg, Damage = dmg.Damage, BlamedPlayer = blamed, Cancelled = pvpBlocked };
+		// Fire pre-damage events — listeners can modify damage or cancel
+		var e = new DamageEvent { Victim = GameObject, DamageInfo = dmg, Attacker = blamed?.GameObject ?? dmg.Attacker, Damage = dmg.Damage, Cancelled = pvpBlocked };
+		Scene.RunEvent<Global.IDamageEvents>( x => x.OnDamaging( e ) );
+
+		var damageEvent = new PlayerDamageEvent { Player = this, DamageInfo = dmg, Damage = e.Damage, BlamedPlayer = blamed, Cancelled = e.Cancelled };
 		Local.IPlayerEvents.PostToGameObject( GameObject, x => x.OnDamaging( damageEvent ) );
+#pragma warning disable CS0618
 		Global.IPlayerEvents.Post( x => x.OnPlayerDamaging( damageEvent ) );
+#pragma warning restore CS0618
 
 		if ( damageEvent.Cancelled )
 			return;
@@ -604,6 +631,10 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 
 		Health -= damage;
 
+		e.Damage = damageEvent.Damage;
+		e.HealthLost = damage;
+		Scene.RunEvent<Global.IDamageEvents>( x => x.OnDamaged( e ) );
+
 		NotifyOnDamage( new PlayerDamageParams()
 		{
 			Damage = damage,
@@ -617,10 +648,21 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 		// We didn't die
 		if ( Health >= 1 ) return;
 
+		var death = new DeathEvent { Victim = GameObject, DamageInfo = dmg, Attacker = e.Attacker };
+		Scene.RunEvent<Global.IDeathEvents>( x => x.OnDying( death ) );
+
+		if ( death.Cancelled )
+		{
+			Health = MathF.Max( Health, 1 );
+			return;
+		}
+
 		GameManager.Current.OnDeath( this, dmg );
 
 		Health = 0;
-		Kill( dmg );
+		Kill( dmg, death.CreateRagdoll );
+
+		Scene.RunEvent<Global.IDeathEvents>( x => x.OnDied( death ) );
 	}
 
 	void PlayerController.IEvents.OnLanded( float distance, Vector3 impactVelocity )

@@ -5,7 +5,7 @@
 	/// </summary>
 	public override void DrawHud( Painter painter, Vector2 crosshair )
 	{
-		if ( _state.IsValid() )
+		if ( _state.IsValid() || !Hud.IsVisible( HudElement.Crosshair ) )
 			return;
 
 		using var scope = painter.Scope();
@@ -14,12 +14,12 @@
 
 		if ( _stateHovered.IsValid() )
 		{
-			painter.Fill = Color.Cyan;
+			painter.Fill = FitToScreen( BeamColor );
 			painter.Circle( crosshair, 1.5f );
 		}
 		else
 		{
-			painter.Fill = Color.Cyan.WithAlpha( 0.2f );
+			painter.Fill = FitToScreen( BeamColor ).WithAlpha( 0.2f );
 			painter.Circle( crosshair, 2.5f );
 		}
 	}

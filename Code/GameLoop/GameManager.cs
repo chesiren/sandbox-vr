@@ -43,11 +43,22 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 		Sandbox.Platform.Chat.AddText( LocalizedText.Resolve( phrase, tokens ) );
 	}
 
+	bool Component.INetworkListener.AcceptConnection( Connection channel, ref string reason )
+	{
+		var e = new ConnectingEvent { Client = channel, Reason = reason };
+		Scene.RunEvent<Global.IConnectionEvents>( x => x.OnConnecting( e ) );
+
+		reason = e.Reason;
+		return !e.Cancelled;
+	}
+
 	void Component.INetworkListener.OnActive( Connection channel )
 	{
 		channel.CanSpawnObjects = false;
 
 		var playerData = CreatePlayerInfo( channel );
+		Scene.RunEvent<Global.IConnectionEvents>( x => x.OnPlayerJoined( playerData ) );
+
 		SpawnPlayer( playerData );
 		CheckConnectionAchievement( channel );
 		CheckFriendsOnlineStat();
@@ -61,6 +72,7 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 		var pd = PlayerData.For( channel );
 		if ( pd is not null )
 		{
+			Scene.RunEvent<Global.IConnectionEvents>( x => x.OnPlayerLeft( pd ) );
 			pd.GameObject.Destroy();
 		}
 
@@ -268,7 +280,8 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 		var attackerName = isSuicide ? null : source.DisplayName;
 		var attackerSteamId = isSuicide ? 0L : source.SteamId;
 		var playerName = player.Network.Owner?.DisplayName ?? "Unknown";
-		Scene.RunEvent<Feed>( x => x.NotifyKill( playerName, attackerName, attackerSteamId, damageTags, attackerTags, "", w?.DisplayIcon ) );
+		var playerSteamId = (long)(player.Network.Owner?.SteamId ?? default);
+		Scene.RunEvent<Feed>( x => x.NotifyKill( playerName, playerSteamId, attackerName, attackerSteamId, damageTags, attackerTags, "", w?.DisplayIcon ) );
 
 		if ( string.IsNullOrEmpty( attackerName ) )
 		{
@@ -295,12 +308,19 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 		var source = DamageBlame.Find( dmg ) as IKillSource ?? dmg.Attacker?.GetComponent<IKillSource>();
 		source?.OnKill( victim.GameObject );
 
+		if ( source is Player killer )
+		{
+			var killEvent = new PlayerKillEvent { Player = killer, Victim = victim.GameObject, DamageInfo = dmg };
+			Local.IPlayerEvents.PostToGameObject( killer.GameObject, x => x.OnKill( killEvent ) );
+			Global.IPlayerEvents.Post( x => x.OnPlayerKill( killEvent ) );
+		}
+
 		var w = dmg.Weapon.IsValid() ? dmg.Weapon.GetComponentInChildren<IKillIcon>() : null;
 		var attackerName = source?.DisplayName;
 		var attackerSteamId = source?.SteamId ?? 0L;
 		var attackerTags = source?.Tags ?? "";
 
-		Scene.RunEvent<Feed>( x => x.NotifyKill( victim.DisplayName, attackerName, attackerSteamId, dmg.Tags.ToString(), attackerTags, "npc", w?.DisplayIcon ) );
+		Scene.RunEvent<Feed>( x => x.NotifyKill( victim.DisplayName, 0, attackerName, attackerSteamId, dmg.Tags.ToString(), attackerTags, "npc", w?.DisplayIcon ) );
 	}
 
 	/// <summary>
@@ -310,7 +330,6 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	internal static void ChangeProperty( Component c, string propertyName, object value )
 	{
 		if ( !c.IsValid() ) return;
-		if ( !c.GameObject.HasAccess( Rpc.Caller ) ) return;
 
 		var tl = TypeLibrary.GetType( c.GetType() );
 		if ( tl is null ) return;
@@ -336,7 +355,6 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	internal static void ApplyMorphBatch( SkinnedModelRenderer smr, string morphsJson )
 	{
 		if ( !smr.IsValid() ) return;
-		if ( !smr.GameObject.HasAccess( Rpc.Caller ) ) return;
 
 		smr.GameObject.GetOrAddComponent<MorphState>().ApplyBatch( morphsJson );
 	}
@@ -348,7 +366,6 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	internal static void ApplyFacePosePreset( SkinnedModelRenderer smr, string morphsJson )
 	{
 		if ( !smr.IsValid() ) return;
-		if ( !smr.GameObject.HasAccess( Rpc.Caller ) ) return;
 
 		smr.GameObject.GetOrAddComponent<MorphState>().ApplyPreset( morphsJson );
 	}
@@ -357,7 +374,6 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	internal static async void ChangeMaterialOverride( ModelRenderer renderer, int materialIndex, string materialPath )
 	{
 		if ( !renderer.IsValid() ) return;
-		if ( !renderer.GameObject.HasAccess( Rpc.Caller ) ) return;
 
 		Material material = null;
 
@@ -381,7 +397,6 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	internal static async void ChangeWholeMaterialOverride( ModelRenderer renderer, string materialPath )
 	{
 		if ( !renderer.IsValid() ) return;
-		if ( !renderer.GameObject.HasAccess( Rpc.Caller ) ) return;
 
 		Material material = null;
 
@@ -402,7 +417,6 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	internal static void ChangeMaterialGroup( ModelRenderer renderer, string group )
 	{
 		if ( !renderer.IsValid() ) return;
-		if ( !renderer.GameObject.HasAccess( Rpc.Caller ) ) return;
 
 		renderer.MaterialGroup = group;
 
@@ -417,7 +431,6 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	internal static void ChangeBodyGroup( ModelRenderer renderer, string partName, int choice )
 	{
 		if ( !renderer.IsValid() ) return;
-		if ( !renderer.GameObject.HasAccess( Rpc.Caller ) ) return;
 
 		// several objects can be selected at once, skip the ones whose model doesn't have this choice
 		var part = renderer.Model?.Parts.Get( partName );
@@ -439,6 +452,10 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 
 	void ICleanupEvents.OnCleanup( int removedObjects, int restoredObjects )
 	{
+		// player corpses aren't networked, so the host's cleanup misses everyone else's
+		foreach ( var corpse in Scene.GetAllComponents<DeathCameraTarget>().ToArray() )
+			corpse.GameObject.Destroy();
+
 		var phrase = restoredObjects > 0 ? "cleanup.restored" : "cleanup.removed";
 		var message = Game.Language.GetPhrase( phrase, new()
 		{

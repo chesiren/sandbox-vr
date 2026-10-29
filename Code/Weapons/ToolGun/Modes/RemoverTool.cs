@@ -39,15 +39,19 @@ public sealed class RemoverTool : ToolMode
 		ShootEffects( select );
 	}
 
-	[Rpc.Host]
+	[Rpc.Host( NetFlags.OwnerOnly )]
 	public void Remove( GameObject go )
 	{
+		if ( !FireToolAction( ToolInput.Primary ) ) return;
+
 		go = go?.Network?.RootGameObject;
 
 		if ( !CanDestroy( go ) ) return;
 		if ( go.IsProxy ) return;
 
 		go.Destroy();
+
+		FirePostToolAction( ToolInput.Primary );
 	}
 
 }

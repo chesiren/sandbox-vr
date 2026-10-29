@@ -29,9 +29,9 @@ public sealed class SpotLightEntity : Component, IPlayerControllable
 	public float Brightness { get; set { field = value; UpdateLight(); } } = 2;
 
 	/// <summary>
-	/// The radius affected by the light.
+	/// How far the light reaches.
 	/// </summary>
-	[Property, Title( "#entity.property.radius" ), Description( "#entity.description.radius" ), Range( 0, 1000 ), ClientEditable, Group( "#entity.group.light" )]
+	[Property, Title( "#entity.property.range" ), Description( "#entity.description.range" ), Range( 0, 1000 ), ClientEditable, Group( "#entity.group.light" )]
 	public float Radius { get; set { field = value; UpdateLight(); } } = 500;
 
 	/// <summary>
@@ -45,6 +45,36 @@ public sealed class SpotLightEntity : Component, IPlayerControllable
 	/// </summary>
 	[Property, Title( "#entity.property.attenuation" ), Description( "#entity.description.attenuation" ), Range( 0, 16 ), ClientEditable, Group( "#entity.group.light" )]
 	public float Attenuation { get; set { field = value; UpdateLight(); } } = 2.4f;
+
+	/// <summary>
+	/// The color temperature of the light in Kelvin, 6500 is neutral white.
+	/// </summary>
+	[Property, Title( "#entity.property.temperature" ), Description( "#entity.description.temperature" ), Range( 1000, 12000 ), ClientEditable, Group( "#entity.group.light" )]
+	public float Temperature { get; set { field = value; UpdateLight(); } } = 6500;
+
+	/// <summary>
+	/// Whether the light's brightness is animated.
+	/// </summary>
+	[Property, Title( "#entity.property.animated" ), Description( "#entity.description.animated" ), ClientEditable, ToggleGroup( "Animated", Label = "#entity.group.animation" )]
+	public bool Animated { get; set { field = value; UpdateLight(); } }
+
+	/// <summary>
+	/// The animation the light plays.
+	/// </summary>
+	[Property, Title( "#entity.property.animationpattern" ), Description( "#entity.description.animationpattern" ), ClientEditable, ToggleGroup( "Animated", Label = "#entity.group.animation" )]
+	public LightAnimationPattern AnimationPattern { get; set { field = value; UpdateLight(); } } = LightAnimationPattern.Flicker;
+
+	/// <summary>
+	/// How fast the animation plays.
+	/// </summary>
+	[Property, Title( "#entity.property.animationspeed" ), Description( "#entity.description.animationspeed" ), Range( 0, 10 ), ClientEditable, ToggleGroup( "Animated", Label = "#entity.group.animation" )]
+	public float AnimationSpeed { get; set { field = value; UpdateLight(); } } = 1;
+
+	/// <summary>
+	/// Shifts the animation in time, so identical lights don't play in step.
+	/// </summary>
+	[Property, Title( "#entity.property.animationoffset" ), Description( "#entity.description.animationoffset" ), Range( 0, 5 ), ClientEditable, ToggleGroup( "Animated", Label = "#entity.group.animation" )]
+	public float AnimationOffset { get; set { field = value; UpdateLight(); } }
 
 	/// <summary>
 	/// Whether the light's model casts shadows.
@@ -130,8 +160,13 @@ public sealed class SpotLightEntity : Component, IPlayerControllable
 
 		light.Shadows = Shadows;
 		light.LightColor = color;
+		light.Temperature = Temperature;
 		light.Radius = Radius;
 		light.Attenuation = Attenuation;
+		light.AnimationEnabled = Animated;
+		light.AnimationPattern = AnimationPattern;
+		light.AnimationSpeed = AnimationSpeed;
+		light.AnimationTimeOffset = AnimationOffset;
 		light.ConeOuter = Angle;
 		light.ConeInner = Angle * 0.5f;
 
