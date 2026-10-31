@@ -14,8 +14,9 @@ public sealed partial class VRPlayer
 	/// Presses the game's existing actions from the controllers, so weapons, tools, menus and the engine's
 	/// use/press all work in VR without knowing about it.
 	/// <list type="bullet">
-	/// <item>Dominant hand: trigger fires (attack1), B is attack2, A reloads, grip uses/carries, stick click
-	/// cycles weapons, stick turns, up jumps, down crouches.</item>
+	/// <item>Dominant hand: trigger fires (attack1), B is attack2, A reloads, grip uses/carries (held to carry,
+	/// letting go throws with the swing; B turns what's carried with the wrist), stick click cycles weapons,
+	/// stick turns, up jumps, down crouches.</item>
 	/// <item>Off hand: stick moves (or aims teleport/shift), stick click runs, A holds the spawn menu,
 	/// B holds the inspect menu, trigger undoes. Both stick clicks together toggle noclip.</item>
 	/// </list>
