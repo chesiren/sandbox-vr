@@ -14,6 +14,8 @@
 			return;
 		}
 
+		if ( player.IsLocalPlayer ) VRMode.PulseDominant( 0.4f, 0.3f );
+
 		Toolgun.PlayToolEffects( target.WorldTransform() );
 	}
 

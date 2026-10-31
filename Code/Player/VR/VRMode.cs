@@ -34,4 +34,22 @@ public static class VRMode
 		if ( !IsActive || hand is null ) return;
 		hand.TriggerHaptics( HapticEffect.SoftImpact, length, 1f, amplitude.Clamp( 0f, 1f ) );
 	}
+
+	/// <summary>
+	/// Pulse the hand holding weapons and tools. Does nothing outside VR, so game code can call it on any client.
+	/// </summary>
+	public static void PulseDominant( float amplitude = 0.4f, float length = 0.5f )
+	{
+		if ( !IsActive ) return;
+		Pulse( DominantHand, amplitude, length );
+	}
+
+	/// <summary>
+	/// Pulse the hand squeezing its grip harder. Does nothing outside VR, so game code can call it on any client.
+	/// </summary>
+	public static void PulseGrip( float amplitude = 0.4f, float length = 0.5f )
+	{
+		if ( !IsActive ) return;
+		Pulse( OffHand.Grip.Value > DominantHand.Grip.Value ? OffHand : DominantHand, amplitude, length );
+	}
 }

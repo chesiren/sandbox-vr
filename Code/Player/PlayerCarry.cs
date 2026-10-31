@@ -304,6 +304,8 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 		_timeSincePickup = 0;
 		_rotateBlocked = true;
 
+		VRMode.PulseGrip();
+
 		return true;
 	}
 
@@ -371,6 +373,8 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 		Held = null;
 		IsRotating = false;
 		_attackBlocked = true;
+
+		VRMode.PulseGrip( 0.2f );
 
 		Unholster();
 	}

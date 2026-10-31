@@ -6,7 +6,7 @@ using Sandbox.VR;
 /// so desktop players see where a VR player's head and hands are, and the host can check reach from the hands.
 /// Inert for desktop players: <see cref="IsVR"/> stays false and nothing here runs.
 /// </summary>
-public sealed partial class VRPlayer : Component, ICameraModifier
+public sealed partial class VRPlayer : Component, ICameraModifier, PlayerController.IEvents
 {
 	[RequireComponent] public Player Player { get; set; }
 
