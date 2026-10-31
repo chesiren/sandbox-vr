@@ -32,10 +32,31 @@ public sealed class VRHud : Component
 	/// </summary>
 	[Property] public float FollowSpeed { get; set; } = 12f;
 
+	/// <summary>
+	/// Scale of the panel while the spawn menu's on the hand: small enough to move about with it.
+	/// </summary>
+	[Property] public float HandMenuScale { get; set; } = 0.14f;
+
+	/// <summary>
+	/// How far above the hand the spawn menu's centre sits, so the hand stays clear of it to point past.
+	/// </summary>
+	[Property] public float HandMenuHeight { get; set; } = 8f;
+
+	/// <summary>
+	/// How far beyond the hand the spawn menu sits, seen from the head, so it isn't right in front of the eyes.
+	/// </summary>
+	[Property] public float HandMenuDistance { get; set; } = 10f;
+
+	/// <summary>
+	/// How quickly the spawn menu catches up with the hand. Softens the hand's shake, so it's easier to click.
+	/// </summary>
+	[Property] public float HandMenuFollowSpeed { get; set; } = 20f;
+
 	GameObject _pointer;
 	WorldInput _input;
 	LineRenderer _laser;
 	LineRenderer _dot;
+	LineRenderer _spawnLaser;
 
 	float _yaw = float.NaN;
 	float _pitch;
@@ -107,6 +128,13 @@ public sealed class VRHud : Component
 		_laser.CastShadows = false;
 		_laser.Opaque = false;
 
+		_spawnLaser = _pointer.AddComponent<LineRenderer>();
+		_spawnLaser.UseVectorPoints = true;
+		_spawnLaser.Width = 0.25f;
+		_spawnLaser.Color = Color.Cyan.WithAlpha( 0.6f );
+		_spawnLaser.CastShadows = false;
+		_spawnLaser.Opaque = false;
+
 		_yaw = float.NaN;
 	}
 
@@ -123,18 +151,64 @@ public sealed class VRHud : Component
 		var head = Input.VR.Head;
 		var menuOpen = SpawnMenuHost.IsOpen || IsScoreboardOpen;
 
-		PlacePanel( head, menuOpen );
+		if ( SpawnMenuHost.IsOpen )
+			PlaceOnHand( head );
+		else
+			PlacePanel( head, menuOpen );
+
+		_wasOnHand = SpawnMenuHost.IsOpen;
+
 		UpdatePointer( menuOpen );
+		UpdateSpawnLaser();
 	}
 
 	static bool IsScoreboardOpen => Input.Down( "score" );
+
+	bool _wasOnHand;
+	Vector3 _handMenuLocal;
+
+	/// <summary>
+	/// The spawn menu floats above the off hand, facing the player, so it goes wherever the hand does.
+	/// </summary>
+	void PlaceOnHand( Transform head )
+	{
+		// Softened in the play area's space, or it would trail behind the hand while walking or driving
+		var anchor = Input.VR.Anchor;
+		var hand = VRMode.OffHand.Transform.Position;
+		var away = (hand - head.Position).WithZ( 0 ).Normal;
+		var target = anchor.PointToLocal( hand + away * HandMenuDistance + Vector3.Up * HandMenuHeight );
+		var t = 1f - MathF.Exp( -HandMenuFollowSpeed * Time.Delta );
+		_handMenuLocal = _wasOnHand ? Vector3.Lerp( _handMenuLocal, target, t ) : target;
+
+		var position = anchor.PointToWorld( _handMenuLocal );
+
+		WorldPosition = position;
+		WorldRotation = Rotation.LookAt( head.Position - position, Vector3.Up );
+		WorldScale = HandMenuScale;
+	}
+
+	/// <summary>
+	/// Shows where the spawn menu's items will land: where the off hand points, see <see cref="Player.SpawnTransform"/>.
+	/// </summary>
+	void UpdateSpawnLaser()
+	{
+		_spawnLaser.Enabled = SpawnMenuHost.IsOpen;
+		if ( !_spawnLaser.Enabled ) return;
+
+		var aim = VRMode.OffHand.AimTransform;
+		var tr = Scene.Trace.Ray( aim.Position, aim.Position + aim.Forward * 2048 )
+			.WithoutTags( "player" )
+			.Run();
+
+		_spawnLaser.VectorPoints = new List<Vector3> { aim.Position, tr.EndPosition };
+	}
 
 	void PlacePanel( Transform head, bool menuOpen )
 	{
 		var look = head.Rotation.Angles();
 		var pitch = look.pitch.Clamp( -60f, 60f );
 
-		if ( float.IsNaN( _yaw ) || (menuOpen && !_wasMenuOpen) )
+		if ( float.IsNaN( _yaw ) || _wasOnHand || (menuOpen && !_wasMenuOpen) )
 		{
 			// A menu opens where you're looking
 			_yaw = look.yaw;
