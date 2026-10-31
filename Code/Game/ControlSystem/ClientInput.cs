@@ -13,9 +13,15 @@ public struct ClientInput
 	[JsonIgnore, Hide]
 	public readonly bool IsEnabled => !string.IsNullOrWhiteSpace( Action );
 
-	public readonly bool Down() => IsEnabled && ControlContext.Connection?.Down( Action ) == true;
+	/// <summary>
+	/// A gamepad's or VR controller's analog input counts too. It's pressed from code in the driver's update, which doesn't
+	/// reach the fixed update we're read in on the host, so it comes through <see cref="Player.ActionAmounts"/> instead.
+	/// </summary>
+	public readonly bool Down() => IsEnabled && (ControlContext.Connection?.Down( Action ) == true || Amount > 0f);
 	public readonly bool Pressed() => IsEnabled && ControlContext.Connection?.Pressed( Action ) == true;
 	public readonly bool Released() => IsEnabled && ControlContext.Connection?.Released( Action ) == true;
+
+	private readonly float Amount => ControlContext.Player?.ActionAmounts is { } amounts && amounts.TryGetValue( Action, out var amount ) ? amount : 0f;
 
 	/// <summary>
 	/// How far the action's pushed, 0 to 1: a key's all the way, a gamepad's trigger or stick anything between (see

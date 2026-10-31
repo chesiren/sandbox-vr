@@ -19,6 +19,8 @@ public sealed partial class VRPlayer
 	/// stick turns, up jumps, down crouches.</item>
 	/// <item>Off hand: stick moves (or aims teleport/shift), stick click runs, A holds the spawn menu,
 	/// B holds the inspect menu, trigger undoes. Both stick clicks together toggle noclip.</item>
+	/// <item>Seated: dominant trigger accelerates, off hand trigger brakes and reverses, off hand stick steers, see
+	/// <see cref="DriveInput"/>. Stick up is the handbrake, B is attack1 (the horn, the seat's weapons), A is attack2.</item>
 	/// </list>
 	/// </summary>
 	internal void MapInput()
@@ -37,7 +39,7 @@ public sealed partial class VRPlayer
 		_triggerDown = Hysteresis( _triggerDown, main.Trigger.Value );
 
 		// Holding the trigger, the stick pushes and pulls (the scroll wheel) instead of jumping and crouching
-		if ( _triggerDown )
+		if ( _triggerDown && !Player.IsSeated )
 		{
 			if ( MathF.Abs( main.Joystick.Value.y ) > 0.3f )
 				Input.MouseWheel = new Vector2( 0, main.Joystick.Value.y * Time.Delta * 10f );
@@ -46,18 +48,22 @@ public sealed partial class VRPlayer
 		}
 		_offTriggerDown = Hysteresis( _offTriggerDown, off.Trigger.Value );
 
-		// The HUD's laser clicks with these too, Player keeps them from the weapon while it's on the UI
-		Press( "attack1", _triggerDown );
-		Press( "attack2", main.ButtonB.IsPressed );
+		// Driving, the trigger's the accelerator (see DriveInput) - left on attack1 it honks the horn and fires the
+		// seat's weapons with every push, so those move to the buttons. The menus still click with it.
+		var driving = Player.IsSeated && !SpawnMenuHost.IsOpen;
 
-		Press( "reload", main.ButtonA.IsPressed );
+		// The HUD's laser clicks with these too, Player keeps them from the weapon while it's on the UI
+		Press( "attack1", driving ? main.ButtonB.IsPressed : _triggerDown );
+		Press( "attack2", driving ? main.ButtonA.IsPressed : main.ButtonB.IsPressed );
+
+		Press( "reload", !driving && main.ButtonA.IsPressed );
 		Press( "use", main.Grip.Value > 0.6f || off.Grip.Value > 0.6f );
 		Press( "slotnext", main.JoystickPress.IsPressed && !off.JoystickPress.IsPressed );
 
 		Press( "run", off.JoystickPress.IsPressed && !main.JoystickPress.IsPressed );
 		Press( "spawnmenu", off.ButtonA.IsPressed );
 		Press( "inspectmenu", off.ButtonB.IsPressed );
-		Press( "undo", _offTriggerDown );
+		Press( "undo", _offTriggerDown && !Player.IsSeated );
 		Press( "noclip", main.JoystickPress.IsPressed && off.JoystickPress.IsPressed );
 
 		// SteamVR also presses the engine's gamepad bindings from the controllers - pushing the stick to turn hit
@@ -69,7 +75,7 @@ public sealed partial class VRPlayer
 		UpdateTurning( main.Joystick.Value );
 		UpdateJumpAndCrouch( main.Joystick.Value );
 
-		if ( Input.Pressed( "jump" ) && Controller.IsOnGround && !Player.IsNoclipping )
+		if ( Input.Pressed( "jump" ) && Controller.IsOnGround && !Player.IsNoclipping && !Player.IsSeated )
 		{
 			Controller.Jump( Vector3.Up * Controller.JumpSpeed );
 			Controller.OnJumped();
@@ -77,7 +83,34 @@ public sealed partial class VRPlayer
 		UpdateLocomotionInput( off );
 	}
 
+	/// <summary>
+	/// The engine only looks for what's in front of the eyes, and presses it with use, while it's driving the view
+	/// itself - which we turned off. Without this nothing can be used in VR: seats, buttons, doors. Runs after
+	/// <see cref="Player"/>'s input pass, where the engine would, so carrying something still keeps use from it.
+	/// </summary>
+	internal void UpdatePressing()
+	{
+		if ( !IsLocalVR ) return;
+
+		Controller.UpdateLookAt();
+	}
+
 	static bool Hysteresis( bool down, float value ) => down ? value > 0.4f : value > 0.6f;
+
+	/// <summary>
+	/// How far the controllers push whatever we're sitting in, the same as a gamepad's triggers and left stick. The
+	/// triggers click a menu while one's open, rather than driving off.
+	/// </summary>
+	internal (float Forward, float Backward, float Steer) DriveInput
+	{
+		get
+		{
+			var steer = VRMode.OffHand.Joystick.Value.x;
+			if ( SpawnMenuHost.IsOpen ) return (0f, 0f, steer);
+
+			return (VRMode.DominantHand.Trigger.Value, VRMode.OffHand.Trigger.Value, steer);
+		}
+	}
 
 	Angles? _lastHandAngles;
 
@@ -107,6 +140,32 @@ public sealed partial class VRPlayer
 
 		if ( down ) _actionsDown.Add( action );
 		else _actionsDown.Remove( action );
+	}
+
+	readonly HashSet<string> _fixedActionsDown = new( StringComparer.OrdinalIgnoreCase );
+
+	/// <summary>
+	/// Presses the same actions for the fixed update, with its own edges. What's set in the update doesn't reach it,
+	/// and that's where the host reads a driver's actions: the handbrake, boost, seated weapons.
+	/// </summary>
+	internal void MapFixedInput()
+	{
+		if ( !IsLocalVR ) return;
+
+		foreach ( var action in _actionsDown )
+		{
+			Input.SetLastAction( action, _fixedActionsDown.Contains( action ) );
+			Input.SetAction( action, true );
+		}
+
+		foreach ( var action in _fixedActionsDown.Except( _actionsDown, StringComparer.OrdinalIgnoreCase ) )
+		{
+			Input.SetLastAction( action, true );
+			Input.SetAction( action, false );
+		}
+
+		_fixedActionsDown.Clear();
+		_fixedActionsDown.UnionWith( _actionsDown );
 	}
 
 	bool _stickUpLatched;
