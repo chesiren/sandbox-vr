@@ -95,6 +95,11 @@ public sealed partial class VRPlayer
 		Controller.UpdateLookAt();
 	}
 
+	void PlayerController.IEvents.StartPressing( Component target )
+	{
+		if ( IsLocalVR ) VRMode.PulseGrip();
+	}
+
 	static bool Hysteresis( bool down, float value ) => down ? value > 0.4f : value > 0.6f;
 
 	/// <summary>

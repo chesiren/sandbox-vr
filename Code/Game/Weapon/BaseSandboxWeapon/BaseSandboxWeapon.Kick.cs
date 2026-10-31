@@ -45,6 +45,8 @@ public partial class BaseSandboxWeapon
 
 		if ( Owner.Controller.ThirdPerson || !Owner.IsLocalPlayer ) return false;
 
+		VRMode.PulseDominant( 0.5f + ShakeAmplitude * 0.2f, 0.3f );
+
 		var punch = new Angles( Random.Shared.Float( PunchPitch.x, PunchPitch.y ), Random.Shared.Float( PunchYaw.x, PunchYaw.y ), Random.Shared.Float( PunchRoll.x, PunchRoll.y ) );
 		Scene.Camera?.AddPunch( punch, PunchFrequency, PunchDuration );
 

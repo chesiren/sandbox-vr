@@ -356,7 +356,12 @@ public partial class Physgun : Local.IPlayerEvents
 
 	protected override void OnControl()
 	{
+		var wasGrabbing = _state.IsValid();
 		ControlGrab();
+
+		// Taking hold of something, or letting go or launching it
+		if ( _state.IsValid() != wasGrabbing )
+			VRMode.PulseDominant( wasGrabbing ? 0.25f : 0.4f, 0.3f );
 
 		// After the grab changes, so they go out together
 		UpdateHoldTarget();

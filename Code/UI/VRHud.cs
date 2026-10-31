@@ -188,6 +188,7 @@ public sealed class VRHud : Component
 		_pointer.WorldTransform = aim;
 
 		IsPointing = _input.Hovered.IsValid();
+		UpdatePointerHaptics();
 
 		var showLaser = menuOpen || IsPointing;
 		_laser.Enabled = showLaser;
@@ -207,6 +208,28 @@ public sealed class VRHud : Component
 			var towardsViewer = WorldRotation.Forward * 0.1f;
 			_dot.VectorPoints = new List<Vector3> { point + towardsViewer, point + towardsViewer * 1.5f };
 		}
+	}
+
+	Sandbox.UI.Panel _lastHovered;
+	RealTimeSince _timeSinceHoverPulse;
+
+	/// <summary>
+	/// A tick when the laser moves onto something new, and a firmer one on clicking. Sweeping across a menu passes
+	/// over many panels quickly, so the ticks are spaced out.
+	/// </summary>
+	void UpdatePointerHaptics()
+	{
+		if ( IsPointing && Input.Pressed( "attack1" ) )
+			VRMode.PulseDominant( 0.35f, 0.3f );
+
+		var hovered = _input.Hovered;
+		if ( hovered == _lastHovered ) return;
+		_lastHovered = hovered;
+
+		if ( !hovered.IsValid() || _timeSinceHoverPulse < 0.08f ) return;
+		_timeSinceHoverPulse = 0;
+
+		VRMode.PulseDominant( 0.1f, 0.2f );
 	}
 
 	/// <summary>
