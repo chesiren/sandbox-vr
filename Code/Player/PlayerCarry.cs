@@ -107,6 +107,11 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 	const float MaxReach = 256.0f;
 
 	/// <summary>
+	/// Simulating instance only, clamp the speed the holder sends when they let go with their hand
+	/// </summary>
+	const float MaxHandThrowSpeed = 2000.0f;
+
+	/// <summary>
 	/// Called by the <see cref="Player"/> on their own machine every frame, before the weapon gets input.
 	/// </summary>
 	internal void OnControl()
@@ -147,27 +152,40 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 
 		_rotation.UpdateSnapping();
 
+		var vr = Player.VR is { IsLocalVR: true } ? Player.VR : null;
+
 		var useDown = Input.Down( "use" );
+		var useReleased = Input.Released( "use" );
 		if ( Input.Pressed( "use" ) ) _timeSinceUsePressed = 0;
 
 		// The press that picked it up is still blocked, so letting go of it doesn't drop
-		var useTapped = Input.Released( "use" ) && !_rotateBlocked && _timeSinceUsePressed < UseTapTime;
+		var useTapped = useReleased && !_rotateBlocked && _timeSinceUsePressed < UseTapTime;
 		if ( !useDown ) _rotateBlocked = false;
 		Input.Clear( "use" );
 
-		if ( useTapped )
+		// In VR the grip is the hand: it holds on for as long as it's closed, and opening it lets go mid swing
+		if ( vr is not null && useReleased )
+		{
+			ThrowFromHand( vr );
+			return;
+		}
+
+		if ( vr is null && useTapped )
 		{
 			Drop();
 			return;
 		}
 
 		if ( Input.Pressed( "attack1" ) ) Throw();
-		else if ( Input.Pressed( "attack2" ) ) Drop();
+		else if ( vr is null && Input.Pressed( "attack2" ) ) Drop();
+
+		// The grip's taken up with holding on in VR, so attack2 turns it
+		var rotateDown = vr is not null ? Input.Down( "attack2" ) : useDown && !_rotateBlocked;
 
 		_attackBlocked = true;
 		BlockAttack();
 
-		IsRotating = IsCarrying && useDown && !_rotateBlocked;
+		IsRotating = IsCarrying && rotateDown;
 		if ( IsRotating )
 		{
 			var move = Input.AnalogMove;
@@ -411,6 +429,28 @@ public sealed class PlayerCarry : Component, Local.IPlayerEvents
 		DamageBlame.Blame( body.GameObject, Player );
 
 		body.ApplyImpulse( velocity * body.Mass );
+	}
+
+	/// <summary>
+	/// Lets go of what we're carrying at the speed the hand was moving, however gently (owner only)
+	/// </summary>
+	void ThrowFromHand( VRPlayer vr )
+	{
+		ReleaseBody( HeldBody, vr.ThrowVelocity );
+		Drop();
+	}
+
+	[Rpc.Host]
+	void ReleaseBody( Rigidbody body, Vector3 velocity )
+	{
+		if ( !body.IsValid() || body.IsProxy || _simulated != body.GameObject ) return;
+
+		_thrown = true;
+		ReleaseHold();
+		DamageBlame.Blame( body.GameObject, Player );
+
+		// Replaces what the hold gave it rather than adding to it, it's already moving with the hand
+		body.Velocity = velocity.ClampLength( MaxHandThrowSpeed );
 	}
 
 	Transform GetHoldTarget()

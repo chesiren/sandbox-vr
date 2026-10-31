@@ -108,6 +108,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 	{
 		if ( !IsLocalVR ) return;
 
+		UpdateHandMotion();
 		UpdateRig();
 		UpdatePose();
 		UpdateFingerPose();
