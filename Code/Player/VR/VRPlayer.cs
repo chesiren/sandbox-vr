@@ -22,6 +22,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 	[Sync] Transform LeftHandLocal { get; set; }
 	[Sync] Transform RightHandLocal { get; set; }
 	[Sync] Transform AimLocal { get; set; }
+	[Sync] Transform OffAimLocal { get; set; }
 	[Sync] bool LeftHanded { get; set; }
 
 	/// <summary>
@@ -46,6 +47,11 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 	/// Where the dominant hand points - what weapons and tools aim along.
 	/// </summary>
 	public Transform Aim => WorldTransform.ToWorld( AimLocal );
+
+	/// <summary>
+	/// Where the off hand points - what the spawn menu's items are placed along.
+	/// </summary>
+	public Transform OffAim => WorldTransform.ToWorld( OffAimLocal );
 
 	/// <summary>
 	/// True when this is our own player and we're in VR.
@@ -242,6 +248,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 		LeftHandLocal = root.ToLocal( vr.LeftHand.Transform );
 		RightHandLocal = root.ToLocal( vr.RightHand.Transform );
 		AimLocal = root.ToLocal( VRMode.DominantHand.AimTransform );
+		OffAimLocal = root.ToLocal( VRMode.OffHand.AimTransform );
 		LeftHanded = VRMode.LeftHanded;
 	}
 

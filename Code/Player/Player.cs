@@ -58,6 +58,11 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 	/// </summary>
 	public Transform ViewTransform => VRPlayer.Get( this ) is { } vr ? vr.Head : EyeTransform;
 
+	/// <summary>
+	/// Where the spawn menu's items are placed along: the off hand in VR, the one holding the menu, the eyes otherwise.
+	/// </summary>
+	public Transform SpawnTransform => VRPlayer.Get( this ) is { } vr ? vr.OffAim : EyeTransform;
+
 	public bool IsLocalPlayer => !IsProxy;
 
 	string IKillSource.DisplayName => Network.Owner?.DisplayName ?? "Unknown";
