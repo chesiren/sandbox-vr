@@ -8,6 +8,9 @@ public sealed class VRInputSystem : GameObjectSystem<VRInputSystem>
 	public VRInputSystem( Scene scene ) : base( scene )
 	{
 		Listen( Stage.StartUpdate, -100, OnStartUpdate, "VRInput" );
+
+		// Before ControlSystem reads the driver's actions
+		Listen( Stage.StartFixedUpdate, -100, OnStartFixedUpdate, "VRInputFixed" );
 	}
 
 	void OnStartUpdate()
@@ -15,5 +18,12 @@ public sealed class VRInputSystem : GameObjectSystem<VRInputSystem>
 		if ( Scene != Game.ActiveScene ) return;
 
 		VRPlayer.Local?.MapInput();
+	}
+
+	void OnStartFixedUpdate()
+	{
+		if ( Scene != Game.ActiveScene ) return;
+
+		VRPlayer.Local?.MapFixedInput();
 	}
 }

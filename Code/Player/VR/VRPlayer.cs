@@ -72,6 +72,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 	Vector3 _rigPosition;
 	bool _rigInitialized;
 	Vector3 _lastBodyPosition;
+	float? _lastSeatYaw;
 	float _defaultEyeDistance;
 
 	protected override void OnStart()
@@ -147,6 +148,8 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 		}
 
 		var seated = Player.IsSeated;
+		UpdateSeatYaw( seated, headLocal );
+
 		var rigRotation = Rotation.FromYaw( _rigYaw );
 
 		if ( seated )
@@ -184,6 +187,28 @@ public sealed partial class VRPlayer : Component, ICameraModifier
 		vr.Anchor = new Transform( _rigPosition, rigRotation );
 
 		_lastBodyPosition = WorldPosition;
+	}
+
+	/// <summary>
+	/// Sitting down faces us the way the seat does, and from then on the play area turns with it, or a car would
+	/// turn away underneath us. Only its yaw: following its pitch and roll would tip the horizon and make people sick.
+	/// </summary>
+	void UpdateSeatYaw( bool seated, Transform headLocal )
+	{
+		if ( !seated )
+		{
+			_lastSeatYaw = null;
+			return;
+		}
+
+		var seatYaw = WorldRotation.Yaw();
+
+		if ( _lastSeatYaw is { } last )
+			_rigYaw += Angles.NormalizeAngle( seatYaw - last );
+		else
+			_rigYaw = seatYaw - headLocal.Rotation.Yaw();
+
+		_lastSeatYaw = seatYaw;
 	}
 
 	/// <summary>

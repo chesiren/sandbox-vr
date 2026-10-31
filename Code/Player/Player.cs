@@ -377,6 +377,7 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 	void PlayerController.IEvents.PreInput()
 	{
 		OnControl();
+		VR?.UpdatePressing();
 	}
 
 	void OnControl()
@@ -447,9 +448,12 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 	/// </summary>
 	private void PressSeatedGamepad()
 	{
-		var steer = Input.GetAnalog( InputAnalog.LeftStickX );
-		PressAnalog( "Forward", Input.GetAnalog( InputAnalog.RightTrigger ), 0.05f );
-		PressAnalog( "Backward", Input.GetAnalog( InputAnalog.LeftTrigger ), 0.05f );
+		var (forward, backward, steer) = VR is { IsLocalVR: true } vr
+			? vr.DriveInput
+			: (Input.GetAnalog( InputAnalog.RightTrigger ), Input.GetAnalog( InputAnalog.LeftTrigger ), Input.GetAnalog( InputAnalog.LeftStickX ));
+
+		PressAnalog( "Forward", forward, 0.05f );
+		PressAnalog( "Backward", backward, 0.05f );
 		PressAnalog( "Left", -steer, 0.15f );
 		PressAnalog( "Right", steer, 0.15f );
 	}
