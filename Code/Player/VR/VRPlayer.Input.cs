@@ -7,6 +7,24 @@ public sealed partial class VRPlayer
 	/// </summary>
 	public bool PointingAtUI => IsLocalVR && (VRHud.IsPointing || SpawnMenuHost.IsOpen);
 
+	/// <summary>
+	/// The weapon wheel is open, see <see cref="VRWeaponWheel"/>. The stick's picking a weapon rather than turning and jumping.
+	/// </summary>
+	public bool WheelOpen { get; set; }
+
+	/// <summary>
+	/// The stick was clicked this frame, on its own: clicking both sticks together is noclip.
+	/// </summary>
+	public bool WheelClicked { get; private set; }
+
+	/// <summary>
+	/// Where the stick is pushed, for picking a weapon.
+	/// </summary>
+	public Vector2 WheelStick { get; private set; }
+
+	bool _stickClickDown;
+	bool _stickClickSpoiled;
+
 	bool _triggerDown;
 	bool _offTriggerDown;
 
@@ -15,8 +33,8 @@ public sealed partial class VRPlayer
 	/// use/press all work in VR without knowing about it.
 	/// <list type="bullet">
 	/// <item>Dominant hand: trigger fires (attack1), B is attack2, A reloads, grip uses/carries (held to carry,
-	/// letting go throws with the swing; B turns what's carried with the wrist), stick click cycles weapons,
-	/// stick turns, up jumps, down crouches.</item>
+	/// letting go throws with the swing; B turns what's carried with the wrist), stick click opens the weapon
+	/// wheel, stick turns, up jumps, down crouches.</item>
 	/// <item>Off hand: stick moves (or aims teleport/shift), stick click runs, A holds the spawn menu,
 	/// B holds the inspect menu, trigger undoes. Both stick clicks together toggle noclip.</item>
 	/// <item>Seated: dominant trigger accelerates, off hand trigger brakes and reverses, off hand stick steers, see
@@ -58,22 +76,27 @@ public sealed partial class VRPlayer
 
 		Press( "reload", !driving && main.ButtonA.IsPressed );
 		Press( "use", main.Grip.Value > 0.6f || off.Grip.Value > 0.6f );
-		Press( "slotnext", main.JoystickPress.IsPressed && !off.JoystickPress.IsPressed );
+
+		UpdateWheelClick( main.JoystickPress.IsPressed, off.JoystickPress.IsPressed );
+		WheelStick = main.Joystick.Value;
 
 		Press( "run", off.JoystickPress.IsPressed && !main.JoystickPress.IsPressed );
 		Press( "spawnmenu", off.ButtonA.IsPressed );
 		Press( "inspectmenu", off.ButtonB.IsPressed );
 		Press( "undo", _offTriggerDown && !Player.IsSeated );
 		Press( "noclip", main.JoystickPress.IsPressed && off.JoystickPress.IsPressed );
+		Press( "score", VRHud.ScoreboardOpen );
 
 		// SteamVR also presses the engine's gamepad bindings from the controllers - pushing the stick to turn hit
 		// the d-pad weapon cycling. Hold those up.
+		Press( "slotnext", false );
 		Press( "slotprev", false );
 		Press( "view", false );
 		Press( "duck", false );
 
-		UpdateTurning( main.Joystick.Value );
-		UpdateJumpAndCrouch( main.Joystick.Value );
+		var stick = WheelOpen ? Vector2.Zero : main.Joystick.Value;
+		UpdateTurning( stick );
+		UpdateJumpAndCrouch( stick );
 
 		if ( Input.Pressed( "jump" ) && Controller.IsOnGround && !Player.IsNoclipping && !Player.IsSeated )
 		{
@@ -98,6 +121,19 @@ public sealed partial class VRPlayer
 	void PlayerController.IEvents.StartPressing( Component target )
 	{
 		if ( IsLocalVR ) VRMode.PulseGrip();
+	}
+
+	/// <summary>
+	/// A click counts when it's let go, by then we know the other stick wasn't clicked with it for noclip.
+	/// </summary>
+	void UpdateWheelClick( bool down, bool otherDown )
+	{
+		WheelClicked = _stickClickDown && !down && !_stickClickSpoiled;
+
+		if ( !down ) _stickClickSpoiled = false;
+		else if ( otherDown ) _stickClickSpoiled = true;
+
+		_stickClickDown = down;
 	}
 
 	static bool Hysteresis( bool down, float value ) => down ? value > 0.4f : value > 0.6f;

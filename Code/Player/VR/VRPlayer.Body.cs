@@ -136,8 +136,8 @@ public sealed partial class VRPlayer
 
 		weapon.WorldModel.WorldTransform = new Transform( DominantHand.Position, Aim.Rotation );
 
-		// With a menu up the gun is just in the way of the laser - hide it on our side only
-		var hide = IsLocalVR && SpawnMenuHost.IsOpen;
+		// With a menu up the gun is just in the way of the laser, or of the wheel - hide it on our side only
+		var hide = IsLocalVR && (SpawnMenuHost.IsOpen || WheelOpen);
 		if ( hide && _hiddenWeaponParts.Count == 0 )
 		{
 			// Models, but also glows, particles and lights (the physgun's glow)

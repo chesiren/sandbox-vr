@@ -21,7 +21,8 @@
         if ( section is null ) return;
 
         var player = Player.FindLocalPlayer();
-        if ( !player.IsValid() || !Hud.IsVisible( HudElement.InteractionHints ) )
+        // In VR it's on the thing itself, see VRPrompt
+        if ( !player.IsValid() || !Hud.IsVisible( HudElement.InteractionHints ) || VRMode.IsActive )
         {
             section.Hint = null;
             return;

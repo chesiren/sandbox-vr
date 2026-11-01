@@ -18,6 +18,23 @@ public abstract class VRHudPanel : PanelComponent
 	protected virtual Vector2 PanelPixels => new( 1024, 1024 );
 
 	/// <summary>
+	/// How visible the panel is right now, on top of the player's HUD opacity.
+	/// </summary>
+	protected virtual float Visibility => 1f;
+
+	/// <summary>
+	/// How far away the laser can click the panel. Nothing by default, see <see cref="Create{T}"/>.
+	/// </summary>
+	protected float InteractionRange
+	{
+		set
+		{
+			if ( GetComponent<Sandbox.WorldPanel>() is { } world )
+				world.InteractionRange = value;
+		}
+	}
+
+	/// <summary>
 	/// The canvas sections paint into, the first time it's needed.
 	/// </summary>
 	protected HudCanvas Canvas
@@ -82,7 +99,11 @@ public abstract class VRHudPanel : PanelComponent
 
 	protected override void OnPreRender()
 	{
-		if ( VRMode.IsActive )
-			Place( Input.VR.Head );
+		if ( !VRMode.IsActive ) return;
+
+		Place( Input.VR.Head );
+
+		if ( Panel is not null )
+			Panel.Style.Opacity = VRSettings.Current.HudOpacity * Visibility;
 	}
 }

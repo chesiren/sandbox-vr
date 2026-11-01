@@ -22,6 +22,36 @@ ToolInfoPanel
 		opacity: 1;
 	}
 
+	// Above the hand rather than in a corner of the screen, see VRToolHints
+	&.vr
+	{
+		top: 0;
+		width: 100%;
+
+		.description, .grid-mask
+		{
+			display: none;
+		}
+
+		.title
+		{
+			font-size: 36px;
+			line-height: 36px;
+		}
+
+		.header
+		{
+			padding: 12px 24px;
+		}
+
+		.hints
+		{
+			flex-wrap: wrap;
+			gap: 8px 24px;
+			padding: 8px 24px;
+		}
+	}
+
 	&.driving
 	{
 		.header, .hints

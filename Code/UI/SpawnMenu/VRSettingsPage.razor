@@ -43,6 +43,15 @@
         [Property, Title( "Crouch Height" ), Description( "Crouch when your head drops below this fraction of your standing height" ), Range( 0.4f, 0.9f ), Step( 0.05f ), Order( 6 )]
         public float PhysicalCrouchFraction { get => S.PhysicalCrouchFraction; set { S.PhysicalCrouchFraction = value; S.Save(); } }
 
+        [Property, Title( "Watch On Weapon Hand" ), Description( "Wear the watch on the hand that holds weapons" ), Order( 8 )]
+        public bool WatchOnDominantHand { get => S.WatchOnDominantHand; set { S.WatchOnDominantHand = value; S.Save(); } }
+
+        [Property, Title( "Watch Size" ), Range( 0.5f, 2f ), Step( 0.1f ), Order( 9 )]
+        public float WatchSize { get => S.WatchSize; set { S.WatchSize = value; S.Save(); } }
+
+        [Property, Title( "HUD Opacity" ), Range( 0.2f, 1f ), Step( 0.1f ), Order( 10 )]
+        public float HudOpacity { get => S.HudOpacity; set { S.HudOpacity = value; S.Save(); } }
+
         [Button( "Recalibrate Height" ), Description( "Stand up straight and press this to size your body to you" ), Order( 7 )]
         public void RecalibrateHeight() => VRPlayer.RecalibrateHeight();
     }

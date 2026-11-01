@@ -4,7 +4,7 @@
 @namespace Sandbox
 
 <root>
-    <HudCanvas @ref="_canvas" Layer=@this />
+    <HudCanvas @ref="Canvas" Layer=@this />
 </root>
 
 @code
@@ -60,10 +60,7 @@
 
     [Property, Group( "Effects" ), Range( 0, 1 )] public float ScanlineSoftness { get; set; } = 0.04f;
 
-    // Looked up as well as referenced: the reference isn't set again when the tree's rebuilt for another panel (the VR HUD)
-    public HudCanvas Canvas => _canvas.IsValid() ? _canvas : _canvas = Panel?.Children.OfType<HudCanvas>().FirstOrDefault();
-
-    HudCanvas _canvas;
+    public HudCanvas Canvas { get; private set; }
 
     /// <summary>
     /// The scene's HUD layer. With <paramref name="create"/> it is added next to the screen panel <paramref name="from"/> lives under if there isn't one yet

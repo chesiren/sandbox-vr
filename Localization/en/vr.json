@@ -3,8 +3,10 @@
     "vr.button.grip": "Grip",
     "vr.button.a": "A",
     "vr.button.b": "B",
+    "vr.button.stick": "Stick",
     "vr.button.stick_up": "Stick up",
     "vr.button.stick_click": "Stick click",
     "vr.hand.left": "left hand",
-    "vr.hand.right": "right hand"
+    "vr.hand.right": "right hand",
+    "vr.watch.scores": "Scores"
 }

@@ -8,4 +8,12 @@ Notices
 	align-items: flex-end;
 	gap: 8px;
 	pointer-events: none;
+
+	&.vr
+	{
+		right: 0;
+		left: 0;
+		bottom: 0;
+		align-items: center;
+	}
 }

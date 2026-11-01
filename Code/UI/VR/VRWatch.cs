@@ -26,6 +26,18 @@ public sealed class VRWatch : VRHudPanel
 
 	protected override Vector2 PanelPixels => new( 640, 200 );
 
+	protected override float Visibility => MathX.Lerp( DimOpacity, 1f, _lit );
+
+	/// <summary>
+	/// The hand the watch is on.
+	/// </summary>
+	public static Sandbox.VR.VRController Hand => VRSettings.Current.WatchOnDominantHand ? VRMode.DominantHand : VRMode.OffHand;
+
+	/// <summary>
+	/// Which way the watch faces: the back of the wrist, what faces up when the arm's brought across the body to read it.
+	/// </summary>
+	public static Vector3 FaceDirection( Transform hand ) => Hand == Input.VR.LeftHand ? hand.Rotation.Left : hand.Rotation.Right;
+
 	Vitals _vitals;
 	VitalsSection _section;
 	bool _wasLow;
@@ -33,20 +45,15 @@ public sealed class VRWatch : VRHudPanel
 
 	protected override void Place( Transform head )
 	{
-		var hand = VRMode.OffHand.AimTransform;
-
-		// The back of the wrist: what faces up when the arm's brought across the body to read it
-		var face = VRMode.LeftHanded ? hand.Rotation.Right : hand.Rotation.Left;
+		var hand = Hand.AimTransform;
+		var face = FaceDirection( hand );
 		var position = hand.Position - hand.Rotation.Forward * WristDistance + face * FaceHeight;
 
-		PlaceAt( position, Rotation.LookAt( face, -hand.Rotation.Up ), Width );
+		PlaceAt( position, Rotation.LookAt( face, -hand.Rotation.Up ), Width * VRSettings.Current.WatchSize );
 
 		var toHead = (head.Position - position).Normal;
 		var lookedAt = Vector3.Dot( face, toHead ) > 0.4f && Vector3.Dot( head.Rotation.Forward, -toHead ) > 0.7f;
 		_lit = _lit.Approach( lookedAt ? 1f : 0f, Time.Delta * 6f );
-
-		if ( Panel is not null )
-			Panel.Style.Opacity = MathX.Lerp( DimOpacity, 1f, _lit );
 	}
 
 	protected override void OnUpdate()
@@ -63,7 +70,7 @@ public sealed class VRWatch : VRHudPanel
 		_section.Data = data;
 
 		var low = data.ShowVitals && data.MaxHealth > 0 && data.Health > 0 && data.Health <= data.MaxHealth * _vitals.LowHealthFraction;
-		if ( low && !_wasLow ) VRMode.Pulse( VRMode.OffHand, 0.8f, 1f );
+		if ( low && !_wasLow ) VRMode.Pulse( Hand, 0.8f, 1f );
 		_wasLow = low;
 
 		var icon = Player.FindLocalPlayer()?.GetComponent<PlayerDamageIndicators>()?.RadialDamageIcon;

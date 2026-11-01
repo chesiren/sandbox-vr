@@ -77,6 +77,11 @@ public sealed class VRHud : Component
 	public static bool IsPointing { get; private set; }
 
 	/// <summary>
+	/// The watch's button has the scoreboard open, there's no button for it on the controllers.
+	/// </summary>
+	public static bool ScoreboardOpen { get; set; }
+
+	/// <summary>
 	/// Moves the scene's HUD into the world, once.
 	/// </summary>
 	public static async System.Threading.Tasks.Task Enable( Scene scene )
@@ -91,7 +96,9 @@ public sealed class VRHud : Component
 
 		// The screen panel has to go, not just be disabled: child panels keep parenting to it while it exists
 		hud.Components.Get<ScreenPanel>( true )?.Destroy();
-		await System.Threading.Tasks.Task.Yield();
+
+		// Long enough for the old panels to finish deleting, which clears the @refs of whatever's built in the meantime
+		await GameTask.DelaySeconds( 0.25f );
 
 		if ( !hud.IsValid() ) return;
 
@@ -118,6 +125,13 @@ public sealed class VRHud : Component
 		foreach ( var menu in hud.GetComponentsInChildren<Sandbox.UI.Scoreboard>( true ) ) menu.GameObject.SetParent( menusObject );
 		foreach ( var menu in hud.GetComponentsInChildren<DragHandler>( true ) ) menu.GameObject.SetParent( menusObject );
 
+		// These keep their looks and whatever calls them, on a panel of their own where they're of use
+		var toolHints = VRHudPanel.Create<VRToolHints>( "VR Tool Hints" );
+		foreach ( var info in hud.GetComponentsInChildren<ToolInfoPanel>( true ) ) info.GameObject.SetParent( toolHints.GameObject );
+
+		var notices = VRHudPanel.Create<VRNoticeBand>( "VR Notices" );
+		foreach ( var list in hud.GetComponentsInChildren<Sandbox.UI.Notices>( true ) ) list.GameObject.SetParent( notices.GameObject );
+
 		// Rebuild every panel under the HUD against the world panel
 		hud.Enabled = true;
 		await System.Threading.Tasks.Task.Yield();
@@ -133,7 +147,10 @@ public sealed class VRHud : Component
 			}
 		}
 
-		hud.AddComponent<VRHud>()._menus = menus;
+		var vrHud = hud.AddComponent<VRHud>();
+		vrHud._menus = menus;
+		vrHud._parts.Add( toolHints.GameObject );
+		vrHud._parts.Add( notices.GameObject );
 	}
 
 	protected override void OnStart()
@@ -163,7 +180,10 @@ public sealed class VRHud : Component
 
 		_parts.Add( VRHudPanel.Create<VRDamagePanel>( "VR Damage" ).GameObject );
 		_parts.Add( VRHudPanel.Create<VRWatch>( "VR Watch" ).GameObject );
+		_parts.Add( VRHudPanel.Create<VRWatchBack>( "VR Watch Back" ).GameObject );
 		_parts.Add( VRHudPanel.Create<VRWeaponAmmo>( "VR Weapon Ammo" ).GameObject );
+		_parts.Add( VRHudPanel.Create<VRWeaponWheel>( "VR Weapon Wheel" ).GameObject );
+		_parts.Add( VRHudPanel.Create<VRPrompt>( "VR Prompt" ).GameObject );
 
 		var aim = new GameObject( true, "VR Aim" );
 		aim.Flags |= GameObjectFlags.NotNetworked | GameObjectFlags.NotSaved;
@@ -181,6 +201,7 @@ public sealed class VRHud : Component
 			if ( part.IsValid() ) part.Destroy();
 		}
 		IsPointing = false;
+		ScoreboardOpen = false;
 	}
 
 	protected override void OnUpdate()
@@ -337,7 +358,7 @@ public sealed class VRHud : Component
 		_laser.Enabled = showLaser;
 
 		// Only stop on the panel over actual UI - the plane goes on forever past the menu's edges
-		var hit = IsPointing ? HitPanel( aim.ForwardRay ) : null;
+		var hit = IsPointing ? HitPanel( aim.ForwardRay, menuOpen ) : null;
 		_dot.Enabled = hit.HasValue;
 
 		if ( !showLaser ) return;
@@ -348,7 +369,7 @@ public sealed class VRHud : Component
 
 		if ( hit is { } point )
 		{
-			var towardsViewer = _menus.WorldRotation.Forward * 0.1f;
+			var towardsViewer = (point - aim.Position).Normal * -0.1f;
 			_dot.VectorPoints = new List<Vector3> { point + towardsViewer, point + towardsViewer * 1.5f };
 		}
 	}
@@ -378,15 +399,17 @@ public sealed class VRHud : Component
 	/// <summary>
 	/// Where a ray crosses the panel's plane, in front of the hand.
 	/// </summary>
-	Vector3? HitPanel( Ray ray )
+	Vector3? HitPanel( Ray ray, bool menuOpen )
 	{
-		if ( !_menus.IsValid() ) return null;
+		// Pointing at something with no menu open, it's the watch's buttons
+		var panel = menuOpen ? _menus?.GameObject : Scene.Get<VRWatchBack>()?.GameObject;
+		if ( !panel.IsValid() ) return null;
 
-		var normal = _menus.WorldRotation.Forward;
+		var normal = panel.WorldRotation.Forward;
 		var denominator = Vector3.Dot( ray.Forward, normal );
 		if ( MathF.Abs( denominator ) < 0.0001f ) return null;
 
-		var distance = Vector3.Dot( _menus.WorldPosition - ray.Position, normal ) / denominator;
+		var distance = Vector3.Dot( panel.WorldPosition - ray.Position, normal ) / denominator;
 		if ( distance <= 0f || distance > MenuDistance * 3f ) return null;
 
 		return ray.Position + ray.Forward * distance;
