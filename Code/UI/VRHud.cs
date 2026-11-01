@@ -53,6 +53,31 @@ public sealed class VRHud : Component
 	/// </summary>
 	[Property] public float HandMenuFollowSpeed { get; set; } = 20f;
 
+	/// <summary>
+	/// The same while the laser's on the menu, when a steady target matters more than keeping up.
+	/// </summary>
+	[Property] public float HandMenuAimingFollowSpeed { get; set; } = 6f;
+
+	/// <summary>
+	/// How far off a button the laser can stray and stay on it, in degrees. The hand shakes by about this much.
+	/// </summary>
+	[Property] public float MagnetAngle { get; set; } = 0.6f;
+
+	/// <summary>
+	/// Nothing bigger than this, in panel pixels, holds on to the laser: lists and pages aren't buttons.
+	/// </summary>
+	const float MagnetMaxSize = 700f;
+
+	/// <summary>
+	/// How far down the trigger is when the laser stops moving for a click. The engine clicks at 0.75, and the hand moves on the way.
+	/// </summary>
+	const float ClickFreezeTrigger = 0.3f;
+
+	/// <summary>
+	/// How long the laser stays still for a click, after that the trigger's being held to drag.
+	/// </summary>
+	const float ClickFreezeTime = 0.35f;
+
 	GameObject _pointer;
 	WorldInput _input;
 	LineRenderer _laser;
@@ -251,7 +276,11 @@ public sealed class VRHud : Component
 		var hand = VRMode.OffHand.Transform.Position;
 		var away = (hand - head.Position).WithZ( 0 ).Normal;
 		var target = anchor.PointToLocal( hand + away * HandMenuDistance + Vector3.Up * HandMenuHeight );
-		var t = 1f - MathF.Exp( -HandMenuFollowSpeed * Time.Delta );
+
+		// Left up with a tap, it stays where it is and the hand's free
+		if ( SpawnMenuHost.IsPinned && _wasOnHand ) target = _handMenuLocal;
+
+		var t = 1f - MathF.Exp( -(IsPointing ? HandMenuAimingFollowSpeed : HandMenuFollowSpeed) * Time.Delta );
 		_handMenuLocal = _wasOnHand ? Vector3.Lerp( _handMenuLocal, target, t ) : target;
 
 		var position = anchor.PointToWorld( _handMenuLocal );
@@ -371,11 +400,13 @@ public sealed class VRHud : Component
 	{
 		if ( !_dot.IsValid() ) _dot = CreateDot();
 
-		var aim = VRMode.DominantHand.AimTransform;
+		var aim = StabilizedAim( VRMode.DominantHand.AimTransform );
 		_pointer.WorldTransform = aim;
 
 		IsPointing = _input.Hovered.IsValid();
 		UpdatePointerHaptics();
+		UpdateSecondaryButton();
+		KeepPopupsOnPanel();
 
 		var showLaser = menuOpen || IsPointing || VRKeyboard.IsOpen;
 		_laser.Enabled = showLaser;
@@ -395,6 +426,156 @@ public sealed class VRHud : Component
 			var towardsViewer = (point - aim.Position).Normal * -0.1f;
 			_dot.VectorPoints = new List<Vector3> { point + towardsViewer, point + towardsViewer * 1.5f };
 		}
+	}
+
+	Sandbox.UI.Panel _magnet;
+	Sandbox.UI.Panel _frozenRoot;
+	Vector2 _frozenPoint;
+	bool _triggerStarted;
+	RealTimeSince _sinceFrozen;
+
+	/// <summary>
+	/// The laser, kept steady: the rest of the UI goes by where it lands, so this is all it takes. It stays on a button until it's
+	/// clearly left it, and holds still while the trigger goes down, since pulling it moves the hand.
+	/// </summary>
+	Transform StabilizedAim( Transform aim )
+	{
+		var hovered = _input.Hovered;
+
+		if ( hovered != _magnet )
+			_magnet = hovered.IsValid() && hovered.Box.Rect.Width < MagnetMaxSize && hovered.Box.Rect.Height < MagnetMaxSize ? hovered : null;
+
+		var trigger = VRMode.DominantHand.Trigger.Value;
+		var started = trigger > ClickFreezeTrigger;
+
+		if ( started && !_triggerStarted && hovered.IsValid() )
+		{
+			_frozenRoot = hovered.FindRootPanel();
+			_sinceFrozen = 0;
+
+			// From where the laser was last frame, this frame's has already moved
+			if ( !_frozenRoot.RayToLocalPosition( _pointer.WorldTransform.ForwardRay, out _frozenPoint, out _ ) )
+				_frozenRoot = null;
+		}
+
+		_triggerStarted = started;
+
+		if ( !started || _sinceFrozen > ClickFreezeTime )
+			_frozenRoot = null;
+
+		if ( _frozenRoot.IsValid() )
+			return AimAtPoint( aim, _frozenRoot, _frozenPoint );
+
+		if ( !_magnet.IsValid() ) return aim;
+
+		var root = _magnet.FindRootPanel();
+		if ( !root.IsValid() || !root.RayToLocalPosition( aim.ForwardRay, out var point, out var distance ) )
+		{
+			_magnet = null;
+			return aim;
+		}
+
+		var rect = _magnet.Box.Rect;
+		if ( rect.IsInside( point ) ) return aim;
+
+		var reach = distance * MathF.Tan( MathX.DegreeToRadian( MagnetAngle ) ) * PixelsPerUnit( root, aim, point );
+		if ( !rect.Grow( reach ).IsInside( point ) )
+		{
+			_magnet = null;
+			return aim;
+		}
+
+		var inside = rect.Shrink( 1f );
+		return AimAtPoint( aim, root, new Vector2( point.x.Clamp( inside.Left, inside.Right ), point.y.Clamp( inside.Top, inside.Bottom ) ) );
+	}
+
+	/// <summary>
+	/// How many of the panel's pixels make a world unit, measured by moving a ray along it.
+	/// </summary>
+	float PixelsPerUnit( Sandbox.UI.Panel root, Transform aim, Vector2 point )
+	{
+		var ray = aim.ForwardRay;
+		if ( !root.RayToLocalPosition( ray, out _, out var distance ) ) return 1f;
+
+		var world = ray.Position + ray.Forward * distance;
+		var moved = world + GetPanelRotation( root ).Right;
+		var sideways = new Ray( ray.Position, (moved - ray.Position).Normal );
+
+		return root.RayToLocalPosition( sideways, out var other, out _ ) ? (other - point).Length : 1f;
+	}
+
+	/// <summary>
+	/// The laser from the same hand, turned onto a point on the panel.
+	/// </summary>
+	Transform AimAtPoint( Transform aim, Sandbox.UI.Panel root, Vector2 target )
+	{
+		var ray = aim.ForwardRay;
+		if ( !root.RayToLocalPosition( ray, out var point, out var distance ) ) return aim;
+
+		var rotation = GetPanelRotation( root );
+		var world = ray.Position + ray.Forward * distance;
+
+		// One unit each way along the panel shows how its pixels lie, whichever way it's facing
+		var right = new Ray( ray.Position, (world + rotation.Right - ray.Position).Normal );
+		var up = new Ray( ray.Position, (world + rotation.Up - ray.Position).Normal );
+		if ( !root.RayToLocalPosition( right, out var alongRight, out _ ) || !root.RayToLocalPosition( up, out var alongUp, out _ ) ) return aim;
+
+		var perRight = alongRight.x - point.x;
+		var perUp = alongUp.y - point.y;
+		if ( MathF.Abs( perRight ) < 0.001f || MathF.Abs( perUp ) < 0.001f ) return aim;
+
+		var offset = rotation.Right * ((target.x - point.x) / perRight) + rotation.Up * ((target.y - point.y) / perUp);
+
+		return new Transform( aim.Position, Rotation.LookAt( world + offset - aim.Position, aim.Rotation.Up ) );
+	}
+
+	static Rotation GetPanelRotation( Sandbox.UI.Panel root ) => root is Sandbox.UI.WorldPanel world ? world.Rotation : Rotation.Identity;
+
+	/// <summary>
+	/// Context menus open under the screen's mouse, which has nothing to do with a world panel and leaves them off the edge of it.
+	/// They go where the laser is instead, all on the panel.
+	/// </summary>
+	void KeepPopupsOnPanel()
+	{
+		var root = _menus?.GetPanel();
+		if ( root is null ) return;
+
+		var bounds = root.Box.Rect;
+		_placedPopups.RemoveWhere( x => !x.IsValid() );
+
+		foreach ( var popup in root.Children.OfType<Sandbox.UI.Popup>() )
+		{
+			var rect = popup.Box.Rect;
+			if ( rect.Width <= 0f ) continue;
+
+			var position = rect.Position;
+
+			if ( popup.Position == Sandbox.UI.Popup.PositionMode.UnderMouse && _placedPopups.Add( popup ) && root.RayToLocalPosition( _pointer.WorldTransform.ForwardRay, out var point, out _ ) )
+				position = point;
+			else if ( bounds.IsInside( rect, true ) )
+				continue;
+
+			position.x = position.x.Clamp( bounds.Left, MathF.Max( bounds.Left, bounds.Right - rect.Width ) );
+			position.y = position.y.Clamp( bounds.Top, MathF.Max( bounds.Top, bounds.Bottom - rect.Height ) );
+
+			popup.Style.Left = Sandbox.UI.Length.Pixels( (position.x - bounds.Left) * root.ScaleFromScreen );
+			popup.Style.Top = Sandbox.UI.Length.Pixels( (position.y - bounds.Top) * root.ScaleFromScreen );
+		}
+	}
+
+	readonly HashSet<Sandbox.UI.Popup> _placedPopups = new();
+
+	/// <summary>
+	/// B closes what's on top of the menu, otherwise it's the right click, which the engine's input doesn't do in VR.
+	/// </summary>
+	void UpdateSecondaryButton()
+	{
+		if ( !IsPointing || !Input.Pressed( "attack2" ) ) return;
+		if ( SpawnMenuHost.IsOpen && SpawnMenuHost.CloseOverlay() ) return;
+
+		var hovered = _input.Hovered;
+		foreach ( var name in new[] { "onmousedown", "onmouseup", "onrightclick" } )
+			hovered.CreateEvent( new Sandbox.UI.MousePanelEvent( name, hovered, "mouseright" ) { MouseButton = MouseButtons.Right } );
 	}
 
 	Sandbox.UI.Panel _lastHovered;

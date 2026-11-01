@@ -94,7 +94,8 @@ public sealed partial class VRPlayer
 		Press( "view", false );
 		Press( "duck", false );
 
-		var stick = WheelOpen ? Vector2.Zero : main.Joystick.Value;
+		// The wheel picks with the stick and a menu scrolls with it, see WorldInput, rather than turning and jumping
+		var stick = WheelOpen || SpawnMenuHost.IsOpen || VRKeyboard.IsOpen ? Vector2.Zero : main.Joystick.Value;
 		UpdateTurning( stick );
 		UpdateJumpAndCrouch( stick );
 
