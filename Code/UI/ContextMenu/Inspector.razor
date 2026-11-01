@@ -112,8 +112,21 @@
         menu.Open( this, Popup.PositionMode.UnderMouse );
     }
 
+    /// <summary>
+    /// Picking adds to the selection, or takes off what's already in it. For VR, where there's no key to hold while aiming.
+    /// </summary>
+    public bool MultiSelect { get; set; }
+
     public void SelectObject( GameObject o )
     {
+        if ( MultiSelect )
+        {
+            if ( o.IsValid() && !_selected.Remove( o ) )
+                _selected.Add( o );
+
+            return;
+        }
+
         if ( !o.IsValid() )
         {
             _selected.Clear();

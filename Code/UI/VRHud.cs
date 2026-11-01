@@ -419,6 +419,11 @@ public sealed class VRHud : Component
 
 		// The laser stops on the panel, with a dot where it touches
 		var end = hit ?? aim.Position + aim.Forward * MenuDistance * 1.5f;
+
+		// Inspecting, it's what it lands on in the world that gets picked
+		if ( !hit.HasValue && InspectCursor.IsOpen )
+			end = Scene.Trace.Ray( aim.ForwardRay, 4096 ).IgnoreGameObjectHierarchy( Player.FindLocalPlayer()?.GameObject ).Run().EndPosition;
+
 		_laser.VectorPoints = new List<Vector3> { aim.Position, end };
 
 		if ( hit is { } point )

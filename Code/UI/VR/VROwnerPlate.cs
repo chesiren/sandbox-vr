@@ -11,7 +11,7 @@ public sealed class VROwnerPlate : VRHudPanel
 	/// <summary>
 	/// How big the label looks, as its width per unit of distance. It stays readable from any distance.
 	/// </summary>
-	[Property] public float Size { get; set; } = 0.3f;
+	[Property] public float Size { get; set; } = 0.6f;
 
 	protected override Vector2 PanelPixels => new( 800, 120 );
 

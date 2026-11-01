@@ -9,5 +9,7 @@
     "vr.hand.left": "left hand",
     "vr.hand.right": "right hand",
     "vr.watch.scores": "Scores",
-    "vr.watch.chat": "Chat"
+    "vr.watch.chat": "Chat",
+    "vr.inspect.multi": "Select several",
+    "vr.inspect.aim_hint": "Aim at an object and pull the trigger."
 }

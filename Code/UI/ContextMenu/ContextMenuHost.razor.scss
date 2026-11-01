@@ -25,6 +25,17 @@ ContextMenuHost
 	}
 }
 
+// in VR the laser goes through to the world, only the windows on the panel catch it
+ContextMenuHost.vr
+{
+	pointer-events: none;
+
+	Inspector > .canvas
+	{
+		pointer-events: none;
+	}
+}
+
 // the strip of settings along the top, like Garry's Mod's context menu bar
 $settings-bar-height: 26px;
 

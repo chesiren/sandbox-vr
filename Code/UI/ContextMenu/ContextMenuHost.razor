@@ -16,7 +16,14 @@
     </div>
 
     <InspectWindow />
-    <InspectWindow Placement=@(InspectWindow.Corner.BottomRight) />
+    @if ( VRMode.IsActive )
+    {
+        <VRInspectCard />
+    }
+    else
+    {
+        <InspectWindow Placement=@(InspectWindow.Corner.BottomRight) />
+    }
 
     <div class="settings-bar" @ref="SettingsBar" @onmousedown=@SettingsBarPress></div>
 
@@ -76,7 +83,39 @@
 
         UpdateCursor();
         DrawHandles();
-        InspectCursor.Update( HasActive );
+
+        SetClass( "vr", VRMode.IsActive );
+        if ( VRMode.IsActive )
+            UpdateLaserClick();
+        else
+            InspectCursor.Update( HasActive );
+    }
+
+    bool _triggerDown;
+
+    /// <summary>
+    /// In VR the laser picks what it's aimed at, straight into the world: this panel's only there for its windows, and would
+    /// only get the click where the laser happened to cross it. The windows still take their own clicks.
+    /// </summary>
+    void UpdateLaserClick()
+    {
+        var down = Input.Down( "attack1" );
+        var pressed = down && !_triggerDown;
+        var released = !down && _triggerDown;
+        _triggerDown = down;
+
+        if ( released ) InspectCursor.Release();
+
+        if ( pressed && InspectCursor.IsOpen && !VRHud.IsPointing )
+        {
+            Sandbox.UI.InputFocus.Clear();
+            Inspector?.SelectObject( Inspector.Hovered );
+
+            if ( Inspector?.Hovered.IsValid() == true )
+                InspectCursor.Press();
+        }
+
+        InspectCursor.Update( down );
     }
 
     protected override void OnVisibilityChanged()

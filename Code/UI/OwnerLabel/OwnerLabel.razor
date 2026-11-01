@@ -15,6 +15,7 @@
 @code
 {
     string _name, _language, _text;
+    GameObject _hovered;
 
     // the last text that was shown, kept so the label can fade out with it
     string _shownText;
@@ -22,11 +23,19 @@
 	protected override void OnUpdate()
 	{
         var name = FindOwnerName();
-        if ( name != _name || Game.Language.SelectedCode != _language )
+
+        // In VR it names the thing the laser's on as well, there's nothing else on it to say what it is
+        var hovered = VRMode.IsActive && Hud.IsVisible( HudElement.OwnerLabel ) && InspectCursor.IsOpen && SpawnMenuHost.GetActiveMode() is ContextMenuHost host ? host.Hovered : null;
+
+        if ( name != _name || hovered != _hovered || Game.Language.SelectedCode != _language )
         {
             _name = name;
+            _hovered = hovered;
             _language = Game.Language.SelectedCode;
             _text = name is null ? null : Game.Language.GetPhrase( "ui.owner.owned_by", new() { { "name", name } } );
+
+            if ( hovered.IsValid() )
+                _text = _text is null ? hovered.Name : $"{hovered.Name} · {_text}";
         }
 
         if ( _text is not null ) _shownText = _text;
