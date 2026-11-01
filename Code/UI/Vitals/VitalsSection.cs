@@ -40,6 +40,11 @@ public sealed class VitalsSection : HudSection
 
 	public bool Hidden { get; set; }
 
+	/// <summary>
+	/// Painted on a small panel of its own rather than the corners of the screen: right up to the edges, no shade behind it.
+	/// </summary>
+	public bool Compact { get; set; }
+
 
 	const float DigitWidth = 32;
 	const float DigitHeight = 68;
@@ -140,7 +145,7 @@ public sealed class VitalsSection : HudSection
 
 		var scale = ScaleToScreen;
 		var bounds = painter.Bounds;
-		var deadzone = Hud.Margin;
+		var deadzone = Compact ? 0f : Hud.Margin;
 		var bottom = MathF.Floor( bounds.Height - deadzone );
 
 		var pad = MathF.Round( BoxPadding * scale );
@@ -155,7 +160,7 @@ public sealed class VitalsSection : HudSection
 			using var _ = painter.Scope();
 			painter.Opacity = opacity;
 
-			DrawShade( painter, new Vector2( 0, bounds.Height ), scale );
+			if ( !Compact ) DrawShade( painter, new Vector2( 0, bounds.Height ), scale );
 
 			painter.Translate( -HideDistance * scale * hide, 0 );
 
@@ -176,7 +181,7 @@ public sealed class VitalsSection : HudSection
 			painter.Opacity = opacity;
 			PaintTint = SectionTint( IsLowAmmo( data ) );
 
-			DrawShade( painter, new Vector2( bounds.Width, bounds.Height ), scale );
+			if ( !Compact ) DrawShade( painter, new Vector2( bounds.Width, bounds.Height ), scale );
 
 			painter.Translate( HideDistance * scale * hide, 0 );
 

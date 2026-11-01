@@ -25,6 +25,18 @@ public sealed class VRDamagePanel : VRHudPanel
 	}
 
 	/// <summary>
+	/// While true, the indicators pulse all around the view, drawn with <paramref name="icon"/>.
+	/// </summary>
+	public void SetLowHealth( bool low, Texture icon )
+	{
+		if ( Canvas?.Section<VRDamageSection>() is { } section )
+		{
+			section.LowHealth = low;
+			section.LowHealthIcon = icon;
+		}
+	}
+
+	/// <summary>
 	/// Shows damage from <paramref name="source"/>, drawn with the player's indicator texture.
 	/// </summary>
 	public void Add( Vector3 source, Texture icon )
@@ -45,11 +57,19 @@ public sealed class VRDamageSection : HudSection
 	const float Lifetime = 2f;
 
 	/// <summary>
+	/// How many indicators ring the view at low health.
+	/// </summary>
+	const int LowHealthRing = 6;
+
+	/// <summary>
 	/// How far from the centre of the panel the indicators start, as a fraction of its width.
 	/// </summary>
 	const float EdgeDistance = 0.28f;
 
 	readonly List<(Vector3 Source, Texture Icon, TimeSince Age)> _indicators = new();
+
+	public bool LowHealth { get; set; }
+	public Texture LowHealthIcon { get; set; }
 
 	public void Add( Vector3 source, Texture icon ) => _indicators.Add( (source, icon, 0f) );
 
@@ -57,29 +77,41 @@ public sealed class VRDamageSection : HudSection
 
 	public override void GetCompositeRegions( List<Rect> regions )
 	{
-		if ( _indicators.Count > 0 )
+		if ( _indicators.Count > 0 || (LowHealth && LowHealthIcon is not null) )
 			regions.Add( CanvasRect );
 	}
 
 	public override void Paint( Painter painter )
 	{
 		var head = Input.VR.Head;
-		var bounds = painter.Bounds;
-		var center = bounds.Center;
 		var focalPoint = head.Position + head.Forward * 16f;
-		var size = new Vector2( 0.11f, 0.22f ) * bounds.Width;
+
+		if ( LowHealth && LowHealthIcon is not null )
+		{
+			var alpha = 0.2f + 0.15f * MathF.Sin( RealTime.Now * 3f );
+			for ( var i = 0; i < LowHealthRing; i++ )
+				DrawIndicator( painter, LowHealthIcon, 360f * i / LowHealthRing, alpha );
+		}
 
 		foreach ( var (source, icon, age) in _indicators )
 		{
 			var direction = (source - focalPoint).Normal;
 			var angle = -MathF.Atan2( direction.y, direction.x ) + head.Rotation.Angles().yaw.DegreeToRadian() - (MathF.PI / 2f);
 
-			using var scope = painter.Scope();
-			painter.Translate( center );
-			painter.Rotate( angle.RadianToDegree() );
-
-			var rect = new Rect( new Vector2( bounds.Width * EdgeDistance, -size.y / 2f ), size );
-			painter.Texture( icon, rect, Color.Red.WithAlpha( 1f - (age / Lifetime) ) );
+			DrawIndicator( painter, icon, angle.RadianToDegree(), 1f - (age / Lifetime) );
 		}
+	}
+
+	static void DrawIndicator( Painter painter, Texture icon, float degrees, float alpha )
+	{
+		var bounds = painter.Bounds;
+		var size = new Vector2( 0.11f, 0.22f ) * bounds.Width;
+
+		using var scope = painter.Scope();
+		painter.Translate( bounds.Center );
+		painter.Rotate( degrees );
+
+		var rect = new Rect( new Vector2( bounds.Width * EdgeDistance, -size.y / 2f ), size );
+		painter.Texture( icon, rect, Color.Red.WithAlpha( alpha ) );
 	}
 }

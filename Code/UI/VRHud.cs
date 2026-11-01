@@ -1,9 +1,10 @@
 using Sandbox.VR;
 
 /// <summary>
-/// Moves the screen HUD into the world for VR: a screen panel only draws on the monitor, so the HUD becomes a
-/// world panel floating in front of the player, and a laser from the dominant hand clicks it. Added at runtime
-/// to the HUD's GameObject by <see cref="VRPlayer"/>, never present outside VR.
+/// Moves the screen HUD into the world for VR, a screen panel only draws on the monitor. Menus get a world panel of their
+/// own that a laser from the dominant hand clicks, what's left of the screen HUD floats in front of the player, and the
+/// <see cref="VRHudPanel"/>s replace the rest. Added at runtime to the HUD's GameObject by <see cref="VRPlayer"/>, never
+/// present outside VR.
 /// </summary>
 public sealed class VRHud : Component
 {
@@ -57,10 +58,17 @@ public sealed class VRHud : Component
 	LineRenderer _laser;
 	LineRenderer _dot;
 	LineRenderer _spawnLaser;
-	VRDamagePanel _damage;
+	readonly List<GameObject> _parts = new();
+
+	/// <summary>
+	/// The panel the menus are on, moved around separately from the HUD.
+	/// </summary>
+	Sandbox.WorldPanel _menus;
 
 	float _yaw = float.NaN;
 	float _pitch;
+	float _menuYaw;
+	float _menuPitch;
 	bool _wasMenuOpen;
 
 	/// <summary>
@@ -78,6 +86,9 @@ public sealed class VRHud : Component
 
 		var hud = layer.GameObject;
 
+		// Off while it has no panel to build against, or everything under it updates without one
+		hud.Enabled = false;
+
 		// The screen panel has to go, not just be disabled: child panels keep parenting to it while it exists
 		hud.Components.Get<ScreenPanel>( true )?.Destroy();
 		await System.Threading.Tasks.Task.Yield();
@@ -88,14 +99,26 @@ public sealed class VRHud : Component
 		// World panels lay out at half their pixel size, so this gives the HUD the same 1920x1080 layout as the screen
 		panel.PanelSize = new Vector2( 3840, 2160 );
 		panel.LookAtCamera = false;
-		panel.InteractionRange = 2000f;
+		// Nothing on it gets clicked: if the laser could hover it, the trigger wouldn't reach the weapon
+		panel.InteractionRange = 0f;
 
 		// These pin labels to things in the world by projecting them onto the screen, which a floating panel isn't
 		foreach ( var overlay in hud.GetComponentsInChildren<SignalsOverlay>( true ) ) overlay.GameObject.Enabled = false;
 		foreach ( var overlay in hud.GetComponentsInChildren<OwnerLabel>( true ) ) overlay.GameObject.Enabled = false;
 
+		// Menus go on a panel of their own, with the same layout
+		var menusObject = new GameObject( true, "VR Menus" );
+		menusObject.Flags |= GameObjectFlags.NotNetworked | GameObjectFlags.NotSaved;
+
+		var menus = menusObject.AddComponent<Sandbox.WorldPanel>();
+		menus.PanelSize = panel.PanelSize;
+		menus.LookAtCamera = false;
+
+		foreach ( var menu in hud.GetComponentsInChildren<SpawnMenuHost>( true ) ) menu.GameObject.SetParent( menusObject );
+		foreach ( var menu in hud.GetComponentsInChildren<Sandbox.UI.Scoreboard>( true ) ) menu.GameObject.SetParent( menusObject );
+		foreach ( var menu in hud.GetComponentsInChildren<DragHandler>( true ) ) menu.GameObject.SetParent( menusObject );
+
 		// Rebuild every panel under the HUD against the world panel
-		hud.Enabled = false;
 		hud.Enabled = true;
 		await System.Threading.Tasks.Task.Yield();
 
@@ -110,7 +133,7 @@ public sealed class VRHud : Component
 			}
 		}
 
-		hud.AddComponent<VRHud>();
+		hud.AddComponent<VRHud>()._menus = menus;
 	}
 
 	protected override void OnStart()
@@ -138,13 +161,25 @@ public sealed class VRHud : Component
 
 		_yaw = float.NaN;
 
-		_damage = VRHudPanel.Create<VRDamagePanel>( "VR Damage" );
+		_parts.Add( VRHudPanel.Create<VRDamagePanel>( "VR Damage" ).GameObject );
+		_parts.Add( VRHudPanel.Create<VRWatch>( "VR Watch" ).GameObject );
+		_parts.Add( VRHudPanel.Create<VRWeaponAmmo>( "VR Weapon Ammo" ).GameObject );
+
+		var aim = new GameObject( true, "VR Aim" );
+		aim.Flags |= GameObjectFlags.NotNetworked | GameObjectFlags.NotSaved;
+		aim.AddComponent<VRAimDot>();
+		_parts.Add( aim );
+
+		if ( _menus.IsValid() ) _parts.Add( _menus.GameObject );
 	}
 
 	protected override void OnDestroy()
 	{
 		if ( _pointer.IsValid() ) _pointer.Destroy();
-		if ( _damage.IsValid() ) _damage.GameObject.Destroy();
+		foreach ( var part in _parts )
+		{
+			if ( part.IsValid() ) part.Destroy();
+		}
 		IsPointing = false;
 	}
 
@@ -155,12 +190,8 @@ public sealed class VRHud : Component
 		var head = Input.VR.Head;
 		var menuOpen = SpawnMenuHost.IsOpen || IsScoreboardOpen;
 
-		if ( SpawnMenuHost.IsOpen )
-			PlaceOnHand( head );
-		else
-			PlacePanel( head, menuOpen );
-
-		_wasOnHand = SpawnMenuHost.IsOpen;
+		PlaceHud( head, menuOpen );
+		PlaceMenus( head, menuOpen );
 
 		UpdatePointer( menuOpen );
 		UpdateSpawnLaser();
@@ -176,6 +207,8 @@ public sealed class VRHud : Component
 	/// </summary>
 	void PlaceOnHand( Transform head )
 	{
+		if ( !_menus.IsValid() ) return;
+
 		// Softened in the play area's space, or it would trail behind the hand while walking or driving
 		var anchor = Input.VR.Anchor;
 		var hand = VRMode.OffHand.Transform.Position;
@@ -186,9 +219,9 @@ public sealed class VRHud : Component
 
 		var position = anchor.PointToWorld( _handMenuLocal );
 
-		WorldPosition = position;
-		WorldRotation = Rotation.LookAt( head.Position - position, Vector3.Up );
-		WorldScale = HandMenuScale;
+		_menus.WorldPosition = position;
+		_menus.WorldRotation = Rotation.LookAt( head.Position - position, Vector3.Up );
+		_menus.WorldScale = HandMenuScale;
 	}
 
 	/// <summary>
@@ -207,36 +240,68 @@ public sealed class VRHud : Component
 		_spawnLaser.VectorPoints = new List<Vector3> { aim.Position, tr.EndPosition };
 	}
 
-	void PlacePanel( Transform head, bool menuOpen )
+	/// <summary>
+	/// What's left of the screen HUD follows the view, just softened, and gets out of the way of a menu.
+	/// </summary>
+	void PlaceHud( Transform head, bool menuOpen )
 	{
 		var look = head.Rotation.Angles();
 		var pitch = look.pitch.Clamp( -60f, 60f );
 
-		if ( float.IsNaN( _yaw ) || _wasOnHand || (menuOpen && !_wasMenuOpen) )
+		if ( float.IsNaN( _yaw ) )
 		{
-			// A menu opens where you're looking
 			_yaw = look.yaw;
 			_pitch = pitch;
 		}
-		else if ( !menuOpen )
-		{
-			// ...and stays put while it's used; the HUD follows the view, just softened
-			var t = 1f - MathF.Exp( -FollowSpeed * Time.Delta );
-			_yaw += Angles.NormalizeAngle( look.yaw - _yaw ) * t;
-			_pitch += (pitch - _pitch) * t;
-		}
 
-		_wasMenuOpen = menuOpen;
+		var t = 1f - MathF.Exp( -FollowSpeed * Time.Delta );
+		_yaw += Angles.NormalizeAngle( look.yaw - _yaw ) * t;
+		_pitch += (pitch - _pitch) * t;
 
 		var rotation = Rotation.From( _pitch, _yaw, 0 );
 		var forward = rotation.Forward;
-		var position = menuOpen
-			? head.Position + forward * MenuDistance
-			: head.Position + forward * Distance + rotation.Down * Drop;
 
-		WorldPosition = position;
+		WorldPosition = head.Position + forward * Distance + rotation.Down * Drop;
 		WorldRotation = Rotation.LookAt( -forward, rotation.Up );
 		WorldScale = Scale;
+
+		var root = GetComponent<Sandbox.WorldPanel>()?.GetPanel();
+		if ( root is not null )
+			root.Style.Opacity = menuOpen ? 0f : 1f;
+	}
+
+	/// <summary>
+	/// The spawn menu goes on the hand. Others open where you're looking and stay put while they're used. Only clickable
+	/// while one's open, the closed ones would catch the laser.
+	/// </summary>
+	void PlaceMenus( Transform head, bool menuOpen )
+	{
+		if ( !_menus.IsValid() ) return;
+
+		_menus.InteractionRange = menuOpen ? 2000f : 0f;
+
+		if ( SpawnMenuHost.IsOpen )
+		{
+			PlaceOnHand( head );
+		}
+		else if ( menuOpen )
+		{
+			if ( !_wasMenuOpen || _wasOnHand )
+			{
+				var look = head.Rotation.Angles();
+				_menuYaw = look.yaw;
+				_menuPitch = look.pitch.Clamp( -60f, 60f );
+			}
+
+			var rotation = Rotation.From( _menuPitch, _menuYaw, 0 );
+
+			_menus.WorldPosition = head.Position + rotation.Forward * MenuDistance;
+			_menus.WorldRotation = Rotation.LookAt( -rotation.Forward, rotation.Up );
+			_menus.WorldScale = Scale;
+		}
+
+		_wasOnHand = SpawnMenuHost.IsOpen;
+		_wasMenuOpen = menuOpen;
 	}
 
 	/// <summary>
@@ -283,7 +348,7 @@ public sealed class VRHud : Component
 
 		if ( hit is { } point )
 		{
-			var towardsViewer = WorldRotation.Forward * 0.1f;
+			var towardsViewer = _menus.WorldRotation.Forward * 0.1f;
 			_dot.VectorPoints = new List<Vector3> { point + towardsViewer, point + towardsViewer * 1.5f };
 		}
 	}
@@ -315,11 +380,13 @@ public sealed class VRHud : Component
 	/// </summary>
 	Vector3? HitPanel( Ray ray )
 	{
-		var normal = WorldRotation.Forward;
+		if ( !_menus.IsValid() ) return null;
+
+		var normal = _menus.WorldRotation.Forward;
 		var denominator = Vector3.Dot( ray.Forward, normal );
 		if ( MathF.Abs( denominator ) < 0.0001f ) return null;
 
-		var distance = Vector3.Dot( WorldPosition - ray.Position, normal ) / denominator;
+		var distance = Vector3.Dot( _menus.WorldPosition - ray.Position, normal ) / denominator;
 		if ( distance <= 0f || distance > MenuDistance * 3f ) return null;
 
 		return ray.Position + ray.Forward * distance;
