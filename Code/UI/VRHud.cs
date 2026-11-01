@@ -407,6 +407,7 @@ public sealed class VRHud : Component
 		UpdatePointerHaptics();
 		UpdateSecondaryButton();
 		KeepPopupsOnPanel();
+		UpdateMenuPanel();
 
 		var showLaser = menuOpen || IsPointing || VRKeyboard.IsOpen;
 		_laser.Enabled = showLaser;
@@ -569,6 +570,23 @@ public sealed class VRHud : Component
 	}
 
 	readonly HashSet<Sandbox.UI.Popup> _placedPopups = new();
+
+	VRHintBar _hintBar;
+
+	/// <summary>
+	/// The class everything on the menus' panel goes by for its size in a headset, and the bar that stands in for tooltips.
+	/// </summary>
+	void UpdateMenuPanel()
+	{
+		var root = _menus?.GetPanel();
+		if ( root is null ) return;
+
+		root.SetClass( "vr", true );
+
+		if ( !_hintBar.IsValid() ) _hintBar = root.AddChild<VRHintBar>();
+
+		_hintBar.ShowFor( _input.Hovered );
+	}
 
 	/// <summary>
 	/// B closes what's on top of the menu, otherwise it's the right click, which the engine's input doesn't do in VR.

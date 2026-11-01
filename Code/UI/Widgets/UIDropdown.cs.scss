@@ -31,3 +31,17 @@ UIDropdown
 		color: $ui-text-strong;
 	}
 }
+
+.vr UIDropdown
+{
+	height: $vr-control;
+	padding: 0 12px 0 20px;
+	gap: 10px;
+	font-size: $vr-font;
+	font-weight: 600;
+
+	.chevron
+	{
+		font-size: 44px;
+	}
+}

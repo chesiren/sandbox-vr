@@ -61,3 +61,26 @@ UIColor
 		}
 	}
 }
+
+.vr UIColor
+{
+	flex-shrink: 0;
+	height: $vr-control;
+	gap: 8px;
+
+	.swatch
+	{
+		flex-grow: 1;
+		min-width: 120px;
+		height: $vr-control;
+		padding: 4px;
+	}
+
+	.textentry
+	{
+		width: 190px;
+		height: $vr-control;
+		min-height: $vr-control;
+		font-size: $vr-font-small;
+	}
+}

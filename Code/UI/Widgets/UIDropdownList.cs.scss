@@ -50,6 +50,21 @@ UIDropdownList.popup-panel.big .option
 	font-size: 12px;
 }
 
+.vr UIDropdownList.popup-panel
+{
+	@include ui-scroll;
+	min-width: 420px;
+	max-height: 900px;
+	overflow-y: scroll;
+
+	.option, &.big .option
+	{
+		height: $vr-control;
+		padding: 0 20px;
+		font-size: $vr-font;
+	}
+}
+
 UIDropdownList.popup-panel:outro
 {
 	margin-top: -1px;

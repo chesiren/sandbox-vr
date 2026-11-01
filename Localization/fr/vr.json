@@ -11,5 +11,7 @@
     "vr.watch.scores": "Scores",
     "vr.watch.chat": "Chat",
     "vr.inspect.multi": "Plusieurs",
-    "vr.inspect.aim_hint": "Vise un objet et appuie sur la gâchette."
+    "vr.inspect.aim_hint": "Vise un objet et appuie sur la gâchette.",
+    "vr.toggle.on": "Oui",
+    "vr.toggle.off": "Non"
 }

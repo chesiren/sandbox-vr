@@ -199,5 +199,119 @@ UISheet
 				margin-top: 1px;
 			}
 		}
+
+		// the words on a checkbox's row, it's a button of its own in VR
+		> .state
+		{
+			display: none;
+		}
+	}
+}
+
+// in a headset every name goes on a line above its control, whatever the width of the page
+.vr UISheet
+{
+	font-size: $vr-font;
+
+	.sheet-group
+	{
+		> .header
+		{
+			gap: 12px;
+			margin-bottom: 12px;
+
+			.title
+			{
+				font-size: $vr-font-small;
+			}
+		}
+	}
+
+	.textentry.text-field
+	{
+		height: $vr-control;
+		padding: 0 14px;
+		font-size: $vr-font;
+	}
+
+	.sheet-row
+	{
+		flex-direction: column;
+		align-items: stretch;
+		margin-bottom: 14px;
+
+		> .label, &.wide > .label
+		{
+			width: auto;
+			height: 46px;
+			padding-right: 0px;
+			font-size: $vr-font;
+			justify-content: flex-start;
+		}
+
+		> .control, &.wide > .control
+		{
+			flex-grow: 0;
+			flex-shrink: 0;
+			margin-top: 0px;
+		}
+
+		&.buttons > .control
+		{
+			gap: 8px;
+			flex-wrap: wrap;
+		}
+
+		// the whole row is the button, and says what it's set to
+		&.toggle
+		{
+			@include ui-button-face;
+			flex-direction: row;
+			align-items: center;
+			height: $vr-control;
+			padding: 0 20px;
+			pointer-events: all;
+
+			> .control
+			{
+				display: none;
+			}
+
+			> .label
+			{
+				width: auto;
+				height: auto;
+				padding-left: 0px;
+				color: $ui-text;
+				pointer-events: none;
+			}
+
+			> .state
+			{
+				display: flex;
+				flex-shrink: 0;
+				margin-left: auto;
+				font-size: $vr-font-small;
+				font-weight: 700;
+				color: $ui-text-muted;
+				pointer-events: none;
+			}
+
+			&.checked
+			{
+				@include ui-selected;
+				background-image: none;
+
+				> .label, > .state
+				{
+					color: white;
+				}
+			}
+
+			&.disabled
+			{
+				pointer-events: none;
+			}
+		}
 	}
 }
