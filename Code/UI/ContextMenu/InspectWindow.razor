@@ -231,7 +231,7 @@
     {
         var saved = Game.Cookies.Get<string>( CookieKey, null );
 
-        if ( saved == "" )
+        if ( saved == "" && !VRMode.IsActive )
         {
             Show( null, false );
             return;
@@ -245,7 +245,12 @@
     static bool IsAvailable( Panel tab ) => tab.IsValid() && (Game.TypeLibrary.GetType( tab.GetType() )?.GetAttribute<Tab>()?.CheckCondition() ?? false);
 
     // the open tab closes the window when clicked again, leaving only the tabs, opening and closing rolls the window but switching pages doesn't
-    void OnTabClicked( Panel tab ) => Show( _active == tab ? null : tab, animate: _active is null || _active == tab );
+    // in VR the window is a whole section of the menu, there's nothing to make room for
+    void OnTabClicked( Panel tab )
+    {
+        if ( VRMode.IsActive ) Show( tab );
+        else Show( _active == tab ? null : tab, animate: _active is null || _active == tab );
+    }
 
     void Show( Panel tab, bool remember = true, bool animate = false )
     {

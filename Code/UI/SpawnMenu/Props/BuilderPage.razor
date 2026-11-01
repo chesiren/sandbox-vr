@@ -20,7 +20,7 @@
             }
             else
             {
-                <VirtualGrid Items=@Entries ItemSize=@(new Vector2( 140, 140 ))>
+                <VirtualGrid Items=@Entries ItemSize=@SpawnMenuIconSizeExtensions.ForHeadset( new Vector2( 140, 140 ) )>
                     <Item Context="item">
                         @if ( item is BuilderCatalog.Piece piece )
                         {

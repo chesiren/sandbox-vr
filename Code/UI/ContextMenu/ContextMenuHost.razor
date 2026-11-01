@@ -15,17 +15,17 @@
 
     </div>
 
-    <InspectWindow />
     @if ( VRMode.IsActive )
     {
         <VRInspectCard />
     }
     else
     {
+        <InspectWindow />
         <InspectWindow Placement=@(InspectWindow.Corner.BottomRight) />
-    }
 
-    <div class="settings-bar" @ref="SettingsBar" @onmousedown=@SettingsBarPress></div>
+        <div class="settings-bar" @ref="SettingsBar" @onmousedown=@SettingsBarPress></div>
+    }
 
 </root>
 
@@ -46,7 +46,7 @@
         // built here rather than on first render so it comes back after a hotload
         if ( SettingsBar.IsValid() && !SettingsBar.Children.Any() )
         {
-            BuildMenuBar();
+            SettingsBar.AddChild( CreateMenuBar( Scene ) );
         }
 
         SelectedOutline ??= ObjectHighlight.Create( GameObject );
@@ -56,10 +56,10 @@
     /// <summary>
     /// The strip of settings along the top, like Garry's Mod's context menu bar. Its menus come from <see cref="IMenuBarEvent"/>.
     /// </summary>
-    void BuildMenuBar()
+    public static MenuBar CreateMenuBar( Scene scene )
     {
         var ev = new IMenuBarEvent.Event();
-        Scene.RunEvent<IMenuBarEvent>( listener => listener.PopulateMenuBar( ev ) );
+        scene.RunEvent<IMenuBarEvent>( listener => listener.PopulateMenuBar( ev ) );
 
         var bar = new MenuBar();
         foreach ( var menu in ev.Menus )
@@ -67,7 +67,7 @@
             bar.AddMenu( menu );
         }
 
-        SettingsBar.AddChild( bar );
+        return bar;
     }
 
     // keep clicks on the bar from selecting whatever is in the world behind it

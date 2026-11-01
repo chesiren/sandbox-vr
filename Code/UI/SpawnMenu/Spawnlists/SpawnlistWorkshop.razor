@@ -27,7 +27,7 @@
         }
         else
         {
-            <VirtualGrid Items=@Items ItemSize=@(new Vector2( 340, 190 )) OnLastCell="@LoadMore">
+            <VirtualGrid Items=@Items ItemSize=@SpawnMenuIconSizeExtensions.ForHeadset( new Vector2( 340, 190 ) ) OnLastCell="@LoadMore">
                 <Item Context="context">
                     @if ( context is WorkshopSpawnlist entry )
                     {

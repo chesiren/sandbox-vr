@@ -33,7 +33,13 @@ public static class SpawnMenuIconSizeExtensions
 	/// </summary>
 	public static SpawnMenuIconSize Current
 	{
-		get => _current ??= Game.Cookies.Get( Cookie, SpawnMenuIconSize.Medium );
+		get
+		{
+			_current ??= Game.Cookies.Get( Cookie, SpawnMenuIconSize.Medium );
+
+			// small tiles have no names and are hard to point at, and there's no leaving a name to a tooltip in a headset
+			return VRMode.IsActive && _current == SpawnMenuIconSize.Small ? SpawnMenuIconSize.Medium : _current.Value;
+		}
 		set
 		{
 			_current = value;
@@ -46,12 +52,17 @@ public static class SpawnMenuIconSizeExtensions
 	/// <summary>
 	/// Cell size to give a <see cref="Sandbox.UI.VirtualGrid"/> for this tile size.
 	/// </summary>
-	public static Vector2 ItemSize( this SpawnMenuIconSize size ) => size switch
+	public static Vector2 ItemSize( this SpawnMenuIconSize size ) => ForHeadset( size switch
 	{
 		SpawnMenuIconSize.Small => new Vector2( 75, 75 ),
 		SpawnMenuIconSize.Large => new Vector2( 171, 171 ),
 		_ => new Vector2( 123, 123 )
-	};
+	} );
+
+	/// <summary>
+	/// A tile's size in a headset. At this the usual one is about 6 degrees of view, big enough to see what it is and to point at.
+	/// </summary>
+	public static Vector2 ForHeadset( Vector2 size ) => VRMode.IsActive ? size * 1.8f : size;
 
 	/// <summary>
 	/// CSS class to put on the grid so tiles can adapt their text to the size.
@@ -76,6 +87,8 @@ public static class SpawnMenuIconSizeExtensions
 		var menu = new Sandbox.UI.Menu();
 		foreach ( var (size, info) in DisplayInfo.ForEnumValues<SpawnMenuIconSize>() )
 		{
+			if ( VRMode.IsActive && size == SpawnMenuIconSize.Small ) continue;
+
 			var s = size;
 			menu.AddOption( info.Name, s.Icon(), () => onPicked( s ) );
 		}
