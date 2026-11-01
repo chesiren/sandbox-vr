@@ -136,6 +136,13 @@ public sealed partial class VRPlayer
 
 		weapon.WorldModel.WorldTransform = new Transform( DominantHand.Position, Aim.Rotation );
 
+		// What sits on the weapon goes with it, from the same pose at the same moment, or it trails behind
+		if ( IsLocalVR )
+		{
+			Scene.Get<VRWeaponAmmo>()?.PlaceNow();
+			Scene.Get<VRScope>()?.PlaceNow();
+		}
+
 		// With a menu up the gun is just in the way of the laser, or of the wheel - hide it on our side only
 		var hide = IsLocalVR && (SpawnMenuHost.IsOpen || WheelOpen || VRKeyboard.IsOpen);
 		if ( hide && _hiddenWeaponParts.Count == 0 )

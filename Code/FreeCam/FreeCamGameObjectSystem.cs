@@ -25,6 +25,10 @@ internal sealed class FreeCamGameObjectSystem : GameObjectSystem<FreeCamGameObje
 		if ( !IsActive )
 			return;
 
+		// The laser needs the trigger to click the settings in VR, the camera doesn't move there
+		if ( VRMode.IsActive )
+			return;
+
 		Input.Suppressed = true;
 	}
 
@@ -32,16 +36,28 @@ internal sealed class FreeCamGameObjectSystem : GameObjectSystem<FreeCamGameObje
 	{
 		if ( !_ui.IsValid() )
 		{
-			_ui = new GameObject( true, "freecam_overlay" );
-			_ui.Flags = GameObjectFlags.NotSaved | GameObjectFlags.NotNetworked;
-			var fc = _ui.AddComponent<FreeCamOverlay>();
-			var sp = _ui.AddComponent<ScreenPanel>();
+			if ( VRMode.IsActive )
+			{
+				_ui = VRHudPanel.Create<VRFreeCamPanel>( "freecam_overlay" ).GameObject;
+				_ui.AddComponent<FreeCamOverlay>();
+			}
+			else
+			{
+				_ui = new GameObject( true, "freecam_overlay" );
+				_ui.Flags = GameObjectFlags.NotSaved | GameObjectFlags.NotNetworked;
+				var fc = _ui.AddComponent<FreeCamOverlay>();
+				var sp = _ui.AddComponent<ScreenPanel>();
+			}
 		}
 
 		if ( _ui.IsValid() )
 		{
 			_ui.Enabled = true;
 		}
+
+		// The headset decides where the view is, see VRPlayer.ModifyCamera, so only the settings apply
+		if ( VRMode.IsActive )
+			return;
 
 		smoothPosition = Scene.Camera.WorldPosition;
 		position = smoothPosition + Scene.Camera.WorldRotation.Backward * 50;
@@ -60,6 +76,10 @@ internal sealed class FreeCamGameObjectSystem : GameObjectSystem<FreeCamGameObje
 		}
 
 		Scene.TimeScale = 1;
+
+		if ( VRMode.IsActive )
+			return;
+
 		Scene.Camera.RenderExcludeTags.Remove( "firstperson" );
 		Scene.Camera.RenderExcludeTags.Remove( "ui" );
 	}
@@ -91,9 +111,10 @@ internal sealed class FreeCamGameObjectSystem : GameObjectSystem<FreeCamGameObje
 		if ( _ui.IsValid() )
 		{
 			var fc = _ui.GetOrAddComponent<FreeCamOverlay>();
-			fc.Update( Input.Down( "score" ) );
+			fc.Update( Input.Down( "score" ) || VRMode.IsActive );
 
-			UpdateCameraPosition( fc );
+			if ( !VRMode.IsActive )
+				UpdateCameraPosition( fc );
 		}
 	}
 

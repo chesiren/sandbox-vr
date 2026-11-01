@@ -47,6 +47,9 @@ public sealed class VRKeyboard : VRHudPanel
 
 		if ( Panel is null || Panel.ChildrenCount > 0 ) return;
 
+		// The whole board catches the laser, or it goes straight through between the keys. Only while open, see InteractionRange
+		Panel.Style.PointerEvents = PointerEvents.All;
+
 		_preview = Panel.Add.Panel( "preview" ).AddChild<Label>();
 		_preview.Tokenize = false;
 

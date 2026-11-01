@@ -170,6 +170,21 @@
 
 	private bool HasContent => Entries.Count > 0 || Connectors.Count > 0;
 
+	/// <summary>
+	/// The wires being shown, for drawing them in the world in VR, see <see cref="VRSignals"/>.
+	/// </summary>
+	public IReadOnlyList<Connector> Wires => Connectors;
+
+	/// <summary>
+	/// The object the card is about, if there's a card up.
+	/// </summary>
+	public GameObject CardTarget => Entries.FirstOrDefault( x => x.Card is not null )?.Target;
+
+	/// <summary>
+	/// The middle of an object, where its wires go to.
+	/// </summary>
+	public Vector3 WorldCenter( GameObject target ) => GetWorldCenter( target );
+
 	protected override void OnUpdate()
 	{
 		base.OnUpdate();
@@ -293,6 +308,7 @@
 		foreach ( var connector in Connectors )
 		{
 			connector.Layout.Visible = false;
+			if ( VRMode.IsActive ) continue;
 			if ( !camera.IsValid() || !connector.Source.IsValid() || !connector.Target.IsValid() ) continue;
 
 			var start = camera.PointToScreenPixels( GetWorldCenter( connector.Source ), out var startBehind );
@@ -328,6 +344,18 @@
 			if ( entry.Card is null ) continue; // Entries only render their card.
 			if ( !camera.IsValid() ) continue;
 			if ( !entry.Target.IsValid() ) continue;
+
+			// The panel's what moves in VR, the card just hangs from the middle of its bottom edge
+			if ( VRMode.IsActive )
+			{
+				entry.Layout.ScreenPosition = new Vector2( Panel.Box.Rect.Width * 0.5f, Panel.Box.Rect.Height ) * scale;
+				entry.Layout.CardOffset = Vector2.Zero;
+				entry.Layout.CardBelow = false;
+				entry.Layout.CardShiftRight = false;
+				entry.Layout.CardShiftLeft = false;
+				entry.Layout.Visible = true;
+				continue;
+			}
 
 			var geometry = GetGeometry( entry.Target );
 			var worldPosition = entry.Target.WorldTransform.PointToWorld( geometry.Center );

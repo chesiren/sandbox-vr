@@ -26,7 +26,8 @@ public sealed class VRWeaponAmmo : VRHudPanel
 
 	protected override void Place( Transform head )
 	{
-		var hand = VRMode.DominantHand.AimTransform;
+		// The pose the weapon's placed from, see VRPlayer.PlaceHeldWeapon
+		var hand = VRPlayer.Local?.Aim ?? VRMode.DominantHand.AimTransform;
 		var position = hand.Position + hand.Rotation.Up * Height - hand.Rotation.Forward * Back;
 
 		PlaceAt( position, Rotation.LookAt( head.Position - position, hand.Rotation.Up ), Width );
