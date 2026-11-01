@@ -36,6 +36,10 @@
 
     protected override void OnUpdate()
     {
+        // On the back of the watch, see VRWatchBack
+        SetClass( "vr", VRMode.IsActive );
+        if ( VRMode.IsActive ) return;
+
         // starts above the vitals
         Panel.Style.Bottom = Length.Pixels( Hud.StackBottom * Panel.ScaleFromScreen );
         Panel.Style.Right = Hud.MarginLength;

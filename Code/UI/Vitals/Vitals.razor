@@ -7,7 +7,10 @@
     return;
 
 <root>
-    <AmmoPickupFeed />
+    @if ( !VRMode.IsActive )
+    {
+        <AmmoPickupFeed />
+    }
 </root>
 
 @code
@@ -96,5 +99,5 @@
         return weapon.SecondaryAmmoType is not null ? weapon.Ammo2 : 0;
     }
 
-    protected override int BuildHash() => System.HashCode.Combine( Player.IsValid() );
+    protected override int BuildHash() => System.HashCode.Combine( Player.IsValid(), VRMode.IsActive );
 }

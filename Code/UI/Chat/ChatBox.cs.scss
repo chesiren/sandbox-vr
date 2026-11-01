@@ -186,6 +186,44 @@ ChatBox
 	}
 }
 
+// On the back of the watch, at the bottom, see VRWatchBack
+ChatBox.vr
+{
+	.recent
+	{
+		left: 8px;
+		right: 8px;
+		bottom: 8px;
+		width: auto;
+		max-height: 136px;
+		overflow: hidden;
+	}
+
+	.recent-list ChatLine
+	{
+		padding: 2px 4px;
+		animation: none;
+	}
+
+	.box
+	{
+		left: 8px;
+		right: 8px;
+		top: 52px;
+		bottom: 8px;
+		width: auto;
+		height: auto;
+		background-image: none;
+		background-color: rgba( 50, 50, 50, 0.95 );
+		transform: translateX( 0px );
+	}
+
+	&.open .box, &.closing .box
+	{
+		animation: none;
+	}
+}
+
 @keyframes chat-line-in
 {
 	from

@@ -70,7 +70,7 @@ public sealed class VRWeaponWheel : VRHudPanel
 			else
 				UpdateSelection( inventory, vr.WheelStick );
 		}
-		else if ( vr.WheelClicked && !vr.Player.IsSeated && !SpawnMenuHost.IsOpen )
+		else if ( vr.WheelClicked && !vr.Player.IsSeated && !SpawnMenuHost.IsOpen && !VRKeyboard.IsOpen )
 		{
 			Open( inventory );
 		}

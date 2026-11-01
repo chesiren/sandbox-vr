@@ -102,14 +102,20 @@ public sealed class ChatBox : PanelComponent, IChatEvent
 		var visible = Sandbox.Platform.Chat.Enabled && Hud.IsVisible( HudElement.Chat );
 		Panel.Style.Display = visible ? DisplayMode.Flex : DisplayMode.None;
 
-		// both sit above the vitals
-		_box.Style.Bottom = Length.Pixels( Hud.StackBottom * _box.ScaleFromScreen );
-		_recent.Style.Bottom = Length.Pixels( Hud.StackBottom * _recent.ScaleFromScreen );
 		_recent.Style.Display = GamePreferences.DrawChatMessages ? null : DisplayMode.None;
 
-		_box.Style.Left = Hud.MarginLength;
-		foreach ( var line in _recentList.Children )
-			line.Style.PaddingLeft = Hud.MarginLength;
+		// On the back of the watch, see VRWatchBack
+		SetClass( "vr", VRMode.IsActive );
+		if ( !VRMode.IsActive )
+		{
+			// both sit above the vitals
+			_box.Style.Bottom = Length.Pixels( Hud.StackBottom * _box.ScaleFromScreen );
+			_recent.Style.Bottom = Length.Pixels( Hud.StackBottom * _recent.ScaleFromScreen );
+
+			_box.Style.Left = Hud.MarginLength;
+			foreach ( var line in _recentList.Children )
+				line.Style.PaddingLeft = Hud.MarginLength;
+		}
 
 		if ( !visible )
 		{

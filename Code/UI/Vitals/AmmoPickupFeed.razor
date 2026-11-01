@@ -19,6 +19,9 @@
     {
         base.Tick();
 
+        // Above the weapon in VR, see VRAmmoPickups
+        if ( VRMode.IsActive ) return;
+
         Style.Right = Hud.MarginLength;
         Style.Bottom = Length.Pixels( Hud.StackBottom * ScaleFromScreen );
     }

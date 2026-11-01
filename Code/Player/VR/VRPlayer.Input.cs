@@ -5,7 +5,7 @@ public sealed partial class VRPlayer
 	/// <summary>
 	/// While true, the dominant trigger clicks UI instead of firing: a menu is open or the laser is on the HUD.
 	/// </summary>
-	public bool PointingAtUI => IsLocalVR && (VRHud.IsPointing || SpawnMenuHost.IsOpen);
+	public bool PointingAtUI => IsLocalVR && (VRHud.IsPointing || SpawnMenuHost.IsOpen || VRKeyboard.IsOpen);
 
 	/// <summary>
 	/// The weapon wheel is open, see <see cref="VRWeaponWheel"/>. The stick's picking a weapon rather than turning and jumping.

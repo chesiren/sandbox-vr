@@ -1,0 +1,65 @@
+@import "/UI/Theme.scss";
+
+VRKeyboard
+{
+	flex-direction: column;
+	gap: 5px;
+	padding: 8px;
+	font-family: $ui-mono;
+	font-weight: 700;
+	font-size: 20px;
+	color: #f7c44d;
+	background-color: rgba( 18, 18, 18, 0.85 );
+	border-radius: 2px;
+
+	.preview
+	{
+		flex-shrink: 0;
+		height: 38px;
+		padding: 0px 10px;
+		align-items: center;
+		overflow: hidden;
+		color: white;
+		background-color: rgba( 0, 0, 0, 0.4 );
+		border-radius: 2px;
+
+		.placeholder
+		{
+			color: rgba( 255, 255, 255, 0.4 );
+		}
+	}
+
+	.row
+	{
+		flex-grow: 1;
+		gap: 5px;
+		justify-content: center;
+	}
+
+	.key
+	{
+		flex-grow: 1;
+		flex-basis: 0px;
+		justify-content: center;
+		align-items: center;
+		background-color: rgba( 74, 74, 74, 0.6 );
+		border-radius: 2px;
+		pointer-events: all;
+
+		&:hover
+		{
+			color: black;
+			background-color: #f7c44d;
+		}
+
+		&.icon
+		{
+			font-family: "Material Icons";
+		}
+
+		&.space
+		{
+			flex-grow: 6;
+		}
+	}
+}

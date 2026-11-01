@@ -188,15 +188,32 @@ public sealed partial class Player : ICameraModifier
 		}
 	}
 
+	/// <summary>
+	/// The weapons on what we're sitting in that we're the one firing.
+	/// </summary>
+	internal IEnumerable<BaseSandboxWeapon> SeatedWeapons
+	{
+		get
+		{
+			if ( _seatedWeapons == null ) yield break;
+
+			foreach ( var weapon in _seatedWeapons )
+			{
+				if ( !weapon.IsValid() ) continue;
+				if ( weapon is IPlayerControllable controllable && !controllable.CanControl( this ) ) continue;
+
+				yield return weapon;
+			}
+		}
+	}
+
 	private void DrawSeatedWeaponHud()
 	{
-		if ( _seatedWeapons == null || _seatedWeapons.Count == 0 ) return;
+		// The camera's screen overlay is stuck in front of the eyes in a headset, see VRAimDot
+		if ( VRMode.IsActive ) return;
 
-		foreach ( var weapon in _seatedWeapons )
+		foreach ( var weapon in SeatedWeapons )
 		{
-			if ( !weapon.IsValid() ) continue;
-			if ( weapon is IPlayerControllable controllable && !controllable.CanControl( this ) ) continue;
-
 			// The engine projects the weapon's aim point onto the screen (targeted aim resolves to a
 			// camera ray, which projects to centre).
 			weapon.DrawHud( Scene.Camera );

@@ -17,3 +17,11 @@ Vitals.spawnmenu-open AmmoPickupFeed
 	opacity: 0;
 	transform: translateX( 40px );
 }
+
+AmmoPickupFeed.vr
+{
+	left: 0;
+	right: 0;
+	bottom: 0;
+	align-items: center;
+}

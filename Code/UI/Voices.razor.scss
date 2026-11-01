@@ -60,3 +60,20 @@ Voices
         overflow: hidden;
     }
 }
+
+// On the back of the watch, under the kill feed, see VRWatchBack
+Voices.vr
+{
+    top: 184px;
+    left: 0;
+    right: 0;
+    padding: 0px 8px;
+    max-height: 72px;
+    overflow: hidden;
+
+    .item-row
+    {
+        width: 200px;
+        height: 32px;
+    }
+}

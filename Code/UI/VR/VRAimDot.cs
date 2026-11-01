@@ -1,6 +1,7 @@
 /// <summary>
-/// Where the held weapon points: a dot on the surface in the world, the HUD's colour, and a short line from the hand. There's
-/// no crosshair in a headset, the screen overlay it paints on is stuck in front of the eyes.
+/// Where the held weapon points: a dot on the surface in the world, the HUD's colour, and a short line from the hand. Sitting
+/// with nothing in hand, a dot for each of the seat's weapons instead. There's no crosshair in a headset, the screen overlay it
+/// paints on is stuck in front of the eyes.
 /// </summary>
 public sealed class VRAimDot : Component
 {
@@ -18,14 +19,24 @@ public sealed class VRAimDot : Component
 	const float MinDotWidth = 0.4f;
 
 	LineRenderer _line;
-	LineRenderer _dot;
+	readonly List<LineRenderer> _dots = new();
 
 	protected override void OnStart()
 	{
 		_line = CreateLine( "VR Aim Line", 0.15f );
-		_dot = CreateLine( "VR Aim Dot", MinDotWidth );
-		_dot.StartCap = SceneLineObject.CapStyle.Rounded;
-		_dot.EndCap = SceneLineObject.CapStyle.Rounded;
+	}
+
+	LineRenderer GetDot( int index )
+	{
+		while ( _dots.Count <= index )
+		{
+			var dot = CreateLine( "VR Aim Dot", MinDotWidth );
+			dot.StartCap = SceneLineObject.CapStyle.Rounded;
+			dot.EndCap = SceneLineObject.CapStyle.Rounded;
+			_dots.Add( dot );
+		}
+
+		return _dots[index];
 	}
 
 	LineRenderer CreateLine( string name, float width )
@@ -44,24 +55,44 @@ public sealed class VRAimDot : Component
 
 	protected override void OnUpdate()
 	{
-		if ( !_dot.IsValid() || !_line.IsValid() ) return;
+		if ( !_line.IsValid() ) return;
+
+		_line.Enabled = false;
+		foreach ( var dot in _dots ) dot.Enabled = false;
 
 		var vr = VRPlayer.Local;
-		var weapon = vr?.Player.GetComponent<PlayerInventory>()?.ActiveWeapon;
-		var show = weapon.IsValid() && weapon is not CameraWeapon && Hud.IsVisible( HudElement.Crosshair ) && !vr.PointingAtUI && !SpawnMenuHost.IsOpen && !vr.WheelOpen;
+		if ( vr is null || !Hud.IsVisible( HudElement.Crosshair ) || vr.PointingAtUI || SpawnMenuHost.IsOpen || vr.WheelOpen ) return;
 
-		_line.Enabled = show;
-		_dot.Enabled = false;
-		if ( !show ) return;
-
-		var aim = VRMode.DominantHand.AimTransform;
 		var tint = Scene.Get<HudLayer>()?.CurrentTint ?? HudLayer.DefaultTint;
+		var weapon = vr.Player.GetComponent<PlayerInventory>()?.ActiveWeapon;
 
-		_line.Color = tint.WithAlpha( 0.45f );
-		_line.VectorPoints = new List<Vector3> { aim.Position, aim.Position + aim.Rotation.Forward * LineLength };
+		if ( weapon.IsValid() )
+		{
+			if ( weapon is CameraWeapon ) return;
 
-		var tr = Scene.Trace.Ray( aim.Position, aim.Position + aim.Rotation.Forward * MaxDistance )
-			.IgnoreGameObjectHierarchy( vr.GameObject.Root )
+			var aim = VRMode.DominantHand.AimTransform;
+
+			_line.Enabled = true;
+			_line.Color = tint.WithAlpha( 0.45f );
+			_line.VectorPoints = new List<Vector3> { aim.Position, aim.Position + aim.Rotation.Forward * LineLength };
+
+			PlaceDot( 0, aim.ForwardRay, vr.GameObject.Root, tint );
+			return;
+		}
+
+		var index = 0;
+		foreach ( var seated in vr.Player.SeatedWeapons )
+		{
+			// Targeted aim fires where the camera looks, which is the head here
+			var ray = seated.IsTargetedAim ? Input.VR.Head.ForwardRay : seated.AimRay;
+			PlaceDot( index++, ray, seated.AimIgnoreRoot, tint );
+		}
+	}
+
+	void PlaceDot( int index, Ray ray, GameObject ignore, Color tint )
+	{
+		var tr = Scene.Trace.Ray( ray.Position, ray.Position + ray.Forward * MaxDistance )
+			.IgnoreGameObjectHierarchy( ignore )
 			.Run();
 
 		if ( !tr.Hit ) return;
@@ -69,9 +100,10 @@ public sealed class VRAimDot : Component
 		// Lifted off the surface, or it sinks into it
 		var point = tr.HitPosition + tr.Normal * 0.5f;
 
-		_dot.Enabled = true;
-		_dot.Color = tint;
-		_dot.Width = MathF.Max( MinDotWidth, tr.Distance * DotSize );
-		_dot.VectorPoints = new List<Vector3> { point, point + tr.Normal * 0.01f };
+		var dot = GetDot( index );
+		dot.Enabled = true;
+		dot.Color = tint;
+		dot.Width = MathF.Max( MinDotWidth, tr.Distance * DotSize );
+		dot.VectorPoints = new List<Vector3> { point, point + tr.Normal * 0.01f };
 	}
 }

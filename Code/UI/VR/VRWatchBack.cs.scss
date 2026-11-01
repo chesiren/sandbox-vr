@@ -2,9 +2,7 @@
 
 VRWatchBack
 {
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
+	align-items: flex-start;
 	gap: 8px;
 	padding: 8px;
 	font-family: $ui-mono;
@@ -14,13 +12,15 @@ VRWatchBack
 
 	.button
 	{
-		width: 100%;
+		flex-grow: 1;
+		flex-basis: 0px;
 		justify-content: center;
 		align-items: center;
 		padding: 12px;
 		border-radius: 2px;
 		background-color: rgba( 18, 18, 18, 0.5 );
 		text-transform: uppercase;
+		pointer-events: all;
 
 		&:hover
 		{

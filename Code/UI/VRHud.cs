@@ -111,7 +111,6 @@ public sealed class VRHud : Component
 
 		// These pin labels to things in the world by projecting them onto the screen, which a floating panel isn't
 		foreach ( var overlay in hud.GetComponentsInChildren<SignalsOverlay>( true ) ) overlay.GameObject.Enabled = false;
-		foreach ( var overlay in hud.GetComponentsInChildren<OwnerLabel>( true ) ) overlay.GameObject.Enabled = false;
 
 		// Menus go on a panel of their own, with the same layout
 		var menusObject = new GameObject( true, "VR Menus" );
@@ -132,6 +131,17 @@ public sealed class VRHud : Component
 		var notices = VRHudPanel.Create<VRNoticeBand>( "VR Notices" );
 		foreach ( var list in hud.GetComponentsInChildren<Sandbox.UI.Notices>( true ) ) list.GameObject.SetParent( notices.GameObject );
 
+		var watchBack = VRHudPanel.Create<VRWatchBack>( "VR Watch Back" );
+		foreach ( var feed in hud.GetComponentsInChildren<Feed>( true ) ) feed.GameObject.SetParent( watchBack.GameObject );
+		foreach ( var voices in hud.GetComponentsInChildren<Facepunch.UI.Voices>( true ) ) voices.GameObject.SetParent( watchBack.GameObject );
+		foreach ( var chat in hud.GetComponentsInChildren<ChatBox>( true ) ) chat.GameObject.SetParent( watchBack.GameObject );
+
+		var ownerPlate = VRHudPanel.Create<VROwnerPlate>( "VR Owner Plate" );
+		foreach ( var label in hud.GetComponentsInChildren<OwnerLabel>( true ) ) label.GameObject.SetParent( ownerPlate.GameObject );
+
+		var loadRing = VRHudPanel.Create<VRLoadRing>( "VR Load Ring" );
+		foreach ( var ring in hud.GetComponentsInChildren<CloudLoadRing>( true ) ) ring.GameObject.SetParent( loadRing.GameObject );
+
 		// Rebuild every panel under the HUD against the world panel
 		hud.Enabled = true;
 		await System.Threading.Tasks.Task.Yield();
@@ -151,6 +161,9 @@ public sealed class VRHud : Component
 		vrHud._menus = menus;
 		vrHud._parts.Add( toolHints.GameObject );
 		vrHud._parts.Add( notices.GameObject );
+		vrHud._parts.Add( watchBack.GameObject );
+		vrHud._parts.Add( ownerPlate.GameObject );
+		vrHud._parts.Add( loadRing.GameObject );
 	}
 
 	protected override void OnStart()
@@ -180,10 +193,11 @@ public sealed class VRHud : Component
 
 		_parts.Add( VRHudPanel.Create<VRDamagePanel>( "VR Damage" ).GameObject );
 		_parts.Add( VRHudPanel.Create<VRWatch>( "VR Watch" ).GameObject );
-		_parts.Add( VRHudPanel.Create<VRWatchBack>( "VR Watch Back" ).GameObject );
 		_parts.Add( VRHudPanel.Create<VRWeaponAmmo>( "VR Weapon Ammo" ).GameObject );
 		_parts.Add( VRHudPanel.Create<VRWeaponWheel>( "VR Weapon Wheel" ).GameObject );
 		_parts.Add( VRHudPanel.Create<VRPrompt>( "VR Prompt" ).GameObject );
+		_parts.Add( VRHudPanel.Create<VRAmmoPickups>( "VR Ammo Pickups" ).GameObject );
+		_parts.Add( VRHudPanel.Create<VRKeyboard>( "VR Keyboard" ).GameObject );
 
 		var aim = new GameObject( true, "VR Aim" );
 		aim.Flags |= GameObjectFlags.NotNetworked | GameObjectFlags.NotSaved;
@@ -253,12 +267,19 @@ public sealed class VRHud : Component
 		_spawnLaser.Enabled = SpawnMenuHost.IsOpen;
 		if ( !_spawnLaser.Enabled ) return;
 
-		var aim = VRMode.OffHand.AimTransform;
-		var tr = Scene.Trace.Ray( aim.Position, aim.Position + aim.Forward * 2048 )
-			.WithoutTags( "player" )
-			.Run();
+		_spawnLaser.VectorPoints = new List<Vector3> { VRMode.OffHand.AimTransform.Position, SpawnAimPoint( Scene ) };
+	}
 
-		_spawnLaser.VectorPoints = new List<Vector3> { aim.Position, tr.EndPosition };
+	/// <summary>
+	/// Where the off hand points, for what's being spawned.
+	/// </summary>
+	public static Vector3 SpawnAimPoint( Scene scene )
+	{
+		var aim = VRMode.OffHand.AimTransform;
+
+		return scene.Trace.Ray( aim.Position, aim.Position + aim.Forward * 2048 )
+			.WithoutTags( "player" )
+			.Run().EndPosition;
 	}
 
 	/// <summary>
@@ -354,7 +375,7 @@ public sealed class VRHud : Component
 		IsPointing = _input.Hovered.IsValid();
 		UpdatePointerHaptics();
 
-		var showLaser = menuOpen || IsPointing;
+		var showLaser = menuOpen || IsPointing || VRKeyboard.IsOpen;
 		_laser.Enabled = showLaser;
 
 		// Only stop on the panel over actual UI - the plane goes on forever past the menu's edges
@@ -397,12 +418,22 @@ public sealed class VRHud : Component
 	}
 
 	/// <summary>
+	/// The panel the laser's on: the keyboard's in front of everything, and with no menu open it's the watch's buttons.
+	/// </summary>
+	GameObject PointedPanel( bool menuOpen )
+	{
+		if ( VRKeyboard.IsOpen && Scene.Get<VRKeyboard>() is { } keyboard && keyboard.Panel?.HasHovered == true )
+			return keyboard.GameObject;
+
+		return menuOpen ? _menus?.GameObject : Scene.Get<VRWatchBack>()?.GameObject;
+	}
+
+	/// <summary>
 	/// Where a ray crosses the panel's plane, in front of the hand.
 	/// </summary>
 	Vector3? HitPanel( Ray ray, bool menuOpen )
 	{
-		// Pointing at something with no menu open, it's the watch's buttons
-		var panel = menuOpen ? _menus?.GameObject : Scene.Get<VRWatchBack>()?.GameObject;
+		var panel = PointedPanel( menuOpen );
 		if ( !panel.IsValid() ) return null;
 
 		var normal = panel.WorldRotation.Forward;

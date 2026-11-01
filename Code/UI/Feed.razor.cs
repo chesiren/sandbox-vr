@@ -14,6 +14,11 @@ partial class Feed : PanelComponent
 	protected override void OnUpdate()
 	{
 		SetClass( "hide", !Hud.IsVisible( HudElement.KillFeed ) );
+
+		// On the back of the watch, see VRWatchBack
+		SetClass( "vr", VRMode.IsActive );
+		if ( VRMode.IsActive ) return;
+
 		Panel.Style.Top = Hud.MarginLength;
 		Panel.Style.Right = Hud.MarginLength;
 	}
