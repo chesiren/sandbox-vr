@@ -21,6 +21,11 @@ $ui-settings-font: 12px;
 // space above every section header except the first one in a sheet or page
 $ui-section-gap: 20px;
 
+// the same in a headset, where 37px is about 1 degree of view: text to read and targets for a laser that shakes
+$vr-font: 30px;
+$vr-font-small: 26px;
+$vr-control: 84px;
+
 // the color palette, swap for "/UI/Theme/Light.scss" to get the light look
 @import "/UI/Theme/Dark.scss";
 

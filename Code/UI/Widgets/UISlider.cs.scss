@@ -10,6 +10,12 @@ UISlider
 	cursor: pointer;
 	pointer-events: all;
 
+	// the buttons for VR
+	.nudge
+	{
+		display: none;
+	}
+
 	.track
 	{
 		position: relative;
@@ -77,5 +83,115 @@ UISlider
 				color: $ui-text-label;
 			}
 		}
+	}
+}
+
+.vr UISlider
+{
+	align-items: center;
+	flex-shrink: 0;
+	min-width: 0px;
+	height: $vr-control;
+	gap: 8px;
+
+	.nudge
+	{
+		@include ui-button-face;
+		display: flex;
+		flex-shrink: 0;
+		width: $vr-control;
+		height: $vr-control;
+		align-items: center;
+		justify-content: center;
+
+		> *
+		{
+			font-size: 44px;
+			pointer-events: none;
+		}
+	}
+
+	.track
+	{
+		max-width: 100%;
+		min-width: 0px;
+		height: $vr-control;
+		margin: 0 18px;
+
+		.line
+		{
+			top: 62px;
+			height: 2px;
+		}
+
+		.tick
+		{
+			top: 68px;
+			width: 2px;
+			height: 8px;
+		}
+
+		.thumb
+		{
+			top: 4px;
+			width: 36px;
+			height: 54px;
+		}
+
+		&:hover .thumb
+		{
+			transform: none;
+		}
+	}
+
+	// the one the stick moves
+	&:hover .track .line
+	{
+		background-color: $ui-blue;
+	}
+
+	&:hover .track .thumb
+	{
+		background-color: $ui-slider-thumb-hover;
+	}
+
+	&.dragging .track .thumb
+	{
+		transform: none;
+	}
+
+	.entry
+	{
+		width: 120px;
+		height: $vr-control;
+
+		.textentry
+		{
+			height: $vr-control;
+			min-height: $vr-control;
+			font-size: $vr-font;
+			font-weight: 600;
+		}
+	}
+}
+
+// in a sheet the number goes on the line of the name, which leaves the row to the bar
+.vr UISheet .sheet-row.slider UISlider
+{
+	position: relative;
+}
+
+.vr UISheet .sheet-row.slider UISlider .entry
+{
+	position: absolute;
+	top: -46px;
+	right: 0px;
+	width: 160px;
+	height: 44px;
+
+	.textentry
+	{
+		height: 44px;
+		min-height: 44px;
 	}
 }

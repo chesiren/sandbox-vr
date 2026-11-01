@@ -65,3 +65,30 @@ UIVector
 		border: 0px;
 	}
 }
+
+.vr UIVector
+{
+	flex-shrink: 0;
+	gap: 8px;
+	margin: 0px;
+
+	> .axis
+	{
+		height: $vr-control;
+		font-size: $vr-font-small;
+
+		.prefix-label
+		{
+			width: 52px;
+			height: $vr-control;
+			margin-right: 2px;
+			line-height: $vr-control;
+			font-size: $vr-font-small;
+		}
+
+		.content-label
+		{
+			line-height: 80px;
+		}
+	}
+}

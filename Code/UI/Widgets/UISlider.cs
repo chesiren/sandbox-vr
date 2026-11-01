@@ -9,6 +9,23 @@ namespace Sandbox;
 public class UISlider : BaseControl
 {
 	const float ThumbWidth = 10f;
+	const float VRThumbWidth = 36f;
+
+	/// <summary>
+	/// How far the stick has to be pushed to move the value in VR.
+	/// </summary>
+	const float StickDeadZone = 0.25f;
+
+	/// <summary>
+	/// How much of the range a full push of the stick goes through in a second.
+	/// </summary>
+	const float StickSpeed = 0.33f;
+
+	/// <summary>
+	/// How much of the range the VR buttons move a value with no step of its own.
+	/// </summary>
+	const float NudgeFraction = 0.02f;
+
 	const int MaxStepTicks = 24;
 	const int DefaultDivisions = 10;
 	static readonly float[] NiceMultiples = { 1f, 2f, 5f };
@@ -28,9 +45,13 @@ public class UISlider : BaseControl
 
 	public UISlider()
 	{
+		AddNudge( "remove", -1f );
+
 		_track = Add.Panel( "track" );
 		_track.Add.Panel( "line" );
 		_thumb = _track.Add.Panel( "thumb" );
+
+		AddNudge( "add", 1f );
 
 		_entryHolder = Add.Panel( "entry" );
 		_entry = _entryHolder.AddChild<NumberEntry>();
@@ -106,7 +127,48 @@ public class UISlider : BaseControl
 		}
 	}
 
-	bool IsHolding => _applyOnRelease && (_dragging && HasActive || _entry.HasFocus);
+	bool IsHolding => _applyOnRelease && (_dragging && HasActive || _entry.HasFocus || _stickValue.HasValue);
+
+	/// <summary>
+	/// A button either side of the bar, only shown in VR where the bar's hard to hit exactly.
+	/// </summary>
+	void AddNudge( string icon, float direction )
+	{
+		var button = Add.Panel( "nudge" );
+		button.Add.Icon( icon );
+		button.AddEventListener( "onclick", () => SetFromUser( Value + NudgeStep * direction ) );
+	}
+
+	float NudgeStep
+	{
+		get
+		{
+			if ( _step > 0f ) return _step;
+
+			var step = (_max - _min) * NudgeFraction;
+			return _entry.WholeNumbers ? MathF.Max( 1f, MathF.Round( step ) ) : step;
+		}
+	}
+
+	// not the slider's own value: that's snapped to the step, and a slow push would never get to the next one
+	float? _stickValue;
+
+	/// <summary>
+	/// In VR the stick moves the slider the laser's on, so it doesn't have to be dragged exactly.
+	/// </summary>
+	void UpdateStick()
+	{
+		var stick = VRMode.IsActive && HasHovered && !_entry.HasFocus ? VRMode.DominantHand.Joystick.Value.x : 0f;
+		if ( MathF.Abs( stick ) < StickDeadZone )
+		{
+			_stickValue = null;
+			return;
+		}
+
+		var value = (_stickValue ?? Value) + stick * MathF.Abs( stick ) * (_max - _min) * StickSpeed * Time.Delta;
+		_stickValue = value.Clamp( _min, _max );
+		SetFromUser( _stickValue.Value );
+	}
 
 	void WriteProperty( float value )
 	{
@@ -225,7 +287,7 @@ public class UISlider : BaseControl
 		var position = _max > _min ? MathX.LerpInverse( value, _min, _max, true ) : 0f;
 
 		_thumb.Style.Left = Length.Percent( position * 100f );
-		_thumb.Style.MarginLeft = -ThumbWidth * 0.5f;
+		_thumb.Style.MarginLeft = -(VRMode.IsActive ? VRThumbWidth : ThumbWidth) * 0.5f;
 
 		if ( !_entry.HasFocus )
 			_entry.Text = Format( value );
@@ -236,6 +298,8 @@ public class UISlider : BaseControl
 		base.Tick();
 
 		SetClass( "dragging", _dragging && HasActive );
+
+		UpdateStick();
 
 		if ( !IsHolding ) ApplyPending();
 

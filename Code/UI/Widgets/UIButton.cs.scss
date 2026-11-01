@@ -25,3 +25,22 @@ UIButton.button
 		background-image: none;
 	}
 }
+
+.vr UIButton.button
+{
+	height: $vr-control;
+	padding: 0 20px;
+	gap: 12px;
+	font-size: $vr-font-small;
+
+	IconPanel, .iconpanel
+	{
+		font-size: 40px;
+	}
+
+	&.icon-only
+	{
+		width: $vr-control;
+		padding: 0;
+	}
+}

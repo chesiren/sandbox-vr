@@ -39,3 +39,23 @@ UIEnumControl
 		}
 	}
 }
+
+.vr UIEnumControl
+{
+	flex-wrap: wrap;
+	flex-shrink: 0;
+	height: auto;
+	min-height: $vr-control;
+
+	.segment
+	{
+		flex-basis: 40%;
+		min-width: 0px;
+		height: $vr-control;
+		padding: 0 8px;
+		font-size: $vr-font-small;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}

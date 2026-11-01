@@ -133,6 +133,9 @@
     {
         Sandbox.UI.InputFocus.Clear();
 
+        // A press only gets here from the windows in VR, see UpdateLaserClick: it isn't a pick of what's behind them
+        if ( VRMode.IsActive ) return;
+
         if ( e.MouseButton == MouseButtons.Right )
         {
             // right click while dragging with the physgun freezes instead

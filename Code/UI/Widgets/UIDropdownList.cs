@@ -9,7 +9,8 @@ namespace Sandbox;
 public class UIDropdownList : Popup
 {
 	public UIDropdownList( Panel source, List<UIDropdown.Item> items, object selected, bool tokenize, Action<UIDropdown.Item> onPick )
-		: base( source, PositionMode.BelowStretch, 0f )
+		// in VR it goes at the laser, see VRHud: placed under its dropdown the engine puts it off the edge of a world panel, every frame
+		: base( source, VRMode.IsActive ? PositionMode.UnderMouse : PositionMode.BelowStretch, 0f )
 	{
 		CloseWhenParentIsHidden = true;
 

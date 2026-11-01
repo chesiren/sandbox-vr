@@ -1,0 +1,50 @@
+@import "/UI/Theme.scss";
+
+VRHintBar
+{
+	@include ui-section;
+
+	// nothing it covers should come through the words
+	background-image: linear-gradient( to bottom, rgba( 30, 32, 36, 0.96 ), rgba( 32, 48, 68, 0.96 ) );
+
+	position: absolute;
+	left: 40px;
+	bottom: 6px;
+	width: 900px;
+	min-height: 70px;
+	padding: 10px 20px;
+	gap: 16px;
+	flex-direction: row;
+	align-items: center;
+	font-family: $body-font;
+	font-size: $vr-font-small;
+	font-weight: 500;
+	opacity: 0;
+	pointer-events: none;
+	z-index: 20000;
+
+	&.visible
+	{
+		opacity: 1;
+	}
+
+	> .name
+	{
+		flex-shrink: 0;
+		font-weight: 800;
+		color: white;
+		text-transform: uppercase;
+
+		&.hidden
+		{
+			display: none;
+		}
+	}
+
+	> .text
+	{
+		flex-grow: 1;
+		flex-shrink: 1;
+		min-width: 0px;
+	}
+}

@@ -183,6 +183,13 @@ public class UISheetRow : Panel
 	InspectorVisibilityAttribute[] _visibility;
 	EnabledIfAttribute _enabledIf;
 	Panel _holder;
+	UICheckbox _checkbox;
+	Label _state;
+
+	/// <summary>
+	/// The property's name and what it does, for whatever shows that in VR, where nothing can be hovered steadily enough for a tooltip.
+	/// </summary>
+	public (string Name, string Description) Hint => (_property?.DisplayName, _property?.Description);
 
 	// the controls of the properties added with [SameLine], they show, hide and grey out by their own conditions
 	readonly List<(Panel control, SerializedProperty property, InspectorVisibilityAttribute[] visibility, EnabledIfAttribute enabledIf)> _sharing = new();
@@ -210,6 +217,9 @@ public class UISheetRow : Panel
 		SetClass( "toggle", isToggle );
 		SetClass( "buttons", isButton );
 		SetClass( "bare", !hasName );
+		SetClass( "slider", control is UISlider );
+
+		_checkbox = control as UICheckbox;
 
 		// a checkbox goes in front of its name, every other control after it
 		if ( isToggle )
@@ -226,6 +236,21 @@ public class UISheetRow : Panel
 		_holder ??= Add.Panel( "control" );
 		if ( control is not null )
 			_holder.AddChild( control );
+
+		if ( isToggle )
+		{
+			_state = Add.Label( "", "state" );
+			_state.Tokenize = false;
+		}
+	}
+
+	protected override void OnClick( MousePanelEvent e )
+	{
+		base.OnClick( e );
+
+		if ( _checkbox is null || !VRMode.IsActive || HasClass( "disabled" ) ) return;
+
+		_checkbox.Toggle();
 	}
 
 	/// <summary>
@@ -258,6 +283,12 @@ public class UISheetRow : Panel
 
 		if ( _enabledIf is not null )
 			SetClass( "disabled", !_enabledIf.Test( _property?.Parent ) );
+
+		if ( _checkbox is not null && VRMode.IsActive )
+		{
+			SetClass( "checked", _checkbox.Value );
+			_state.Text = LocalizedText.Resolve( _checkbox.Value ? "#vr.toggle.on" : "#vr.toggle.off" );
+		}
 
 		foreach ( var (control, property, visibility, enabledIf) in _sharing )
 		{

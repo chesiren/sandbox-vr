@@ -122,3 +122,82 @@ menulist.menulist
 		}
 	}
 }
+
+.vr menulist.menulist
+{
+	background-image: linear-gradient( to bottom, rgba( 30, 32, 36, 0.96 ), rgba( 32, 48, 68, 0.96 ) );
+	min-width: 560px;
+	padding: 6px;
+	gap: 4px;
+	font-size: $vr-font;
+
+	> .menu
+	{
+		height: $vr-control;
+		padding: 0px 16px;
+		gap: 16px;
+
+		> .gutter
+		{
+			width: 44px;
+			height: 44px;
+
+			> .icon, > .check
+			{
+				font-size: 44px;
+			}
+		}
+
+		> .chevron
+		{
+			font-size: 44px;
+		}
+
+		&.separator
+		{
+			height: 2px;
+			min-height: 2px;
+			margin: 6px 8px;
+			padding: 0px;
+		}
+	}
+}
+
+// the engine's button for choosing a resource, which any sheet can have
+.vr ResourcePickerButton
+{
+	flex-shrink: 0;
+	min-height: $vr-control;
+	padding: 8px 14px;
+	gap: 14px;
+	align-items: center;
+
+	> .preview
+	{
+		flex-shrink: 0;
+		width: 68px;
+		height: 68px;
+	}
+
+	> .content
+	{
+		flex-grow: 1;
+		min-width: 0px;
+
+		> .title
+		{
+			font-size: $vr-font-small;
+		}
+
+		> .subtitle
+		{
+			font-size: 22px;
+		}
+	}
+}
+
+// the laser shakes too much to keep one up, and it would open under the screen's mouse: see VRHintBar
+.vr panel.tooltip, .vr UIHintPanel
+{
+	display: none;
+}

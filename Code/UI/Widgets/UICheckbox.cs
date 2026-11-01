@@ -40,12 +40,20 @@ public class UICheckbox : BaseControl
 		SetClass( "checked", Value );
 	}
 
+	/// <summary>
+	/// Flips it as a click would.
+	/// </summary>
+	public void Toggle()
+	{
+		Value = !Value;
+		OnValueChanged?.Invoke( Value );
+	}
+
 	protected override void OnMouseDown( MousePanelEvent e )
 	{
 		base.OnMouseDown( e );
 
-		Value = !Value;
-		OnValueChanged?.Invoke( Value );
+		Toggle();
 		e.StopPropagation();
 	}
 }

@@ -8,6 +8,8 @@ namespace Sandbox;
 /// </summary>
 public class UIEnumControl : BaseControl
 {
+	const int MaxVRSegments = 4;
+
 	UIDropdown _dropdown;
 	readonly List<(Panel panel, object value)> _segments = new();
 
@@ -26,9 +28,12 @@ public class UIEnumControl : BaseControl
 
 		var list = options.Select( o => new UIDropdown.Item( o.Title, o.ObjectValue ) ).ToList();
 
-		SetClass( "segmented", list.Count == 2 );
+		// a laser's better off with the choices already there than with a list to open
+		var segmented = list.Count == 2 || VRMode.IsActive && list.Count <= MaxVRSegments;
 
-		if ( list.Count == 2 )
+		SetClass( "segmented", segmented );
+
+		if ( segmented )
 		{
 			foreach ( var item in list )
 			{
