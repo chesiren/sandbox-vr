@@ -27,6 +27,11 @@
     /// </summary>
     public static bool IsOpen { get; private set; }
 
+    /// <summary>
+    /// The menu's up without its button held, in VR it then stays where it is rather than following the hand.
+    /// </summary>
+    public static bool IsPinned { get; private set; }
+
     PanelSwitcher PanelSwitcher = default;
     Sandbox.UI.Panel modalLayer = default;
 
@@ -71,11 +76,68 @@
     // when toggle key is enabled from settings
     string toggledKey;
 
+    /// <summary>
+    /// A press of a menu's button up to this long leaves the menu up in VR, so the hand that had to hold it is free.
+    /// </summary>
+    const float VRTapTime = 0.3f;
+
+    string _vrPressed;
+    bool _vrClosing;
+    RealTimeSince _sinceVRPress;
+
+    /// <summary>
+    /// A tap leaves the menu up and another closes it, holding works as it does on a screen.
+    /// </summary>
+    bool UpdateVRMenuKeys()
+    {
+        var pressed = Input.Pressed( "spawnmenu" ) ? "spawnmenu" : Input.Pressed( "inspectmenu" ) ? "inspectmenu" : null;
+        if ( pressed is not null )
+        {
+            _vrPressed = pressed;
+            _vrClosing = toggledKey == pressed;
+            _sinceVRPress = 0;
+        }
+
+        if ( _vrPressed is not null && !Input.Down( _vrPressed ) )
+        {
+            toggledKey = _sinceVRPress < VRTapTime && !_vrClosing ? _vrPressed : null;
+            _vrPressed = null;
+        }
+
+        return toggledKey is not null || _vrPressed is not null;
+    }
+
+    /// <summary>
+    /// Closes the popup or window on top of the menu, if there is one.
+    /// </summary>
+    public static bool CloseOverlay()
+    {
+        var host = Game.ActiveScene?.Get<SpawnMenuHost>();
+        if ( !host.IsValid() || host.Panel is null ) return false;
+
+        var layer = host.Panel.FindPopupPanel();
+        if ( layer.IsValid() && layer.Children.Any( x => x is Popup && x.IsValid() && !x.IsDeleting ) )
+        {
+            Popup.CloseAll();
+            return true;
+        }
+
+        var modal = host.modalLayer?.Children.OfType<UIModal>().LastOrDefault();
+        if ( !modal.IsValid() ) return false;
+
+        modal.Close();
+        return true;
+    }
+
     void UpdateSpawnMenuState()
     {
         bool openAnyMenu;
 
-        if ( GamePreferences.ToggleMenus )
+        if ( VRMode.IsActive )
+        {
+            openAnyMenu = UpdateVRMenuKeys();
+        }
+        else if ( GamePreferences.ToggleMenus )
         {
             var pressed = Input.Pressed( "spawnmenu" ) ? "spawnmenu" : Input.Pressed( "inspectmenu" ) ? "inspectmenu" : null;
             if ( pressed is not null ) toggledKey = toggledKey == pressed ? null : pressed;
@@ -100,6 +162,7 @@
 
         SetClass("open", state);
         IsOpen = state;
+        IsPinned = state && !Input.Down("spawnmenu") && !Input.Down("inspectmenu");
 
         if (lastState != state )
         {
