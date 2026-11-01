@@ -42,6 +42,10 @@ public class Hints : GameObjectSystem<Hints>
 		if ( next is null ) return;
 
 		_queue.Remove( next );
+
+		// Tells you to press ESC, which isn't on the controllers
+		if ( VRMode.IsActive && next.Name == "openpausemenu" ) return;
+
 		timeSinceLast = 0;
 
 		var phrase = Game.Language.GetPhrase( $"hint.{next.Name}", InputTokens() );
@@ -57,7 +61,7 @@ public class Hints : GameObjectSystem<Hints>
 	{
 		var tokens = new Dictionary<string, object>();
 		foreach ( var action in InputActions )
-			tokens[$"input:{action}"] = Input.GetButtonOrigin( action ) ?? action;
+			tokens[$"input:{action}"] = (VRMode.IsActive ? VRInputNames.Label( action ) : Input.GetButtonOrigin( action )) ?? action;
 
 		return tokens;
 	}

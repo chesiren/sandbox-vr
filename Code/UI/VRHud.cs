@@ -57,6 +57,7 @@ public sealed class VRHud : Component
 	LineRenderer _laser;
 	LineRenderer _dot;
 	LineRenderer _spawnLaser;
+	VRDamagePanel _damage;
 
 	float _yaw = float.NaN;
 	float _pitch;
@@ -136,11 +137,14 @@ public sealed class VRHud : Component
 		_spawnLaser.Opaque = false;
 
 		_yaw = float.NaN;
+
+		_damage = VRHudPanel.Create<VRDamagePanel>( "VR Damage" );
 	}
 
 	protected override void OnDestroy()
 	{
 		if ( _pointer.IsValid() ) _pointer.Destroy();
+		if ( _damage.IsValid() ) _damage.GameObject.Destroy();
 		IsPointing = false;
 	}
 

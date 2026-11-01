@@ -20,6 +20,9 @@ public sealed class PlayerDamageIndicators : Component, Local.IPlayerEvents
 		if ( !Player.IsLocalPlayer ) return;
 		if ( Scene.Camera is null ) return;
 
+		// The camera's screen overlay is stuck in front of the eyes in a headset, VRDamagePanel shows these instead
+		if ( VRMode.IsActive ) return;
+
 		UpdateRadialIndicators();
 	}
 
@@ -66,7 +69,15 @@ public sealed class PlayerDamageIndicators : Component, Local.IPlayerEvents
 	void Local.IPlayerEvents.OnDamage( PlayerDamageParams args )
 	{
 		if ( !args.Attacker.IsValid() ) return;
-		
+
+		if ( VRMode.IsActive )
+		{
+			if ( Player.IsLocalPlayer && RadialDamageIcon is not null )
+				Scene.Get<VRDamagePanel>()?.Add( args.Attacker.WorldPosition, RadialDamageIcon );
+
+			return;
+		}
+
 		radialIndicators.Add( (args.Attacker.WorldPosition, 0f) );
 	}
 }
