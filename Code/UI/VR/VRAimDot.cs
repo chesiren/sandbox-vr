@@ -48,7 +48,7 @@ public sealed class VRAimDot : Component
 
 		var vr = VRPlayer.Local;
 		var weapon = vr?.Player.GetComponent<PlayerInventory>()?.ActiveWeapon;
-		var show = weapon.IsValid() && weapon is not CameraWeapon && Hud.IsVisible( HudElement.Crosshair ) && !vr.PointingAtUI && !SpawnMenuHost.IsOpen;
+		var show = weapon.IsValid() && weapon is not CameraWeapon && Hud.IsVisible( HudElement.Crosshair ) && !vr.PointingAtUI && !SpawnMenuHost.IsOpen && !vr.WheelOpen;
 
 		_line.Enabled = show;
 		_dot.Enabled = false;

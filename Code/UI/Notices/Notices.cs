@@ -74,10 +74,34 @@ public partial class Notices : PanelComponent
 
 		// notices stack themselves, the layout lives in Notices.cs.scss
 		Panel.Style.Display = Hud.IsVisible( HudElement.Notices ) ? DisplayMode.Flex : DisplayMode.None;
+
+		if ( VRMode.IsActive )
+		{
+			UpdateVR();
+			return;
+		}
+
 		Panel.Style.Right = Hud.MarginLength;
 
 		var voices = Facepunch.UI.Voices.ListHeight;
 		var bottom = Hud.StackBottom + (voices > 0 ? voices : 0);
 		Panel.Style.Bottom = Length.Pixels( bottom * Panel.ScaleFromScreen + (voices > 0 ? VoicesGap : 0) );
+	}
+
+	/// <summary>
+	/// In VR, the most notices to keep in view at a time, there's no corner of the screen for them to pile up in.
+	/// </summary>
+	const int MaxVRNotices = 2;
+
+	/// <summary>
+	/// In a headset they're a short stack low in the view, see <see cref="VRNoticeBand"/>.
+	/// </summary>
+	void UpdateVR()
+	{
+		SetClass( "vr", true );
+
+		var shown = Panel.Children.OfType<NoticePanel>().Where( x => !x.Manual && !x.HasClass( "leaving" ) ).ToList();
+		for ( var i = 0; i < shown.Count - MaxVRNotices; i++ )
+			shown[i].Dismiss();
 	}
 }

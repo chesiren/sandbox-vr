@@ -78,6 +78,7 @@
 	protected override void OnUpdate()
 	{
 		SetClass( "visible", Info is not null );
+		SetClass( "vr", VRMode.IsActive );
 		SetClass( "driving", Driving );
 	}
 

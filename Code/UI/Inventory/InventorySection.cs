@@ -198,7 +198,7 @@ public sealed class InventorySection : HudSection
 
 	bool IsHighlighted( BaseSandboxWeapon weapon ) => weapon.IsValid() && weapon == _shownSelection;
 
-	void DrawTile( Painter painter, Rect rect, BaseSandboxWeapon weapon, int index, bool highlighted, float contentAlpha, float scale )
+	internal void DrawTile( Painter painter, Rect rect, BaseSandboxWeapon weapon, int index, bool highlighted, float contentAlpha, float scale )
 	{
 		var empty = !weapon.IsValid();
 		Color Shade( Color color ) => empty ? color.WithAlpha( color.a * EmptyOpacity ) : color;

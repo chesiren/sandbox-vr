@@ -44,6 +44,21 @@ public sealed class VRSettings
 	/// </summary>
 	public float PhysicalCrouchFraction { get; set; } = 0.7f;
 
+	/// <summary>
+	/// Wear the watch on the hand that holds weapons rather than the other one.
+	/// </summary>
+	public bool WatchOnDominantHand { get; set; }
+
+	/// <summary>
+	/// Multiplies the size of the watch.
+	/// </summary>
+	public float WatchSize { get; set; } = 1f;
+
+	/// <summary>
+	/// How opaque the VR HUD's panels are.
+	/// </summary>
+	public float HudOpacity { get; set; } = 1f;
+
 	const string FilePath = "vr/settings.json";
 
 	static VRSettings _current;

@@ -17,6 +17,11 @@ public sealed class PressableSection : HudSection
 	/// </summary>
 	public string Action { get; set; }
 
+	/// <summary>
+	/// Shown as the key to press instead of what's bound to <see cref="Action"/>, for inputs that aren't bound to it (VR)
+	/// </summary>
+	public string KeyLabel { get; set; }
+
 	const string TextFont = "Inter";
 	const int TextWeight = 800;
 
@@ -66,8 +71,8 @@ public sealed class PressableSection : HudSection
 	void UpdateKey()
 	{
 		_keyGlyph = null;
-		_keyLabel = null;
-		if ( string.IsNullOrEmpty( Action ) ) return;
+		_keyLabel = KeyLabel;
+		if ( _keyLabel is not null || string.IsNullOrEmpty( Action ) ) return;
 
 		// controllers get the button's glyph, keyboards a key cap with the key's name
 		if ( Input.UsingController )
