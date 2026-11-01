@@ -3,6 +3,11 @@ namespace Sandbox;
 
 public partial class BaseSpawnMenu : Panel
 {
+	/// <summary>
+	/// How tall the tree's rows are in a headset, it goes by this rather than by the stylesheet.
+	/// </summary>
+	const int VRRowHeight = 72;
+
 	SpawnMenuOption activeOption;
 	PanelSwitcher Switcher = default;
 	protected Panel ActivePanel => activeOption?.Panel;
@@ -56,6 +61,8 @@ public partial class BaseSpawnMenu : Panel
 	protected override void OnAfterTreeRender( bool firstTime )
 	{
 		base.OnAfterTreeRender( firstTime );
+
+		if ( VRMode.IsActive ) Tree.RowHeight = VRRowHeight;
 
 		if ( !_addedHeader && MenuHeader.IsValid() )
 		{

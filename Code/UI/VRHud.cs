@@ -539,7 +539,8 @@ public sealed class VRHud : Component
 
 	/// <summary>
 	/// Context menus open under the screen's mouse, which has nothing to do with a world panel and leaves them off the edge of it.
-	/// They go where the laser is instead, all on the panel.
+	/// Anything placed against its button lands off the edge too, every frame: the engine doesn't allow for the panel's centre being
+	/// its origin. They all go where the laser is instead, all on the panel.
 	/// </summary>
 	void KeepPopupsOnPanel()
 	{
@@ -551,12 +552,14 @@ public sealed class VRHud : Component
 
 		foreach ( var popup in root.Children.OfType<Sandbox.UI.Popup>() )
 		{
+			popup.Position = Sandbox.UI.Popup.PositionMode.UnderMouse;
+
 			var rect = popup.Box.Rect;
 			if ( rect.Width <= 0f ) continue;
 
 			var position = rect.Position;
 
-			if ( popup.Position == Sandbox.UI.Popup.PositionMode.UnderMouse && _placedPopups.Add( popup ) && root.RayToLocalPosition( _pointer.WorldTransform.ForwardRay, out var point, out _ ) )
+			if ( _placedPopups.Add( popup ) && root.RayToLocalPosition( _pointer.WorldTransform.ForwardRay, out var point, out _ ) )
 				position = point;
 			else if ( bounds.IsInside( rect, true ) )
 				continue;

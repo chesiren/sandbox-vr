@@ -10,7 +10,7 @@
     </Header>
 
     <Body>
-        <VirtualGrid Items=@( Entries ) ItemSize=@(new Vector2( 123, 123 ))>
+        <VirtualGrid Items=@( Entries ) ItemSize=@SpawnMenuIconSize.Medium.ItemSize()>
             <Item Context="item">
                 @if (item is Entry entry)
                 {

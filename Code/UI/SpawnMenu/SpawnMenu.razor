@@ -11,7 +11,41 @@
 
     <div class="container">
 
-        <div class="spawnmenuleft">
+        @if ( VRMode.IsActive )
+        {
+            <div class="vr-rail">
+
+                @foreach ( var t in tabs )
+                {
+                    var type = Game.TypeLibrary.GetType( t.GetType() );
+
+                    <div class="section @( _vrSection == VRSection.Spawn && activeTab == t ? "active" : "" )" @onclick=@(() => ShowVRSection( VRSection.Spawn, t ))>
+                        <span class="icon">@type.Icon</span>
+                        <label>@type.Title</label>
+                    </div>
+                }
+
+                @foreach ( var t in utilityTabs )
+                {
+                    var type = Game.TypeLibrary.GetType( t.GetType() );
+
+                    <div class="section @( _vrSection == VRSection.Utility && activeUtilityTab == t ? "active" : "" )" @onclick=@(() => ShowVRSection( VRSection.Utility, t ))>
+                        <span class="icon">@type.Icon</span>
+                        <label>@type.Title</label>
+                    </div>
+                }
+
+                <div class="section @( _vrSection == VRSection.Settings ? "active" : "" )" @onclick=@(() => ShowVRSection( VRSection.Settings, null ))>
+                    <span class="icon">⚙️</span>
+                    <label>#vr.menu.settings</label>
+                </div>
+
+            </div>
+
+            <VRSettingsSection class="@( _vrSection == VRSection.Settings ? "" : "vr-hidden" )" />
+        }
+
+        <div class="spawnmenuleft @( VRMode.IsActive && _vrSection != VRSection.Spawn ? "vr-hidden" : "" )">
 
             <div class="tabs">
 
@@ -34,7 +68,7 @@
 
         </div>
 
-        <div class="spawnmenuright">
+        <div class="spawnmenuright @( VRMode.IsActive && _vrSection != VRSection.Utility ? "vr-hidden" : "" )">
 
             <div class="tabs">
 
@@ -71,6 +105,28 @@
 
     List<Panel> tabs = new List<Panel>();
     List<Panel> utilityTabs = new List<Panel>();
+
+    /// <summary>
+    /// What fills the menu in VR, where there's only room to read one thing at a time.
+    /// </summary>
+    enum VRSection
+    {
+        Spawn,
+        Utility,
+        Settings
+    }
+
+    VRSection _vrSection;
+
+    void ShowVRSection( VRSection section, Panel tab )
+    {
+        _vrSection = section;
+
+        if ( section == VRSection.Spawn ) SwitchTab( tab );
+        else if ( section == VRSection.Utility ) SwitchUtilityTab( tab );
+
+        StateHasChanged();
+    }
 
     public void BuildTabs()
     {
@@ -132,6 +188,7 @@
         var page = tabs.OfType<PropsPage>().FirstOrDefault();
         if ( page is null ) return;
 
+        _vrSection = VRSection.Spawn;
         SwitchTab( page );
         page.SelectSpawnlist( entry );
     }

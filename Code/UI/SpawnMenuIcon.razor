@@ -23,6 +23,10 @@
     {
         <div class="title">@Title</div>
     }
+    @if ( VRMode.IsActive )
+    {
+        <div class="more"><i>more_horiz</i></div>
+    }
 
 </root>
 
@@ -157,12 +161,19 @@
 
     protected override async void OnClick( MousePanelEvent e )
     {
+        // the VR button for what the right click opens, on a tile that would otherwise spawn
+        if ( e.Target?.AncestorsAndSelf.Any( x => x.HasClass( "more" ) ) == true )
+        {
+            OpenMenu();
+            return;
+        }
+
         // Work out what we can locally first, the host might not have this content (e.g. mounts)
         var metadata = await ISpawner.ResolveMetadata( Type, Path );
         GameManager.Spawn( Ident, metadata );
     }
 
-    protected override async void OnMouseDown( MousePanelEvent e )
+    protected override void OnMouseDown( MousePanelEvent e )
     {
         if ( e.MouseButton != MouseButtons.Right )
         {
@@ -170,6 +181,13 @@
             return;
         }
 
+        OpenMenu();
+
+        e.StopPropagation();
+    }
+
+    async void OpenMenu()
+    {
         var menu = new Sandbox.UI.Menu();
 
         // If inside a spawnlist, offer removal
@@ -200,8 +218,6 @@
         }, spawnlistView?.Entry );
 
         menu.Open( this, Popup.PositionMode.UnderMouse );
-
-        e.StopPropagation();
 
         // Spawner-specific actions are optional: cloud loading must not leave the
         // generic spawnlist and workshop options empty if it fails.

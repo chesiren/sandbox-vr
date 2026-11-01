@@ -7,7 +7,7 @@
 <SpawnMenuContent>
 
     <Body>
-        <VirtualGrid Items=@( GetData() ) ItemSize=@(new Vector2( 240, 180 ))>
+        <VirtualGrid Items=@( GetData() ) ItemSize=@SpawnMenuIconSizeExtensions.ForHeadset( new Vector2( 240, 180 ) )>
             <Item Context="item">
 
 				@if (item is Storage.Entry content)

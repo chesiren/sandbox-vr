@@ -266,10 +266,11 @@ UISheet
 		&.toggle
 		{
 			@include ui-button-face;
+			position: relative;
 			flex-direction: row;
 			align-items: center;
 			height: $vr-control;
-			padding: 0 20px;
+			padding: 0 120px 0 20px;
 			pointer-events: all;
 
 			> .control
@@ -279,8 +280,9 @@ UISheet
 
 			> .label
 			{
-				width: auto;
+				width: 0px;
 				height: auto;
+				flex-grow: 1;
 				padding-left: 0px;
 				color: $ui-text;
 				pointer-events: none;
@@ -289,8 +291,11 @@ UISheet
 			> .state
 			{
 				display: flex;
-				flex-shrink: 0;
-				margin-left: auto;
+				position: absolute;
+				right: 20px;
+				width: 90px;
+				justify-content: flex-end;
+				text-align: right;
 				font-size: $vr-font-small;
 				font-weight: 700;
 				color: $ui-text-muted;

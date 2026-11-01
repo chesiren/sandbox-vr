@@ -12,6 +12,7 @@
     "vr.watch.chat": "Chat",
     "vr.inspect.multi": "Select several",
     "vr.inspect.aim_hint": "Aim at an object and pull the trigger.",
+    "vr.menu.settings": "Settings",
     "vr.toggle.on": "On",
     "vr.toggle.off": "Off"
 }

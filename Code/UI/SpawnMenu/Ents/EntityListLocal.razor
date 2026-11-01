@@ -10,7 +10,7 @@
     return;
 }
 
-<VirtualGrid Items=@Entities ItemSize=@(new Vector2( 123, 123 ))>
+<VirtualGrid Items=@Entities ItemSize=@SpawnMenuIconSize.Medium.ItemSize()>
     <Item Context="item">
         @if (item is ScriptedEntity entry)
         {

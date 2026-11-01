@@ -1,0 +1,500 @@
+@import "/UI/Theme.scss";
+
+// The spawn menu in a headset: one thing at a time, and big. The pages stay what they are on a screen, so anything that
+// adds one gets this too. Loaded on the root of the panel, 37px here is about 1 degree of view.
+
+// --- the shell --------------------------------------------------------------------------------
+
+.vr SpawnMenu .container
+{
+	width: 1720px;
+	min-width: 0px;
+	max-width: 100%;
+	padding-top: 20px;
+	padding-bottom: 83px; // the hint bar goes under it
+	gap: 10px;
+
+	> .vr-hidden
+	{
+		display: none;
+	}
+
+	> .spawnmenuleft, > .spawnmenuright
+	{
+		flex-grow: 1;
+		width: auto;
+
+		> .tabs
+		{
+			display: none;
+		}
+	}
+}
+
+.vr-rail
+{
+	@include ui-block;
+	flex-direction: column;
+	flex-shrink: 0;
+	width: 180px;
+	gap: 6px;
+
+	> .section
+	{
+		@include ui-button-face;
+		flex-grow: 1;
+		flex-basis: 0px;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 2px;
+		overflow: hidden;
+		font-family: $body-font;
+		font-size: 24px;
+		font-weight: 600;
+
+		> .icon
+		{
+			font-size: 34px;
+		}
+
+		> *
+		{
+			pointer-events: none;
+		}
+
+		&.active
+		{
+			@include ui-selected;
+			background-image: none;
+		}
+	}
+}
+
+// --- what every page is made of ---------------------------------------------------------------
+
+.vr VirtualGrid, .vr MixedVirtualGrid, .vr .treeview, .vr UIGroupedList .list, .vr UISettingsPane .settings-body
+{
+	scrollbar-width: 20px;
+}
+
+.vr .textentry.menu-input, .vr UIGroupedList .filter.textentry, .vr SaveMenu > .footer TextEntry
+{
+	height: $vr-control;
+	min-height: $vr-control;
+	padding: 0 14px;
+	font-size: $vr-font;
+}
+
+.vr SpawnMenuToolbar
+{
+	height: auto;
+	min-height: $vr-control;
+	gap: 10px;
+
+	> .left, > .right, > .body
+	{
+		gap: 10px;
+	}
+
+	.textentry.menu-input
+	{
+		width: 420px;
+		min-width: 200px;
+	}
+
+	UIDropdown
+	{
+		width: 300px;
+	}
+}
+
+.vr SpawnMenuContent > .header
+{
+	margin-bottom: 14px;
+}
+
+.vr SpawnlistView .spawnlist-identity
+{
+	.identity-icon
+	{
+		font-size: 44px;
+	}
+
+	.spawnlist-name
+	{
+		font-size: 44px;
+	}
+
+	.meta
+	{
+		font-size: $vr-font-small;
+
+		IconPanel
+		{
+			font-size: 30px;
+		}
+	}
+}
+
+.vr SpawnlistView .edit-bar
+{
+	font-size: $vr-font-small;
+}
+
+// --- categories -------------------------------------------------------------------------------
+
+.vr SpawnMenuPage > .left
+{
+	width: 400px;
+	margin-right: 12px;
+}
+
+.vr SpawnMenuPage .treeview .tree-row
+{
+	font-size: 28px;
+
+	.tree-expander
+	{
+		width: 50px;
+		font-size: 40px;
+	}
+
+	.tree-icon
+	{
+		width: 46px;
+		margin-right: 10px;
+		font-size: 36px;
+	}
+}
+
+.vr SpawnMenuPage .menu-footer UIButton
+{
+	width: 100%;
+}
+
+// --- tiles ------------------------------------------------------------------------------------
+
+// the name's always there, nothing can be hovered steadily enough to read it, and the thumbnail stops above it
+.vr SpawnMenuIcon, .vr .size-large SpawnMenuIcon, .vr .size-small SpawnMenuIcon
+{
+	padding: 6px;
+
+	.title
+	{
+		position: relative;
+		left: 0px;
+		right: 0px;
+		bottom: 0px;
+		flex-shrink: 0;
+		width: 100%;
+		height: 46px;
+		font-size: 24px;
+		opacity: 1;
+	}
+
+	.thumb
+	{
+		flex-grow: 1;
+		height: 0px;
+	}
+
+	&:active
+	{
+		transform: none;
+	}
+
+	.more
+	{
+		@include ui-button-face;
+		position: absolute;
+		display: none;
+		top: 6px;
+		right: 6px;
+		width: $vr-control;
+		height: $vr-control;
+		align-items: center;
+		justify-content: center;
+
+		> i
+		{
+			font-family: "Material Icons";
+			font-size: 50px;
+			font-style: normal;
+			pointer-events: none;
+		}
+	}
+
+	&:hover .more
+	{
+		display: flex;
+	}
+}
+
+.vr LocalDupeIcon .footer, .vr WorkshopIcon .footer
+{
+	height: 64px;
+
+	.avatar
+	{
+		width: 48px;
+		height: 48px;
+	}
+
+	.name
+	{
+		font-size: 24px;
+	}
+}
+
+// --- the tool and utility lists ---------------------------------------------------------------
+
+.vr UIGroupedList
+{
+	width: 420px;
+	gap: 10px;
+
+	.group
+	{
+		margin-bottom: 14px;
+	}
+
+	.group-header
+	{
+		height: 56px;
+		padding: 0 16px;
+		font-size: $vr-font-small;
+	}
+
+	.group-items
+	{
+		margin-top: 2px;
+	}
+
+	.item
+	{
+		height: 72px;
+		padding: 0 16px;
+		font-size: 28px;
+	}
+}
+
+.vr UISettingsPane
+{
+	.title-bar
+	{
+		height: 56px;
+		padding: 0 16px;
+		font-size: $vr-font-small;
+	}
+
+	.settings-body
+	{
+		padding: 16px 16px 12px 16px;
+
+		.note
+		{
+			font-size: $vr-font-small;
+		}
+
+		.section-header
+		{
+			font-size: $vr-font-small;
+		}
+
+		.list-entry
+		{
+			min-height: $vr-control;
+			padding: 8px 14px;
+		}
+
+		.list-entry-icon
+		{
+			width: 60px;
+			font-size: 40px;
+		}
+
+		.list-entry-avatar
+		{
+			width: 64px;
+			height: 64px;
+		}
+
+		.list-entry-name
+		{
+			font-size: 28px;
+		}
+
+		.list-entry-detail
+		{
+			font-size: 24px;
+		}
+
+		.list-entry-action
+		{
+			width: 68px;
+			height: 68px;
+
+			i
+			{
+				font-size: 40px;
+			}
+		}
+	}
+}
+
+// --- the settings section: what's on the inspect menu's screen, its window and its bar --------
+
+VRSettingsSection
+{
+	flex-direction: column;
+	flex-grow: 1;
+	min-width: 0px;
+	gap: 10px;
+	font-family: $body-font;
+	font-size: $vr-font-small;
+	font-weight: 500;
+	color: $ui-text;
+
+	> .settings-bar
+	{
+		@include ui-section;
+		flex-shrink: 0;
+		height: $vr-control;
+		pointer-events: all;
+
+		> .menubar
+		{
+			flex-grow: 1;
+			flex-direction: row;
+			align-items: stretch;
+			gap: 6px;
+			padding: 0px;
+
+			> .menu
+			{
+				@include ui-button-face;
+				flex-grow: 1;
+				align-items: center;
+				justify-content: center;
+				padding: 0px 24px;
+				font-family: $body-font;
+				font-size: 28px;
+				font-weight: 600;
+				sound-in: "sounds/kenney/ui/ui.navigate.forward.sound";
+
+				> .part, > .part *
+				{
+					pointer-events: none;
+				}
+
+				&.active, &.open
+				{
+					@include ui-selected;
+					background-image: none;
+				}
+			}
+		}
+	}
+
+	> InspectWindow.top-left
+	{
+		position: relative;
+		top: 0px;
+		left: 0px;
+		flex-grow: 1;
+		min-height: 0px;
+		align-items: stretch;
+
+		// the spawn menu's own tabs have a look that reaches this far
+		> .tabs
+		{
+			align-self: stretch;
+			height: auto;
+			margin-left: 0px;
+			max-width: 100%;
+			gap: 4px;
+
+			> .tab
+			{
+				flex-grow: 1;
+				height: 80px;
+				font-size: 28px;
+
+				&.active
+				{
+					height: 80px;
+					pointer-events: none;
+				}
+			}
+		}
+
+		> .body
+		{
+			flex-grow: 1;
+			flex-shrink: 1;
+			min-height: 0px;
+
+			> *
+			{
+				flex-grow: 1;
+				flex-shrink: 1;
+				min-height: 0px;
+				width: 100%;
+				height: auto;
+			}
+		}
+	}
+
+	SaveMenu
+	{
+		gap: 10px;
+		font-size: $vr-font-small;
+
+		> .save-list
+		{
+			flex-grow: 1;
+			max-height: 100%;
+			min-height: 0px;
+			gap: 10px;
+		}
+
+		> .footer UIButton
+		{
+			width: 240px;
+		}
+
+		.empty-state
+		{
+			height: 200px;
+
+			IconPanel
+			{
+				font-size: 56px;
+			}
+		}
+
+		.save-card
+		{
+			.save-info
+			{
+				padding: 0px 110px 0px 24px;
+			}
+
+			.save-name
+			{
+				font-size: $vr-font;
+			}
+
+			.save-timestamp
+			{
+				font-size: 24px;
+			}
+
+			.save-outdated-badge
+			{
+				font-size: 20px;
+			}
+		}
+	}
+}
