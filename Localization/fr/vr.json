@@ -9,5 +9,7 @@
     "vr.hand.left": "main gauche",
     "vr.hand.right": "main droite",
     "vr.watch.scores": "Scores",
-    "vr.watch.chat": "Chat"
+    "vr.watch.chat": "Chat",
+    "vr.inspect.multi": "Plusieurs",
+    "vr.inspect.aim_hint": "Vise un objet et appuie sur la gâchette."
 }

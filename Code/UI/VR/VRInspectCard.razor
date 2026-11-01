@@ -1,0 +1,151 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits Panel
+@namespace Sandbox
+
+<root>
+
+    <div class="title-bar">
+        <label class="name" Tokenize=@false>@TargetName</label>
+        <div class="toggle @(Inspector?.MultiSelect == true ? "active" : "")" @onclick=@ToggleMulti>#vr.inspect.multi</div>
+    </div>
+
+    @if ( !string.IsNullOrEmpty( OwnerText ) )
+    {
+        <label class="owner" Tokenize=@false>@OwnerText</label>
+    }
+
+    @if ( Target.IsValid() )
+    {
+        <div class="actions">
+            @foreach ( var option in _options )
+            {
+                var picked = option;
+                <div class="action @(picked.Icon == "delete" ? "danger" : "") @(picked.Enabled ? "" : "disabled")" @onclick=@(() => Pick( picked ))>
+                    <i>@picked.Icon</i>
+                    <label Tokenize=@false>@picked.Text</label>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="hint">#vr.inspect.aim_hint</div>
+    }
+
+    <div class="tabs">
+        <div class="tab @(_showTool ? "" : "active")" @onclick=@(() => ShowTool( false ))>#spawnmenu.inspect.prop_inspector</div>
+        <div class="tab @(_showTool ? "active" : "")" @onclick=@(() => ShowTool( true ))>#spawnmenu.inspect.tool_options</div>
+    </div>
+
+    <div class="pages">
+        <InspectObjectTab class="@(_showTool ? "hidden" : "")" />
+        <InspectToolOptionsTab class="@(_showTool ? "" : "hidden")" />
+    </div>
+
+</root>
+
+@code
+{
+    /// <summary>
+    /// How often the actions are asked for again: they change with the object, on fire or not.
+    /// </summary>
+    const float RefreshTime = 0.5f;
+
+    readonly List<IContextMenuEvent.Option> _options = new();
+    GameObject _optionsTarget;
+    RealTimeSince _sinceOptions;
+    bool _showTool;
+
+    Inspector Inspector => Ancestors.OfType<ContextMenuHost>().FirstOrDefault()?.Inspector;
+
+    /// <summary>
+    /// What the actions are for: the last one picked, when there are several.
+    /// </summary>
+    GameObject Target => Inspector?.Selected.LastOrDefault();
+
+    string TargetName
+    {
+        get
+        {
+            var count = Inspector?.Selected.Count ?? 0;
+            if ( count == 0 ) return Game.Language.GetPhrase( "spawnmenu.inspect.object" );
+
+            var name = Target.IsValid() ? Target.Name : "";
+            return count > 1 ? $"{name} +{count - 1}" : name;
+        }
+    }
+
+    string OwnerText
+    {
+        get
+        {
+            var owner = Target.IsValid() ? Target.GetComponentInParent<Ownable>( true )?.Owner?.DisplayName : null;
+            return owner is null ? null : Game.Language.GetPhrase( "ui.owner.owned_by", new() { { "name", owner } } );
+        }
+    }
+
+    public override void Tick()
+    {
+        base.Tick();
+
+        var target = Target;
+        if ( target == _optionsTarget && _sinceOptions < RefreshTime ) return;
+
+        _optionsTarget = target;
+        _sinceOptions = 0;
+        _options.Clear();
+
+        if ( !target.IsValid() ) return;
+
+        var ev = new IContextMenuEvent.Event( target );
+        Scene.RunEvent<IContextMenuEvent>( listener => listener.PopulateContextMenu( ev ) );
+        _options.AddRange( ev.Options );
+    }
+
+    void Pick( IContextMenuEvent.Option option )
+    {
+        if ( !option.Enabled ) return;
+
+        if ( option.SubmenuBuilder is not null )
+        {
+            var menu = new Sandbox.UI.Menu();
+            option.SubmenuBuilder( menu );
+            menu.Open( this, Popup.PositionMode.UnderMouse );
+            return;
+        }
+
+        option.Action?.Invoke();
+        _sinceOptions = RefreshTime;
+    }
+
+    void ToggleMulti()
+    {
+        if ( Inspector is { } inspector )
+            inspector.MultiSelect = !inspector.MultiSelect;
+    }
+
+    void ShowTool( bool show )
+    {
+        _showTool = show;
+        StateHasChanged();
+    }
+
+    protected override int BuildHash()
+    {
+        var hash = new HashCode();
+        hash.Add( TargetName );
+        hash.Add( OwnerText );
+        hash.Add( Inspector?.MultiSelect );
+        hash.Add( _showTool );
+        hash.Add( Game.Language.SelectedCode );
+
+        foreach ( var option in _options )
+        {
+            hash.Add( option.Text );
+            hash.Add( option.Enabled );
+        }
+
+        return hash.ToHashCode();
+    }
+}

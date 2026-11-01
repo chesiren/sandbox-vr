@@ -31,6 +31,12 @@ SpawnMenuHost.open .menu-wrapper
 	pointer-events: all;
 }
 
+// inspecting in VR, the laser goes through to the world, only the windows on the panel catch it
+SpawnMenuHost.open.laser-through .menu-wrapper
+{
+	pointer-events: none;
+}
+
 // windows over the menu, they are the only thing in it that takes the mouse
 SpawnMenuHost .modal-layer
 {

@@ -161,6 +161,7 @@
         bool state = stickOpen || openAnyMenu || IsHeldOpenByPopup();
 
         SetClass("open", state);
+        SetClass("laser-through", VRMode.IsActive && GetActiveMode() is ContextMenuHost);
         IsOpen = state;
         IsPinned = state && !Input.Down("spawnmenu") && !Input.Down("inspectmenu");
 

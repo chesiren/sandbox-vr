@@ -1,0 +1,149 @@
+@import "/UI/Theme.scss";
+
+// the inspected object's card, in the menus' own look and sized for a headset: 37px here is about 1 degree of view
+VRInspectCard
+{
+	@include ui-block;
+
+	// the same colours as the block, with less showing through: whatever's behind it isn't a flat screen's backdrop
+	background-image: linear-gradient( to bottom, rgba( 30, 32, 36, 0.96 ), rgba( 32, 48, 68, 0.96 ) );
+
+	position: absolute;
+	top: 90px;
+	right: 40px;
+	bottom: 40px;
+	width: 900px;
+	padding: 14px;
+	gap: 12px;
+	flex-direction: column;
+	font-family: $body-font;
+	font-size: 30px;
+	font-weight: 500;
+	color: $ui-text;
+	pointer-events: all;
+	z-index: 200;
+
+	> .title-bar
+	{
+		@include ui-title-bar;
+		height: 84px;
+		padding: 0 10px 0 20px;
+		gap: 12px;
+		font-size: 34px;
+
+		> .name
+		{
+			flex-grow: 1;
+			min-width: 0px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		> .toggle
+		{
+			@include ui-button-face;
+			flex-shrink: 0;
+			height: 66px;
+			padding: 0 18px;
+			align-items: center;
+			font-size: 26px;
+			font-weight: 600;
+			text-transform: none;
+
+			&.active
+			{
+				@include ui-selected;
+			}
+		}
+	}
+
+	> .owner
+	{
+		flex-shrink: 0;
+		padding: 0 6px;
+		color: $ui-text-label;
+	}
+
+	> .hint
+	{
+		@include ui-section;
+		flex-shrink: 0;
+		padding: 24px;
+		justify-content: center;
+		color: $ui-text-muted;
+	}
+
+	> .actions
+	{
+		flex-direction: row;
+		flex-wrap: wrap;
+		flex-shrink: 0;
+		gap: 8px;
+
+		> .action
+		{
+			@include ui-button-face;
+			flex-grow: 1;
+			width: 280px;
+			height: 96px;
+			gap: 12px;
+			align-items: center;
+			justify-content: center;
+			font-size: 28px;
+			font-weight: 600;
+
+			> i
+			{
+				font-family: "Material Icons";
+				font-size: 36px;
+				font-style: normal;
+			}
+
+			&.danger
+			{
+				background-image: none;
+				background-color: $ui-danger;
+				color: white;
+			}
+		}
+	}
+
+	> .tabs
+	{
+		flex-direction: row;
+		flex-shrink: 0;
+		gap: 4px;
+
+		> .tab
+		{
+			@include ui-tab-button;
+			flex-grow: 1;
+			height: 80px;
+			font-size: 28px;
+
+			&.active
+			{
+				height: 80px;
+				pointer-events: none;
+			}
+		}
+	}
+
+	> .pages
+	{
+		flex-grow: 1;
+		min-height: 0px;
+		flex-direction: column;
+
+		> *
+		{
+			flex-grow: 1;
+			min-height: 0px;
+		}
+
+		> .hidden
+		{
+			display: none;
+		}
+	}
+}
