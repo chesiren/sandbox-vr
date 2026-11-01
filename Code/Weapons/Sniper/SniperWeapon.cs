@@ -103,8 +103,9 @@ public sealed class SniperWeapon : BaseBulletWeapon
 			SetScoped( wantsScope );
 		}
 
-		// Hide viewmodel once ADS animation has finished, then enable scope overlay
-		if ( _isScoped && !_viewModelHidden && _timeUntilHideViewModel )
+		// Hide viewmodel once ADS animation has finished, then enable scope overlay. Not in VR: the
+		// overlay and the zoom would be stuck to the eyes, the picture's in the glass, see VRScope
+		if ( _isScoped && !_viewModelHidden && _timeUntilHideViewModel && !VRMode.IsActive )
 		{
 			HideViewModel();
 

@@ -109,9 +109,6 @@ public sealed class VRHud : Component
 		// Nothing on it gets clicked: if the laser could hover it, the trigger wouldn't reach the weapon
 		panel.InteractionRange = 0f;
 
-		// These pin labels to things in the world by projecting them onto the screen, which a floating panel isn't
-		foreach ( var overlay in hud.GetComponentsInChildren<SignalsOverlay>( true ) ) overlay.GameObject.Enabled = false;
-
 		// Menus go on a panel of their own, with the same layout
 		var menusObject = new GameObject( true, "VR Menus" );
 		menusObject.Flags |= GameObjectFlags.NotNetworked | GameObjectFlags.NotSaved;
@@ -139,6 +136,9 @@ public sealed class VRHud : Component
 		var ownerPlate = VRHudPanel.Create<VROwnerPlate>( "VR Owner Plate" );
 		foreach ( var label in hud.GetComponentsInChildren<OwnerLabel>( true ) ) label.GameObject.SetParent( ownerPlate.GameObject );
 
+		var signals = VRHudPanel.Create<VRSignals>( "VR Signals" );
+		foreach ( var overlay in hud.GetComponentsInChildren<SignalsOverlay>( true ) ) overlay.GameObject.SetParent( signals.GameObject );
+
 		var loadRing = VRHudPanel.Create<VRLoadRing>( "VR Load Ring" );
 		foreach ( var ring in hud.GetComponentsInChildren<CloudLoadRing>( true ) ) ring.GameObject.SetParent( loadRing.GameObject );
 
@@ -164,6 +164,7 @@ public sealed class VRHud : Component
 		vrHud._parts.Add( watchBack.GameObject );
 		vrHud._parts.Add( ownerPlate.GameObject );
 		vrHud._parts.Add( loadRing.GameObject );
+		vrHud._parts.Add( signals.GameObject );
 	}
 
 	protected override void OnStart()
@@ -198,6 +199,7 @@ public sealed class VRHud : Component
 		_parts.Add( VRHudPanel.Create<VRPrompt>( "VR Prompt" ).GameObject );
 		_parts.Add( VRHudPanel.Create<VRAmmoPickups>( "VR Ammo Pickups" ).GameObject );
 		_parts.Add( VRHudPanel.Create<VRKeyboard>( "VR Keyboard" ).GameObject );
+		_parts.Add( VRHudPanel.Create<VRScope>( "VR Scope" ).GameObject );
 
 		var aim = new GameObject( true, "VR Aim" );
 		aim.Flags |= GameObjectFlags.NotNetworked | GameObjectFlags.NotSaved;
@@ -379,7 +381,7 @@ public sealed class VRHud : Component
 		_laser.Enabled = showLaser;
 
 		// Only stop on the panel over actual UI - the plane goes on forever past the menu's edges
-		var hit = IsPointing ? HitPanel( aim.ForwardRay, menuOpen ) : null;
+		var hit = IsPointing ? HitPanel( aim.ForwardRay ) : null;
 		_dot.Enabled = hit.HasValue;
 
 		if ( !showLaser ) return;
@@ -418,22 +420,22 @@ public sealed class VRHud : Component
 	}
 
 	/// <summary>
-	/// The panel the laser's on: the keyboard's in front of everything, and with no menu open it's the watch's buttons.
+	/// The object of the panel the laser's on.
 	/// </summary>
-	GameObject PointedPanel( bool menuOpen )
+	GameObject PointedPanel()
 	{
-		if ( VRKeyboard.IsOpen && Scene.Get<VRKeyboard>() is { } keyboard && keyboard.Panel?.HasHovered == true )
-			return keyboard.GameObject;
+		var root = _input.Hovered?.FindRootPanel();
+		if ( root is null ) return null;
 
-		return menuOpen ? _menus?.GameObject : Scene.Get<VRWatchBack>()?.GameObject;
+		return Scene.GetAllComponents<Sandbox.WorldPanel>().FirstOrDefault( x => x.GetPanel() == root )?.GameObject;
 	}
 
 	/// <summary>
 	/// Where a ray crosses the panel's plane, in front of the hand.
 	/// </summary>
-	Vector3? HitPanel( Ray ray, bool menuOpen )
+	Vector3? HitPanel( Ray ray )
 	{
-		var panel = PointedPanel( menuOpen );
+		var panel = PointedPanel();
 		if ( !panel.IsValid() ) return null;
 
 		var normal = panel.WorldRotation.Forward;

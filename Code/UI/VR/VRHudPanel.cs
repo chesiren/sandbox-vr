@@ -97,7 +97,27 @@ public abstract class VRHudPanel : PanelComponent
 	/// </summary>
 	protected abstract void Place( Transform head );
 
-	protected override void OnPreRender()
+	/// <summary>
+	/// Moves the panel again and straight onto what's drawn, for a panel that has to stay on something placed while rendering
+	/// has already begun: the engine's world panel may have taken its transform by then.
+	/// </summary>
+	internal void PlaceNow()
+	{
+		if ( !VRMode.IsActive ) return;
+
+		Place( Input.VR.Head );
+
+		if ( GetComponent<Sandbox.WorldPanel>()?.GetPanel() is Sandbox.UI.WorldPanel drawn )
+		{
+			drawn.Position = WorldPosition;
+			drawn.Rotation = WorldRotation;
+		}
+	}
+
+	/// <summary>
+	/// Moves the panel and sets how visible it is, see <see cref="VRHudSystem"/>.
+	/// </summary>
+	internal void UpdatePlacement()
 	{
 		if ( !VRMode.IsActive ) return;
 
@@ -106,5 +126,25 @@ public abstract class VRHudPanel : PanelComponent
 		// On the root, what's been moved onto this object from the screen HUD sits next to the panel
 		if ( GetComponent<Sandbox.WorldPanel>()?.GetPanel() is { } root )
 			root.Style.Opacity = VRSettings.Current.HudOpacity * Visibility;
+	}
+}
+
+/// <summary>
+/// Places the <see cref="VRHudPanel"/>s once everything's updated. Not in their pre-render: the engine's world panel takes its
+/// transform in its own, which comes first, so a panel placed there is drawn where it was the frame before and trails the hand.
+/// </summary>
+public sealed class VRHudSystem : GameObjectSystem<VRHudSystem>
+{
+	public VRHudSystem( Scene scene ) : base( scene )
+	{
+		Listen( Stage.FinishUpdate, 100, OnFinishUpdate, "VRHudPanels" );
+	}
+
+	void OnFinishUpdate()
+	{
+		if ( Scene != Game.ActiveScene ) return;
+
+		foreach ( var panel in Scene.GetAll<VRHudPanel>() )
+			panel.UpdatePlacement();
 	}
 }

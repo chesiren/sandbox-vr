@@ -94,6 +94,7 @@
     public void Update( bool isActive )
     {
         SetClass("active", isActive);
+        SetClass("vr", VRMode.IsActive);
 
         var volume = GetOrAddComponent<PostProcessVolume>();
         volume.SceneVolume = new Volumes.SceneVolume { Type = Volumes.SceneVolume.VolumeTypes.Infinite };
