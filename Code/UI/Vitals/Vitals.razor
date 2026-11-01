@@ -48,18 +48,29 @@
         section = HudLayer.FindSection( this, section );
         if ( section is null ) return;
 
-        if ( !Player.IsValid() )
+        // In VR they're on the wrist and the weapon, see VRWatch and VRWeaponAmmo
+        if ( !Player.IsValid() || VRMode.IsActive )
         {
             section.Data = default;
             return;
         }
 
+        section.Settings = this;
+        section.Hidden = SpawnMenuHost.IsOpen && SpawnMenuHost.GetActiveMode() is not ContextMenuHost;
+        section.Data = Read();
+    }
+
+    /// <summary>
+    /// What the readouts should show right now
+    /// </summary>
+    public VitalsSection.Readout Read()
+    {
+        if ( !Player.IsValid() ) return default;
+
         var weapon = Weapon;
         var showAmmo = weapon.IsValid() && weapon.UsesAmmo && Hud.IsVisible( HudElement.Ammo );
 
-        section.Settings = this;
-        section.Hidden = SpawnMenuHost.IsOpen && SpawnMenuHost.GetActiveMode() is not ContextMenuHost;
-        section.Data = new VitalsSection.Readout
+        return new VitalsSection.Readout
         {
             ShowVitals = Hud.IsVisible( HudElement.Vitals ),
             Health = (int)Player.Health,
