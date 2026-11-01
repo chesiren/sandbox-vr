@@ -59,7 +59,7 @@ public sealed class VRWatchBack : VRHudPanel
 		var hand = VRWatch.Hand.AimTransform;
 		var face = -VRWatch.FaceDirection( hand );
 		var watch = Scene.Get<VRWatch>();
-		var position = hand.Position - hand.Rotation.Forward * (watch?.WristDistance ?? 5f) + face * (watch?.FaceHeight ?? 4.5f);
+		var position = hand.Position - hand.Rotation.Forward * (watch?.WristDistance ?? 5f) + face * (watch?.FaceHeight ?? 3f);
 
 		PlaceAt( position, Rotation.LookAt( face, hand.Rotation.Up ), Width );
 

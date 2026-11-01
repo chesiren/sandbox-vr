@@ -43,6 +43,9 @@ public sealed class InventorySection : HudSection
 	static readonly Color TileColor = HudStyle.PanelColor;
 	static readonly Color HighlightTileColor = new Color( 0.29f, 0.29f, 0.29f, HudStyle.PanelColor.a ); // 4A4A4A
 	static readonly Color DimContent = Color.White.WithAlpha( 0.51f ); // icon and name of unselected slots
+	static readonly Color SolidTileColor = new Color( 0.08f, 0.08f, 0.08f, 0.95f );
+	static readonly Color SolidHighlightTileColor = new Color( 0.2f, 0.2f, 0.2f, 0.98f );
+	static readonly Color SolidContent = Color.White.WithAlpha( 0.9f );
 
 	float _slide;
 	float[] _expand = Array.Empty<float>();
@@ -198,12 +201,14 @@ public sealed class InventorySection : HudSection
 
 	bool IsHighlighted( BaseSandboxWeapon weapon ) => weapon.IsValid() && weapon == _shownSelection;
 
-	internal void DrawTile( Painter painter, Rect rect, BaseSandboxWeapon weapon, int index, bool highlighted, float contentAlpha, float scale )
+	/// <param name="solid">For a tile floating in the world, over whatever's behind it: nearly opaque, with its contents at full strength.</param>
+	internal void DrawTile( Painter painter, Rect rect, BaseSandboxWeapon weapon, int index, bool highlighted, float contentAlpha, float scale, bool solid = false )
 	{
 		var empty = !weapon.IsValid();
 		Color Shade( Color color ) => empty ? color.WithAlpha( color.a * EmptyOpacity ) : color;
 
 		var tile = Shade( highlighted ? HighlightTileColor : TileColor );
+		if ( solid ) tile = highlighted ? SolidHighlightTileColor : SolidTileColor;
 
 		HudStyle.DrawPanel( painter, rect, tile, scale );
 
@@ -226,8 +231,9 @@ public sealed class InventorySection : HudSection
 		painter.Opacity = contentAlpha;
 
 		var glow = Glowing( Tinted( Color.White ) );
-		var iconColor = highlighted ? glow : Tinted( DimContent );
-		var nameColor = highlighted ? glow : Tinted( DimContent );
+		var dim = Tinted( solid ? SolidContent : DimContent );
+		var iconColor = highlighted ? glow : dim;
+		var nameColor = highlighted ? glow : dim;
 
 		if ( GetIcon( weapon ) is { } icon && icon.Width > 0 && icon.Height > 0 )
 		{
@@ -235,6 +241,8 @@ public sealed class InventorySection : HudSection
 			var fit = MathF.Min( area.x / icon.Width, area.y / icon.Height );
 			var size = new Vector2( icon.Width, icon.Height ) * fit;
 			var center = new Vector2( rect.Center.x, rect.Top + IconAreaHeight * scale * 0.5f );
+			// streaming only hears of what the engine draws itself, a painted texture would stay at its smallest
+			icon.MarkUsed( (int)size.x );
 			painter.Texture( icon, new Rect( center - size * 0.5f, size ), iconColor );
 		}
 

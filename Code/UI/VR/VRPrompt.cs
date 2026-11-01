@@ -5,9 +5,14 @@
 public sealed class VRPrompt : VRHudPanel
 {
 	/// <summary>
-	/// How wide the panel is, in world units.
+	/// How wide the panel is at least, in world units.
 	/// </summary>
 	[Property] public float Width { get; set; } = 14f;
+
+	/// <summary>
+	/// How wide the panel gets per unit of distance, so the text stays readable from afar: at this its name is about 1 degree of view.
+	/// </summary>
+	[Property] public float WidthPerDistance { get; set; } = 0.41f;
 
 	/// <summary>
 	/// How far towards the player the prompt comes off the surface, so it doesn't sink into it.
@@ -23,7 +28,9 @@ public sealed class VRPrompt : VRHudPanel
 	protected override void Place( Transform head )
 	{
 		var position = _target + (head.Position - _target).Normal * SurfaceGap;
-		PlaceAt( position, Rotation.LookAt( head.Position - position, Vector3.Up ), Width );
+		var width = MathF.Max( Width, head.Position.Distance( position ) * WidthPerDistance );
+
+		PlaceAt( position, Rotation.LookAt( head.Position - position, Vector3.Up ), width );
 	}
 
 	protected override void OnUpdate()

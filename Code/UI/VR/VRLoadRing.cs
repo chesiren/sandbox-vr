@@ -1,27 +1,28 @@
 /// <summary>
-/// At the end of the spawn laser, for the screen HUD's <see cref="CloudLoadRing"/> to sit on: what's on its way lands there.
+/// At the base of the spawn laser, for the screen HUD's <see cref="CloudLoadRing"/> to sit on: right by the hand it's spawning
+/// from, where it can't be missed, rather than wherever the laser ends.
 /// </summary>
 public sealed class VRLoadRing : VRHudPanel
 {
 	/// <summary>
-	/// How big the ring looks, as the panel's width per unit of distance. It stays the same size from any distance.
+	/// How wide the ring is, in world units.
 	/// </summary>
-	[Property] public float Size { get; set; } = 0.08f;
+	[Property] public float Width { get; set; } = 6f;
 
 	/// <summary>
-	/// How far towards the player the ring comes off the surface, so it doesn't sink into it.
+	/// How far along the laser the ring sits, in front of the hand so the controller doesn't cover it.
 	/// </summary>
-	[Property] public float SurfaceGap { get; set; } = 4f;
+	[Property] public float HandGap { get; set; } = 7f;
 
-	protected override Vector2 PanelPixels => new( 128, 128 );
+	protected override Vector2 PanelPixels => new( 256, 256 );
 
 	protected override void Place( Transform head )
 	{
 		if ( !CloudLoadTracker.IsLoading ) return;
 
-		var point = VRHud.SpawnAimPoint( Scene );
-		var position = point + (head.Position - point).Normal * SurfaceGap;
+		var aim = VRMode.OffHand.AimTransform;
+		var position = aim.Position + aim.Forward * HandGap;
 
-		PlaceAt( position, Rotation.LookAt( head.Position - position, Vector3.Up ), head.Position.Distance( position ) * Size );
+		PlaceAt( position, Rotation.LookAt( head.Position - position, Vector3.Up ), Width );
 	}
 }

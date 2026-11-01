@@ -12,7 +12,7 @@ public sealed class VRWatch : VRHudPanel
 	/// <summary>
 	/// How far above the wrist the watch floats.
 	/// </summary>
-	[Property] public float FaceHeight { get; set; } = 4.5f;
+	[Property] public float FaceHeight { get; set; } = 3f;
 
 	/// <summary>
 	/// How wide the panel is, in world units.
