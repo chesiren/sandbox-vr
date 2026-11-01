@@ -103,7 +103,8 @@ public abstract class VRHudPanel : PanelComponent
 
 		Place( Input.VR.Head );
 
-		if ( Panel is not null )
-			Panel.Style.Opacity = VRSettings.Current.HudOpacity * Visibility;
+		// On the root, what's been moved onto this object from the screen HUD sits next to the panel
+		if ( GetComponent<Sandbox.WorldPanel>()?.GetPanel() is { } root )
+			root.Style.Opacity = VRSettings.Current.HudOpacity * Visibility;
 	}
 }

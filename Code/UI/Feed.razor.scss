@@ -106,3 +106,38 @@ Feed > .entry
 		transition: opacity 0.35s ease-in, height 0.2s ease-in 0.3s, margin-top 0.2s ease-in 0.3s;
 	}
 }
+
+// On the back of the watch, under its buttons, see VRWatchBack
+Feed.vr
+{
+	top: 52px;
+	left: 0;
+	right: 0;
+	padding: 0px 8px;
+	max-height: 128px;
+	overflow: hidden;
+	gap: 2px;
+	font-size: 16px;
+
+	> .entry
+	{
+		height: 28px;
+		padding: 0px 6px;
+		gap: 6px;
+
+		.icon
+		{
+			height: 20px;
+
+			&.modifier
+			{
+				height: 16px;
+			}
+		}
+
+		.npc-icon
+		{
+			height: 14px;
+		}
+	}
+}

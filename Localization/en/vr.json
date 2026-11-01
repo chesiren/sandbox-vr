@@ -8,5 +8,6 @@
     "vr.button.stick_click": "Stick click",
     "vr.hand.left": "left hand",
     "vr.hand.right": "right hand",
-    "vr.watch.scores": "Scores"
+    "vr.watch.scores": "Scores",
+    "vr.watch.chat": "Chat"
 }

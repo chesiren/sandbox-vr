@@ -31,3 +31,10 @@ OwnerLabel
 		white-space: nowrap;
 	}
 }
+
+OwnerLabel.vr
+{
+	top: 0;
+	bottom: 0;
+	justify-content: center;
+}

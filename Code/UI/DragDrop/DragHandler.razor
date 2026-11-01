@@ -7,7 +7,7 @@
 
 	@if ( Current is not null )
 	{
-		var mouse = Mouse.Position;
+		var mouse = Cursor;
 		var left = mouse.x * Panel.ScaleFromScreen - 32;
 		var top = mouse.y * Panel.ScaleFromScreen - 32;
 		<div class="dragging" style="left: @(left)px; top: @(top)px;" @ref="DragVisual">
@@ -39,6 +39,12 @@
     public static bool IsDragging => Current is not null;
 
     Panel DragVisual { get; set; }
+
+    /// <summary>
+    /// Where the pointer is on the panel: the laser in VR, the mouse has nothing to do with a world panel.
+    /// </summary>
+    Vector2 Cursor => VRMode.IsActive ? Panel.MousePosition : Mouse.Position;
+
     private RootPanel _rootPanel;
 
     protected override void OnStart()
@@ -86,7 +92,7 @@
 
         if ( DragVisual is not null )
         {
-            var mouse = Mouse.Position;
+            var mouse = Cursor;
             DragVisual.Style.Left = Length.Pixels( mouse.x * Panel.ScaleFromScreen - 32 );
             DragVisual.Style.Top = Length.Pixels( mouse.y * Panel.ScaleFromScreen - 32 );
         }
