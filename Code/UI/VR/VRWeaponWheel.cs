@@ -62,6 +62,9 @@ public sealed class VRWeaponWheel : VRHudPanel
 		_section ??= Canvas?.Section<VRWeaponWheelSection>();
 		if ( _section is null ) return;
 
+		// Made here rather than when the wheel first paints with it: the canvas can't take a new section while it's painting them
+		Canvas.Section<InventorySection>();
+
 		if ( _open )
 		{
 			var blocked = vr.Player.IsSeated || SpawnMenuHost.IsOpen;
@@ -155,6 +158,7 @@ public sealed class VRWeaponWheelSection : HudSection
 
 	const float TileWidth = 230;
 	const float TileHeight = 120;
+	const float SelectedFrame = 6;
 
 	/// <summary>
 	/// How far from the centre the tiles are, as a fraction of the canvas's width.
@@ -185,7 +189,11 @@ public sealed class VRWeaponWheelSection : HudSection
 			var center = bounds.Center + new Vector2( MathF.Sin( angle ), -MathF.Cos( angle ) ) * bounds.Width * Radius;
 			var rect = new Rect( center - size * 0.5f, size );
 
-			tiles.DrawTile( painter, rect, Items[i], -1, Items[i] == Selected, 1f, scale );
+			// In the HUD's colour round the one that would be picked
+			if ( Items[i] == Selected )
+				HudStyle.DrawPanel( painter, rect.Grow( SelectedFrame * scale ), Tinted( Color.White ), scale );
+
+			tiles.DrawTile( painter, rect, Items[i], -1, Items[i] == Selected, 1f, scale, solid: true );
 		}
 	}
 }

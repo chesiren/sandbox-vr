@@ -112,6 +112,7 @@ public sealed class VRDamageSection : HudSection
 		painter.Rotate( degrees );
 
 		var rect = new Rect( new Vector2( bounds.Width * EdgeDistance, -size.y / 2f ), size );
+		icon.MarkUsed( (int)size.x ); // streaming only hears of what the engine draws itself
 		painter.Texture( icon, rect, Color.Red.WithAlpha( alpha ) );
 	}
 }

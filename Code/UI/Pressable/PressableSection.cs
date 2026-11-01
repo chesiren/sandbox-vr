@@ -170,6 +170,7 @@ public sealed class PressableSection : HudSection
 
 		if ( _keyGlyph is { } glyph )
 		{
+			glyph.MarkUsed( (int)_key.Width ); // streaming only hears of what the engine draws itself
 			painter.Texture( glyph, _key, enabled ? Color.White : DimContent );
 		}
 		else if ( _key.Width > 0 )
