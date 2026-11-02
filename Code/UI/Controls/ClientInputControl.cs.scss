@@ -24,6 +24,8 @@ ClientInputControl
 		align-items: center;
 		justify-content: center;
 
+		&.hidden { display: none; }
+
 		.hint
 		{
 			width: 100%;

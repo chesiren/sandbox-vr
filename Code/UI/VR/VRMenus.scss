@@ -498,3 +498,81 @@ VRSettingsSection
 		}
 	}
 }
+
+// --- the resource picker: picked with the trigger, then Apply, where a screen has a double click ----
+
+.vr ResourceSelectPopup.popup .inner
+{
+	width: 1700px;
+	height: 1000px;
+	max-width: 100%;
+	max-height: 100%;
+	gap: 10px;
+	font-size: $vr-font-small;
+
+	.popup-header
+	{
+		min-height: 96px;
+		padding: 6px 16px;
+		gap: 10px;
+
+		h2
+		{
+			font-size: 28px;
+		}
+
+		.search
+		{
+			width: 420px;
+			min-width: 200px;
+			height: $vr-control;
+			font-size: $vr-font;
+		}
+
+		.sort-dropdown
+		{
+			width: 300px;
+		}
+	}
+
+	.grid
+	{
+		scrollbar-width: 20px;
+		gap: 12px;
+	}
+
+	.grid .item
+	{
+		padding: 12px;
+
+		.title
+		{
+			font-size: $vr-font-small;
+			line-height: 32px;
+		}
+
+		.desc
+		{
+			font-size: 22px;
+			line-height: 28px;
+		}
+	}
+
+	.popup-footer UIButton
+	{
+		width: 300px;
+	}
+}
+
+// --- binding a contraption's input to a controller button --------------------------------------
+
+.vr ClientInputControl
+{
+	min-height: $vr-control;
+	padding: 0 20px;
+
+	.bind-label
+	{
+		font-size: $vr-font-small;
+	}
+}

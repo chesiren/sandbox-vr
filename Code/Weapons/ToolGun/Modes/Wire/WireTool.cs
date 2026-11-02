@@ -30,6 +30,7 @@ public sealed class WireTool : BaseConstraintToolMode
 		var select = TraceSelect();
 		UpdateHoveredSelection( select );
 		SelectPortWithMouseWheel();
+		SelectPortWithStick();
 
 		var pressedPrimary = Input.Pressed( "attack1" );
 		if ( pressedPrimary && SelectedPort is null )
@@ -129,6 +130,32 @@ public sealed class WireTool : BaseConstraintToolMode
 
 		// Inventory reads this later in the frame. Wire tool owns the wheel while choosing a port.
 		Input.MouseWheel = default;
+	}
+
+	/// <summary>
+	/// There's more than one port to choose from where we're aiming, see <see cref="SelectPortWithStick"/>.
+	/// </summary>
+	public bool ChoosingPort => _hoveredPorts.Length > 1;
+
+	private bool _stickLatched;
+
+	/// <summary>
+	/// In VR a flick of the stick up or down goes to the port above or below: there's no wheel, and the trigger that turns the
+	/// stick into one is what wires. VRPlayer keeps the flick from jumping or crouching meanwhile.
+	/// </summary>
+	private void SelectPortWithStick()
+	{
+		if ( !VRMode.IsActive || !ChoosingPort ) return;
+
+		var y = VRMode.DominantHand.Joystick.Value.y;
+		if ( MathF.Abs( y ) < 0.3f ) _stickLatched = false;
+		if ( _stickLatched || MathF.Abs( y ) < 0.7f ) return;
+
+		_stickLatched = true;
+
+		var direction = y > 0f ? -1 : 1;
+		_selectedPortIndex = (_selectedPortIndex + direction + _hoveredPorts.Length) % _hoveredPorts.Length;
+		VRMode.PulseDominant( 0.1f, 0.2f );
 	}
 
 	private void UpdateOverlay()

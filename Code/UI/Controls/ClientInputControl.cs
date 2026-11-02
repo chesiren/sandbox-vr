@@ -23,6 +23,9 @@ public partial class ClientInputControl : BaseControl
 	{
 		if ( Property == null ) return;
 
+		// a keyboard key's picture means nothing in a headset, the label says which button
+		_preview.SetClass( "hidden", VRMode.IsActive );
+
 		var action = Property.GetValue<ClientInput>().Action;
 		var outputCount = GetLinkedOutputs().Count( IsConnected );
 
@@ -45,6 +48,17 @@ public partial class ClientInputControl : BaseControl
 
 		var match = Input.GetActions().FirstOrDefault( a => a.Name == action );
 		var label = match != null ? LocalizedText.InputTitle( match ) : action;
+
+		if ( VRMode.IsActive )
+		{
+			var button = VRInputNames.SeatedLabel( action );
+			label = button is not null
+				? Game.Language.GetPhrase( "ui.input.binding_with_key", new() { { "binding", label }, { "key", button } } )
+				: Game.Language.GetPhrase( "vr.input.no_button", new() { { "action", label } } );
+
+			SetClass( "no-binding", button is null && outputCount == 0 );
+		}
+
 		_bindLabel.Text = outputCount > 0
 			? Game.Language.GetPhrase( "ui.input.binding_with_outputs", new() { { "binding", label }, { "count", outputCount } } )
 			: label;
@@ -88,6 +102,13 @@ public partial class ClientInputControl : BaseControl
 
 		menu.AddSeparator();
 
+		if ( VRMode.IsActive )
+		{
+			AddVRActions( menu );
+			menu.Open( this, Popup.PositionMode.UnderMouse );
+			return;
+		}
+
 		var grouped = Input.GetActions()
 			.GroupBy( a => a.GroupName ?? "" )
 			.OrderBy( g => LocalizedText.InputGroup( g.Key ), StringComparer.CurrentCultureIgnoreCase );
@@ -115,6 +136,23 @@ public partial class ClientInputControl : BaseControl
 		}
 
 		menu.Open( this, Popup.PositionMode.UnderMouse );
+	}
+
+	/// <summary>
+	/// Only what a controller presses in a seat, which is where this is read: a keyboard's keys aren't there to press.
+	/// </summary>
+	void AddVRActions( Sandbox.UI.Menu menu )
+	{
+		var actions = Input.GetActions().ToList();
+
+		foreach ( var name in VRInputNames.SeatedActionNames )
+		{
+			var action = actions.FirstOrDefault( a => string.Equals( a.Name, name, StringComparison.OrdinalIgnoreCase ) );
+			if ( action is null ) continue;
+
+			var label = Game.Language.GetPhrase( "ui.input.binding_with_key", new() { { "binding", LocalizedText.InputTitle( action ) }, { "key", VRInputNames.SeatedLabel( name ) } } );
+			menu.AddOption( label, "", () => OnBindChanged( action.Name ) );
+		}
 	}
 
 	IEnumerable<SignalOutputDescription> GetLinkedOutputs()
