@@ -45,6 +45,11 @@ public sealed class VRSettings
 	public float PhysicalCrouchFraction { get; set; } = 0.7f;
 
 	/// <summary>
+	/// Seated, tip with the seat as it pitches and rolls, rather than only turning with it and keeping the horizon level.
+	/// </summary>
+	public bool TiltWithSeat { get; set; } = true;
+
+	/// <summary>
 	/// Wear the watch on the hand that holds weapons rather than the other one.
 	/// </summary>
 	public bool WatchOnDominantHand { get; set; }
