@@ -162,6 +162,15 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 		{
 			// Keep the play area on the seat, which drives us around
 			_rigPosition = WorldPosition - (rigRotation * headLocal.Position).WithZ( 0 );
+			_rigPosition.z = WorldPosition.z;
+
+			if ( VRSettings.Current.TiltWithSeat )
+			{
+				var tilt = SeatTilt();
+				vr.Anchor = new Transform( WorldPosition + tilt * (_rigPosition - WorldPosition), tilt * rigRotation );
+				_lastBodyPosition = WorldPosition;
+				return;
+			}
 		}
 		else
 		{
@@ -197,7 +206,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 
 	/// <summary>
 	/// Sitting down faces us the way the seat does, and from then on the play area turns with it, or a car would
-	/// turn away underneath us. Only its yaw: following its pitch and roll would tip the horizon and make people sick.
+	/// turn away underneath us. Its pitch and roll are followed in <see cref="UpdateRig"/>, if wanted.
 	/// </summary>
 	void UpdateSeatYaw( bool seated, Transform headLocal )
 	{
@@ -212,9 +221,26 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 		if ( _lastSeatYaw is { } last )
 			_rigYaw += Angles.NormalizeAngle( seatYaw - last );
 		else
+		{
 			_rigYaw = seatYaw - headLocal.Rotation.Yaw();
+			_seatRest = SeatRotation;
+		}
 
 		_lastSeatYaw = seatYaw;
+	}
+
+	Rotation _seatRest;
+
+	Rotation SeatRotation => (GetComponentInParent<Sandbox.Movement.ISitTarget>( false ) as Component)?.WorldRotation ?? WorldRotation;
+
+	/// <summary>
+	/// How far the seat's pitched and rolled since we sat down, leaving out its yaw. Measured from then because a seat
+	/// isn't always level on a level vehicle.
+	/// </summary>
+	Rotation SeatTilt()
+	{
+		var turned = SeatRotation * _seatRest.Inverse;
+		return turned * Rotation.FromYaw( turned.Yaw() ).Inverse;
 	}
 
 	/// <summary>
