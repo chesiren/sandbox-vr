@@ -27,13 +27,20 @@ public static class VRMode
 	public static VRController OffHand => LeftHanded ? Input.VR.RightHand : Input.VR.LeftHand;
 
 	/// <summary>
-	/// Short pulse on a hand, for confirming grabs, shots and UI clicks.
+	/// Short pulse on a hand, for confirming grabs, shots and UI clicks. A length of 1 is a tenth of a second.
+	/// The engine samples a haptic effect each frame, and an impact's curve starts and ends at nothing, so one
+	/// shortened to a few frames often came out as nothing at all. A rumble is as strong all along.
 	/// </summary>
 	public static void Pulse( VRController hand, float amplitude = 0.4f, float length = 0.5f )
 	{
 		if ( !IsActive || hand is null ) return;
-		hand.TriggerHaptics( HapticEffect.SoftImpact, length, 1f, amplitude.Clamp( 0f, 1f ) );
+		hand.TriggerHaptics( HapticEffect.Rumble, MathF.Max( length, MinPulse ), 1f, amplitude.Clamp( 0f, 1f ) );
 	}
+
+	/// <summary>
+	/// Shorter than this, three hundredths of a second, and a controller's motor barely starts.
+	/// </summary>
+	const float MinPulse = 0.3f;
 
 	/// <summary>
 	/// Pulse the hand holding weapons and tools. Does nothing outside VR, so game code can call it on any client.
