@@ -273,7 +273,7 @@ public sealed class HandGrenadeWeapon : BaseSandboxWeapon
 		{
 			Source = GameObject,
 			Attacker = Attacker,
-			Position = Owner.IsValid() ? Owner.EyeTransform.Position : WorldPosition,
+			Position = Owner.IsValid() ? Owner.AimTransform.Position : WorldPosition,
 			Rotation = Rotation.Identity,
 			Radius = Radius,
 			Damage = MaxDamage,
