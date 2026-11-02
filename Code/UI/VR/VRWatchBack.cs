@@ -12,6 +12,11 @@ public sealed class VRWatchBack : VRHudPanel
 	/// </summary>
 	[Property] public float Width { get; set; } = 14f;
 
+	/// <summary>
+	/// How far off the inside of the wrist the panel floats, in world units.
+	/// </summary>
+	[Property] public float FaceHeight { get; set; } = 1.5f;
+
 	protected override Vector2 PanelPixels => new( 1000, 800 );
 
 	Panel _chat;
@@ -59,7 +64,7 @@ public sealed class VRWatchBack : VRHudPanel
 		var hand = VRWatch.Hand.AimTransform;
 		var face = -VRWatch.FaceDirection( hand );
 		var watch = Scene.Get<VRWatch>();
-		var position = hand.Position - hand.Rotation.Forward * (watch?.WristDistance ?? 5f) + face * (watch?.FaceHeight ?? 3f);
+		var position = hand.Position - hand.Rotation.Forward * (watch?.WristDistance ?? 5f) + face * FaceHeight;
 
 		PlaceAt( position, Rotation.LookAt( face, hand.Rotation.Up ), Width );
 
