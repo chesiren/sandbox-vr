@@ -33,6 +33,12 @@ public sealed class VRScope : VRHudPanel
 	[Property] public float CameraReach { get; set; } = 30f;
 
 	/// <summary>
+	/// How much of the view the glass shows, in degrees. The glass covers about 30 degrees of the eye's view, so this is a
+	/// fixed zoom of a little over 3 times - the screen's scoped field of view would show no zoom at all in it.
+	/// </summary>
+	[Property] public float FieldOfView { get; set; } = 9f;
+
+	/// <summary>
 	/// How sharp the picture is, in pixels across.
 	/// </summary>
 	[Property] public int Resolution { get; set; } = 512;
@@ -110,6 +116,6 @@ public sealed class VRScope : VRHudPanel
 		_camera.Enabled = _showing;
 
 		if ( _showing )
-			_camera.FieldOfView = sniper.ScopedFov;
+			_camera.FieldOfView = FieldOfView;
 	}
 }
