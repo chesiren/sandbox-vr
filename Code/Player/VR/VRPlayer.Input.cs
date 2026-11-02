@@ -96,6 +96,10 @@ public sealed partial class VRPlayer
 
 		// The wheel picks with the stick and a menu scrolls with it, see WorldInput, rather than turning and jumping
 		var stick = WheelOpen || SpawnMenuHost.IsOpen || VRKeyboard.IsOpen ? Vector2.Zero : main.Joystick.Value;
+
+		// Up and down choose a wire's port rather than jumping and crouching, see WireTool
+		if ( Player.GetComponent<PlayerInventory>()?.ActiveWeapon is Toolgun toolgun && toolgun.GetCurrentMode() is WireTool { ChoosingPort: true } )
+			stick = stick.WithY( 0 );
 		UpdateTurning( stick );
 		UpdateJumpAndCrouch( stick );
 

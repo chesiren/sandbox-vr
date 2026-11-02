@@ -28,7 +28,15 @@ public static class VRInputNames
 		["backward"] = (true, "trigger"),
 		["left"] = (true, "stick"),
 		["right"] = (true, "stick"),
+		["jump"] = (false, "stick_up"),
+		["run"] = (true, "stick_click"),
 	};
+
+	/// <summary>
+	/// The actions there's a button for sitting in something, which is where what's bound to a contraption is read, see
+	/// <see cref="ClientInput"/>.
+	/// </summary>
+	public static IEnumerable<string> SeatedActionNames => SeatedActions.Keys;
 
 	static bool Find( string action, out (bool OffHand, string Button) input )
 	{
@@ -41,8 +49,16 @@ public static class VRInputNames
 	/// </summary>
 	public static string Label( string action )
 	{
-		if ( !Find( action, out var input ) ) return null;
+		return Find( action, out var input ) ? Format( input ) : null;
+	}
 
+	/// <summary>
+	/// The same, for the action as it is when sitting in something, whether or not the player is. Null if there's no button for it there.
+	/// </summary>
+	public static string SeatedLabel( string action ) => SeatedActions.TryGetValue( action, out var input ) ? Format( input ) : null;
+
+	static string Format( (bool OffHand, string Button) input )
+	{
 		var left = input.OffHand != VRMode.LeftHanded;
 		var hand = Game.Language.GetPhrase( left ? "vr.hand.left" : "vr.hand.right" );
 

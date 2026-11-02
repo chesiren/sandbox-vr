@@ -132,7 +132,8 @@
     /// </summary>
     SpawnMenuIconSize IconSize
     {
-        get => _iconSize;
+        // small tiles leave the name to a tooltip, which a headset can't show
+        get => VRMode.IsActive && _iconSize == SpawnMenuIconSize.Small ? SpawnMenuIconSize.Medium : _iconSize;
         set
         {
             if ( value == _iconSize ) return;
@@ -147,12 +148,12 @@
         }
     }
 
-    Vector2 ItemSize => IconSize switch
+    Vector2 ItemSize => SpawnMenuIconSizeExtensions.ForHeadset( IconSize switch
     {
         SpawnMenuIconSize.Small => new Vector2( 120, 120 ),
         SpawnMenuIconSize.Large => new Vector2( 260, 308 ),
         _ => new Vector2( 190, 238 )
-    };
+    } );
 
     // Small tiles drop the title, so it moves into a tooltip
     string SmallTooltip( string title ) => IconSize == SpawnMenuIconSize.Small ? title : "";
