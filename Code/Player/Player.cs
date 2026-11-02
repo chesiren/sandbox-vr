@@ -258,6 +258,9 @@ public sealed partial class Player : Component, Component.IDamageable, PlayerCon
 		if ( !Controller.Renderer.IsValid() || Controller.Renderer.Model is null )
 			return;
 
+		// The corpse copies this body's bones, and we're out of the headset's way once dead
+		VRPlayer.Get( this )?.ShowOwnHead();
+
 		var batch = Scene.BatchGroup();
 
 		var go = new GameObject( true, "Ragdoll" );

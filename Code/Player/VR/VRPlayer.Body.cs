@@ -178,6 +178,19 @@ public sealed partial class VRPlayer
 	bool _headHidden;
 
 	/// <summary>
+	/// Puts back the head <see cref="HideOwnHead"/> shrank away.
+	/// </summary>
+	public void ShowOwnHead()
+	{
+		if ( !_headHidden ) return;
+
+		var head = Controller.IsValid() ? Controller.Renderer?.GetBoneObject( "head" ) : null;
+		if ( head.IsValid() ) head.LocalScale = 1f;
+
+		_headHidden = false;
+	}
+
+	/// <summary>
 	/// Our own head (and the hats and hair hanging off it) would sit right in front of the headset. The model has no
 	/// headless body group, so shrink the head bone away - only on our side, everyone else still sees it.
 	/// </summary>
