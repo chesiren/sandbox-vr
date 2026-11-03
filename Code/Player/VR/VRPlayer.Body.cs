@@ -26,9 +26,24 @@ public sealed partial class VRPlayer
 	[Property, Group( "VR Body" )] public float ModelEyeHeight { get; set; } = 63.7f;
 
 	/// <summary>
-	/// How far the model's eyes are in front of its feet, plus a little so its head stays behind the headset.
+	/// How far the model's head bone is kept behind the headset, at scale 1, so the face isn't in front of the eyes.
 	/// </summary>
-	[Property, Group( "VR Body" )] public float ModelEyeForward { get; set; } = 8.5f;
+	[Property, Group( "VR Body" )] public float HeadBehind { get; set; } = 3f;
+
+	/// <summary>
+	/// How far the head or the hands can turn from the body before the body turns after them at once, in degrees.
+	/// </summary>
+	[Property, Group( "VR Body" )] public float BodyTurnAngle { get; set; } = 30f;
+
+	/// <summary>
+	/// How long the head can stay turned a little from the body before the body squares up to it, in seconds.
+	/// </summary>
+	[Property, Group( "VR Body" )] public float BodySettleTime { get; set; } = 0.5f;
+
+	/// <summary>
+	/// How quickly the body catches up with the head once it turns.
+	/// </summary>
+	[Property, Group( "VR Body" )] public float BodyTurnSpeed { get; set; } = 12f;
 
 	/// <summary>
 	/// The body is scaled so its eyes are at the player's real standing eye height.
@@ -69,41 +84,140 @@ public sealed partial class VRPlayer
 			BodyScale = (_standingHeight / ModelEyeHeight).Clamp( 0.6f, 1.2f );
 	}
 
-	/// <summary>
-	/// On every peer, pins the body's hands to the synced controller poses, so everyone sees the VR player's
-	/// real hands - and the weapon in them, since the world model hangs off the hand.
-	/// </summary>
 	protected override void OnUpdate()
+	{
+		if ( IsVR || !_ikApplied ) return;
+
+		var renderer = Controller.IsValid() ? Controller.Renderer : null;
+		if ( !renderer.IsValid() ) return;
+
+		renderer.ClearIk( "hand_left" );
+		renderer.ClearIk( "hand_right" );
+		ReleaseFingers();
+		renderer.LocalScale = 1f;
+		_ikApplied = false;
+		_bodyTurned = false;
+	}
+
+	/// <summary>
+	/// On every peer, once the controller has animated the body like any player's: its hands on the synced controller
+	/// poses, so everyone sees the VR player's real hands, and it turned, crouched and sized from the headset.
+	/// See <see cref="VRBodySystem"/>.
+	/// </summary>
+	public void PoseBody()
 	{
 		var renderer = Controller.IsValid() ? Controller.Renderer : null;
 		if ( !renderer.IsValid() ) return;
 
-		if ( !IsVR )
-		{
-			if ( _ikApplied )
-			{
-				renderer.ClearIk( "hand_left" );
-				renderer.ClearIk( "hand_right" );
-				ReleaseFingers();
-				renderer.LocalScale = 1f;
-				_ikApplied = false;
-			}
+		renderer.LocalScale = BodyScale;
 
-			return;
+		if ( IsLocalVR && !_headHidden )
+			HideOwnHead( renderer );
+
+		// The weapon's on the controller, see PlaceHeldWeapon - a hold pose only pulls the arms away from the hands
+		renderer.Set( "holdtype", "none" );
+
+		// A seat has its own pose and turns us with it
+		if ( Player.IsSeated )
+		{
+			_bodyTurned = false;
+			_headOffset = null;
+			_duck = 0f;
+		}
+		else
+		{
+			TurnBody( renderer );
+			PlaceUnderHead( renderer );
+			renderer.Set( "duck", MathF.Max( renderer.GetFloat( "duck" ), _duck ) );
 		}
 
+		// Last: the engine takes these relative to the body as it is now, so turning or moving it after carried them off
 		renderer.SetIk( "hand_left", HandTarget( LeftHand, LeftHandIkOffset, LeftHandIkPositionOffset ) );
 		renderer.SetIk( "hand_right", HandTarget( RightHand, RightHandIkOffset, RightHandIkPositionOffset ) );
 		UpdateFingers( renderer );
 		_ikApplied = true;
+	}
 
-		if ( IsLocalVR && !_headHidden )
-			HideOwnHead( renderer );
+	float _bodyYaw;
+	bool _bodyTurned;
+	bool _bodyTurning;
+	TimeSince _timeOffSquare;
+
+	/// <summary>
+	/// The body stays put while the head glances about, and turns after it when the head or both hands go far enough
+	/// round, when walking, or when the head stays a little turned. Not while looking down, where the head's yaw means
+	/// little - at the hands, or at the feet.
+	/// </summary>
+	void TurnBody( SkinnedModelRenderer renderer )
+	{
+		var head = Head.Rotation;
+		var headYaw = head.Yaw();
+
+		if ( !_bodyTurned )
+		{
+			_bodyYaw = headYaw;
+			_bodyTurned = true;
+		}
+
+		var difference = Angles.NormalizeAngle( headYaw - _bodyYaw );
+		var walking = Controller.Velocity.WithZ( 0 ).Length > 30f;
+
+		if ( MathF.Abs( difference ) < 8f )
+			_timeOffSquare = 0;
+
+		if ( MathF.Abs( difference ) > BodyTurnAngle || HandsTurned() || walking || _timeOffSquare > BodySettleTime )
+			_bodyTurning = true;
+		else if ( MathF.Abs( difference ) < 3f )
+			_bodyTurning = false;
+
+		var lookingDown = head.Forward.z < -0.75f;
+		var turn = _bodyTurning && (walking || !lookingDown) ? difference * (Time.Delta * BodyTurnSpeed).Clamp( 0f, 1f ) : 0f;
+		_bodyYaw += turn;
+
+		renderer.WorldRotation = Rotation.FromYaw( _bodyYaw );
+
+		// Shuffles the feet while turning on the spot, and keeps the head and eyes on where the headset looks
+		renderer.Set( "move_rotationspeed", turn / MathF.Max( Time.Delta, 0.001f ) );
+
+		var look = renderer.WorldRotation.Inverse * head.Forward;
+		renderer.Set( "aim_eyes", look );
+		renderer.Set( "aim_head", look );
+		renderer.Set( "aim_body", look );
 	}
 
 	/// <summary>
-	/// After the controller has placed the body for the frame: size it to the player and step it back so its eyes,
-	/// not its feet, are under the headset - otherwise the camera ends up in its neck and shoulders.
+	/// Both hands well round to one side of the body, the way they go when turning to face something.
+	/// </summary>
+	bool HandsTurned()
+	{
+		var reach = ((LeftHand.Position + RightHand.Position) * 0.5f - Head.Position).WithZ( 0 );
+		if ( reach.Length < 12f * BodyScale ) return false;
+
+		return MathF.Abs( Angles.NormalizeAngle( Rotation.LookAt( reach ).Yaw() - _bodyYaw ) ) > BodyTurnAngle;
+	}
+
+	Vector3? _headOffset;
+	float _duck;
+
+	/// <summary>
+	/// Moves the body so its head is under the headset. Where the head is over the feet changes with crouching, leaning
+	/// and looking about, so it's taken from the last pose rather than assumed.
+	/// </summary>
+	void PlaceUnderHead( SkinnedModelRenderer renderer )
+	{
+		if ( _headOffset is not { } offset ) return;
+
+		var rotation = renderer.WorldRotation;
+		var target = Head.Position - rotation.Forward * HeadBehind * BodyScale;
+		var position = target - rotation * (offset * BodyScale);
+
+		renderer.WorldPosition = position.WithZ( renderer.WorldPosition.z );
+	}
+
+	/// <summary>
+	/// Once the bones are worked out, measures where the body's head ended up: for placing it under the headset, and
+	/// for bending the knees to bring it to the headset's height. The player only crouches for real - lower and
+	/// smaller - past the crouch height setting.
 	/// </summary>
 	protected override void OnPreRender()
 	{
@@ -112,10 +226,16 @@ public sealed partial class VRPlayer
 		var renderer = Controller.IsValid() ? Controller.Renderer : null;
 		if ( !renderer.IsValid() ) return;
 
-		renderer.LocalScale = BodyScale;
+		if ( !Player.IsSeated && renderer.TryGetBoneTransform( "head", out var bone ) )
+		{
+			// In the model's own units, flat, and eased so a twitch of the animation doesn't shake the whole body
+			var offset = renderer.WorldTransform.PointToLocal( bone.Position ).WithZ( 0 );
+			_headOffset = _headOffset is { } last ? last.LerpTo( offset, (Time.Delta * 10f).Clamp( 0f, 1f ) ) : offset;
 
-		var forward = renderer.WorldRotation.Forward.WithZ( 0 ).Normal;
-		renderer.WorldPosition -= forward * ModelEyeForward * BodyScale;
+			// Ducking all the way takes the head down about 40% of the model's height
+			var tooHigh = bone.Position.z - Head.Position.z;
+			_duck = (_duck + tooHigh / (25f * BodyScale) * (Time.Delta * 6f).Clamp( 0f, 1f )).Clamp( 0f, 1f );
+		}
 
 		PlaceHeldWeapon();
 	}
