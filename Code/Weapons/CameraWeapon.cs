@@ -1,8 +1,7 @@
 /// <summary>
-/// A camera weapon that can be held by a player and renders to a render target texture, which can be displayed on a TV.
+/// A handheld camera. CameraFeed provides its video output; this component handles weapon controls.
 /// </summary>
 [Title( "#weapon.name.camera" ), Icon( "videocam" )]
-[SignalOutput( Default = true )] // Linkable as a component reference — a TV's display input takes the camera itself.
 public sealed class CameraWeapon : BaseSandboxWeapon
 {
 	public CameraWeapon()
@@ -18,68 +17,43 @@ public sealed class CameraWeapon : BaseSandboxWeapon
 	bool focusing;
 	Vector3 focusPoint;
 
-	/// <summary>
-	/// The RT camera's resolution 
-	/// </summary>
-	private static int _cameraResolution = 512;
+	[RequireComponent, Hide] public CameraFeed Feed { get; set; }
+	[Property, Feature( "WorldModel" )] public Sandbox.Animation.Clip HoldAnimation { get; set; }
 
-	/// <summary>
-	/// The render target texture produced by this camera. Read by <see cref="TVEntity"/>.
-	/// </summary>
-	public Texture RenderTexture => _renderTexture;
-
-	private Texture _renderTexture;
-	private CameraComponent _rtCamera;
+	Model _poseModel;
+	Sandbox.Animation.Clip _poseClip;
+	(BoneCollection.Bone Bone, Sandbox.Animation.Skeleton.Bone Track)[] _poseBones;
+	Transform[] _poseTransforms;
 
 	public override bool WantsHideHud => true;
 
 	public override HudElement HiddenHudElements => HudElement.All & ~HudElement.Inventory;
-
-	protected override void OnEnabled()
-	{
-		base.OnEnabled();
-
-		EnsureRTCamera();
-		EnsureRenderTexture();
-	}
 
 	protected override void OnDisabled()
 	{
 		base.OnDisabled();
 
 		DestroyDepthOfField();
-		CleanupRenderTexture();
-		_rtCamera = null;
 	}
 
 	protected override void OnDestroy()
 	{
 		DestroyDepthOfField();
-		CleanupRenderTexture();
-		_rtCamera = null;
 	}
 
 	protected override void OnPreRender()
 	{
-		if ( !_rtCamera.IsValid() ) return;
-
-		EnsureRenderTexture();
+		if ( !Feed.IsValid() ) return;
 
 		if ( HasOwner && Scene.Camera.IsValid() )
 		{
 			// When held, mirror the player's camera so the TV shows their POV.
 			// TODO: network some props to the TV so they show up in the RT camera when held by a player other than the host.
-			_rtCamera.WorldPosition = Scene.Camera.WorldPosition;
-			_rtCamera.WorldRotation = Scene.Camera.WorldRotation;
-			_rtCamera.FieldOfView = Scene.Camera.FieldOfView;
-
-			if ( !_rtCamera.RenderExcludeTags.Has( "viewer" ) )
-				_rtCamera.RenderExcludeTags.Add( "viewer" );
+			Feed.SetWorldView( Scene.Camera.View.Transform, Scene.Camera.View.FieldOfView, Scene.Camera.FovAxis, hideViewer: true );
 		}
 		else
 		{
-			_rtCamera.RenderExcludeTags.Remove( "viewer" );
-			_rtCamera.FieldOfView = 40f;
+			Feed.UseLensView( 40f );
 		}
 	}
 
@@ -174,56 +148,83 @@ public sealed class CameraWeapon : BaseSandboxWeapon
 		dof.FocalDistance = dof.FocalDistance.LerpTo( target, Time.Delta * 2.0f );
 	}
 
-	private void EnsureRTCamera()
-	{
-		_rtCamera = GetComponentInChildren<CameraComponent>( true );
-
-		if ( _rtCamera is null )
-		{
-			var go = new GameObject( GameObject, true, "rt_camera" );
-			_rtCamera = go.AddComponent<CameraComponent>();
-		}
-
-		_rtCamera.IsMainCamera = false;
-		_rtCamera.BackgroundColor = Color.Black;
-		_rtCamera.ClearFlags = ClearFlags.Color | ClearFlags.Depth | ClearFlags.Stencil;
-		_rtCamera.FieldOfView = fov;
-		_rtCamera.RenderExcludeTags.Add( "viewmodel" );
-	}
-
-	private void EnsureRenderTexture()
-	{
-		if ( _renderTexture.IsValid() && _renderTexture.Width == _cameraResolution && _renderTexture.Height == _cameraResolution )
-			return;
-
-		CleanupRenderTexture();
-
-		_renderTexture = Texture.CreateRenderTarget()
-			.WithSize( _cameraResolution, _cameraResolution )
-			.Create();
-
-		if ( _rtCamera.IsValid() )
-		{
-			_rtCamera.RenderTarget = _renderTexture;
-		}
-	}
-
-	private void CleanupRenderTexture()
-	{
-		if ( _rtCamera.IsValid() )
-		{
-			_rtCamera.RenderTarget = null;
-		}
-
-		_renderTexture?.Dispose();
-		_renderTexture = null;
-	}
-
 	/// <summary>
 	/// Keeps the camera view clear of weapon HUD elements.
 	/// </summary>
 	public override void DrawHud( Painter painter, Vector2 crosshair )
 	{
 		// nothing!
+	}
+
+	internal void UpdateHoldAnimation( bool prepare )
+	{
+		var controller = Owner?.Controller;
+		if ( !IsActive || !controller.IsValid() || !controller.Renderer.IsValid() || !WorldModel.IsValid() || HoldAnimation?.IsBound != true ) return;
+		var body = controller.Renderer;
+		var model = body.SceneModel;
+		if ( !model.IsValid() ) return;
+		if ( prepare )
+		{
+			// The clip supplies pitch; suppress the base graph's extra aiming bend.
+			if ( body.Animation.Graph is not null ) body.Animation.Parameters.TrySet( "aim_body_weight", 0f );
+#pragma warning disable CS0618
+			else body.Set( "aim_body_weight", 0f );
+#pragma warning restore CS0618
+			return;
+		}
+		if ( _poseModel != body.Model || _poseClip != HoldAnimation || _poseBones is null )
+		{
+			var bones = new List<(BoneCollection.Bone Bone, Sandbox.Animation.Skeleton.Bone Track)>();
+			// Clip bones are parent-first. Including descendants here also establishes
+			// evaluation order, without sorting or walking ancestors each frame.
+			foreach ( var track in HoldAnimation.Skeleton.Bones )
+				if ( track.Name == "spine_0" || bones.Any( b => b.Track.Index == track.ParentIndex ) )
+					if ( body.Model.Bones.GetBone( track.Name ) is { } bone ) bones.Add( (bone, track) );
+			_poseBones = bones.ToArray();
+			_poseTransforms = new Transform[HoldAnimation.Skeleton.BoneCount];
+			_poseModel = body.Model;
+			_poseClip = HoldAnimation;
+		}
+
+		// The baked clip is an aim strip: -85 degrees at the start, neutral in the
+		// middle, +85 at the end. Leave pelvis/legs on the normal locomotion graph.
+		var aim = (body.WorldRotation.Inverse * controller.EyeTransform.Rotation).Angles();
+		var cycle = (aim.pitch.Clamp( -85f, 85f ) + 85f) / 170f;
+		var yaw = Rotation.FromAxis( body.WorldRotation.Up, aim.yaw );
+		foreach ( var (bone, track) in _poseBones )
+		{
+			bool root = track.Name == "spine_0";
+			var parentWorld = root ? model.GetBoneWorldTransform( bone.Parent.Index ) : _poseTransforms[track.ParentIndex];
+			var world = parentWorld.ToWorld( HoldAnimation.GetLocalTransform( cycle, track.Index ) );
+			if ( root ) world.Rotation = yaw * world.Rotation;
+			_poseTransforms[track.Index] = world;
+			model.SetBoneWorldTransform( bone.Index, world );
+			var go = body.GetBoneObject( bone.Index );
+			if ( go.IsValid() ) go.WorldTransform = world;
+		}
+		foreach ( var clothing in body.GameObject.Components.GetAll<SkinnedModelRenderer>( FindMode.InDescendants ) )
+			if ( clothing.BoneMergeTarget.IsValid() && clothing.SceneModel.IsValid() && clothing.BoneMergeTarget.SceneModel.IsValid() )
+				clothing.SceneModel.MergeBones( clothing.BoneMergeTarget.SceneModel );
+	}
+}
+
+public sealed class CameraHoldAnimationSystem : GameObjectSystem<CameraHoldAnimationSystem>
+{
+	public CameraHoldAnimationSystem( Scene scene ) : base( scene )
+	{
+		Listen( Stage.UpdateBones, -500, PreparePoses, nameof( PreparePoses ) );
+		Listen( Stage.UpdateBones, 10, UpdatePoses, nameof( UpdatePoses ) );
+	}
+
+	void PreparePoses()
+	{
+		if ( Scene.IsEditor ) return;
+		foreach ( var camera in Scene.GetAll<CameraWeapon>() ) camera.UpdateHoldAnimation( prepare: true );
+	}
+
+	void UpdatePoses()
+	{
+		if ( Scene.IsEditor ) return;
+		foreach ( var camera in Scene.GetAll<CameraWeapon>() ) camera.UpdateHoldAnimation( prepare: false );
 	}
 }
