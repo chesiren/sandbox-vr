@@ -562,6 +562,181 @@ VRSettingsSection
 	{
 		width: 300px;
 	}
+
+	.grid .item .preview-status
+	{
+		width: 44px;
+		height: 44px;
+
+		IconPanel
+		{
+			font-size: 32px;
+		}
+	}
+
+	// rows as tall as ForHeadset makes them, sounds' list
+	.grid.list-view .item
+	{
+		padding: 8px 18px;
+		gap: 18px;
+
+		.icon
+		{
+			width: 64px;
+			height: 64px;
+		}
+
+		.sound-icon i
+		{
+			font-size: 44px;
+		}
+	}
+}
+
+// --- tool presets: the bar over a tool's settings, its editor and the name prompt ---------------
+
+.vr ToolPresetBar
+{
+	margin-bottom: 16px;
+	padding-bottom: 14px;
+
+	.preset-controls
+	{
+		gap: 10px;
+
+		UIButton
+		{
+			width: $vr-control;
+			height: $vr-control;
+		}
+	}
+}
+
+.vr ToolPresetBar .preset-error, .vr UIModal.tool-preset-prompt .preset-error, .vr ToolPresetEditor .editor-status
+{
+	min-height: 32px;
+	margin-top: 8px;
+	font-size: $vr-font-small;
+}
+
+.vr UIModal
+{
+	width: 900px;
+
+	> .window > .title-bar
+	{
+		height: 56px;
+		font-size: $vr-font-small;
+	}
+
+	> .window > .body
+	{
+		padding: 16px;
+		gap: 10px;
+	}
+
+	.message
+	{
+		font-size: $vr-font-small;
+	}
+
+	&.confirm
+	{
+		width: 1000px;
+
+		.buttons > UIButton
+		{
+			width: 300px;
+		}
+	}
+}
+
+.vr ToolPresetEditor
+{
+	.preset-window
+	{
+		width: 1700px;
+		height: 1000px;
+		max-width: 100%;
+		max-height: 100%;
+		gap: 10px;
+		font-size: $vr-font-small;
+	}
+
+	.editor-heading
+	{
+		height: 72px;
+		font-size: 28px;
+
+		UIButton
+		{
+			width: $vr-control;
+			height: $vr-control;
+		}
+	}
+
+	.preset-list
+	{
+		width: 420px;
+		padding: 8px;
+		gap: 6px;
+		scrollbar-width: 20px;
+	}
+
+	.preset-row
+	{
+		min-height: 72px;
+		padding: 0 16px;
+		align-items: center;
+		font-size: 28px;
+	}
+
+	.preset-details
+	{
+		padding: 16px;
+		gap: 12px;
+	}
+
+	.name-row
+	{
+		gap: 16px;
+
+		.textentry
+		{
+			height: $vr-control;
+			min-height: $vr-control;
+			padding: 0 14px;
+			font-size: $vr-font;
+		}
+	}
+
+	.draft-properties
+	{
+		scrollbar-width: 20px;
+	}
+
+	.editor-footer, .confirmation-buttons
+	{
+		gap: 12px;
+
+		UIButton
+		{
+			min-width: 240px;
+		}
+	}
+
+	.confirmation
+	{
+		width: 1000px;
+		padding: 24px;
+		gap: 20px;
+		font-size: $vr-font-small;
+
+		.confirmation-title
+		{
+			font-size: $vr-font;
+		}
+	}
 }
 
 // --- binding a contraption's input to a controller button --------------------------------------

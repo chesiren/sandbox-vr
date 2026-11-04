@@ -145,7 +145,7 @@
     sealed record ListEntry( object Value ) : IMixedVirtualGridFullRow
     {
         public bool IsFullRow => true;
-        public float Height => 48f;
+        public float Height => SpawnMenuIconSizeExtensions.ForHeadset( new Vector2( 48f ) ).y;
     }
 
     /// <summary>

@@ -160,6 +160,8 @@ public sealed class CameraWeapon : BaseSandboxWeapon
 	{
 		var controller = Owner?.Controller;
 		if ( !IsActive || !controller.IsValid() || !controller.Renderer.IsValid() || !WorldModel.IsValid() || HoldAnimation?.IsBound != true ) return;
+		// A VR body is posed from the headset and the hands, see VRBodySystem: the clip would put the arms and head elsewhere
+		if ( VRPlayer.Get( Owner ) is not null ) return;
 		var body = controller.Renderer;
 		var model = body.SceneModel;
 		if ( !model.IsValid() ) return;

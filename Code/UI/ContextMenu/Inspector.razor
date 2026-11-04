@@ -65,7 +65,49 @@
 
         if ( !CanSelect( go ) ) go = null;
 
+        // In VR things with nothing to hit get no icon to click, see ContextMenuHost.DrawHandles: the laser goes near them
+        if ( VRMode.IsActive && HandleAlong( screenRay, go.IsValid() ? tr.Distance : float.MaxValue ) is { } handle )
+        {
+            // its own object, not its network root, like a click on its icon
+            if ( hovered != handle.GameObject )
+            {
+                hovered = handle.GameObject;
+                PlaySound( "ui.button.over" );
+            }
+
+            return;
+        }
+
         UpdateHovered( go );
+    }
+
+    /// <summary>
+    /// How far off the laser, in degrees, an <see cref="IInspectHandle"/> still counts as aimed at.
+    /// </summary>
+    const float HandleAngle = 3f;
+
+    /// <summary>
+    /// The inspect handle nearest the laser, in front of what it hits.
+    /// </summary>
+    Component HandleAlong( Ray ray, float hitDistance )
+    {
+        Component best = null;
+        var bestAngle = HandleAngle;
+
+        foreach ( var component in InspectHandles.GetVisible( Scene ) )
+        {
+            var offset = component.WorldPosition - ray.Position;
+            var distance = offset.Length;
+            if ( distance > ComponentHandle.MaxDistance || distance > hitDistance ) continue;
+
+            var angle = Vector3.GetAngle( ray.Forward, offset );
+            if ( angle >= bestAngle ) continue;
+
+            best = component;
+            bestAngle = angle;
+        }
+
+        return best;
     }
 
     bool CanSelect( GameObject o )

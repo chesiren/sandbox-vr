@@ -45,7 +45,8 @@ public sealed class CameraViewSystem : Component, Global.ISaveEvents
 		if ( Scene != Game.ActiveScene ) return;
 		var player = Player.FindLocalPlayer();
 		// Leave before freecam applies its own render filters later in this frame.
-		if ( !player.IsValid() || player.Health <= 0 || Input.Keyboard.Pressed( "J" ) || Scene.Get<FreeCamGameObjectSystem>().IsActive )
+		// Not in VR: the headset always has the view (see VRPlayer.ModifyCamera), so only the render filters would change
+		if ( !player.IsValid() || player.Health <= 0 || VRMode.IsActive || Input.Keyboard.Pressed( "J" ) || Scene.Get<FreeCamGameObjectSystem>().IsActive )
 		{
 			Clear();
 			_down.Clear();

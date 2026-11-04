@@ -189,6 +189,14 @@
         // things with nothing to click on in the world, like hidden speakers, get an icon instead
         foreach ( var component in InspectHandles.GetVisible( Scene ) )
         {
+            // The icon goes where the thing is on the screen, which a headset doesn't have: its name hangs there in the
+            // world instead, and the laser picks it by going near it, see Inspector.HandleAlong
+            if ( VRMode.IsActive )
+            {
+                DrawVRHandle( component );
+                continue;
+            }
+
             if ( _handles.TryGetValue( component, out var existing ) && existing.IsValid() )
                 continue;
 
@@ -201,6 +209,19 @@
         // forget handles that have gone
         foreach ( var key in _handles.Where( x => !x.Value.IsValid() ).Select( x => x.Key ).ToList() )
             _handles.Remove( key );
+    }
+
+    void DrawVRHandle( Component component )
+    {
+        if ( component.WorldPosition.Distance( Scene.Camera.WorldPosition ) > ComponentHandle.MaxDistance ) return;
+
+        var target = component.GameObject;
+        var color = Inspector?.Selected.Contains( target ) == true ? Color.Cyan
+            : Inspector?.Hovered == target ? Color.White
+            : Color.White.WithAlpha( 0.6f );
+
+        Scene.DebugOverlay.Sphere( new Sphere( component.WorldPosition, 2f ), color, duration: 0f, overlay: true );
+        Scene.DebugOverlay.Text( component.WorldPosition + Vector3.Up * 4f, SignalSystem.GetComponentTitle( component ), color: color, duration: 0f );
     }
 
     bool ShouldCreateHandle(Component component)
