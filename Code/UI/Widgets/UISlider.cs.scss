@@ -152,6 +152,14 @@ UISlider
 		}
 	}
 
+	// a gradient's colours need a wide bar, the plain one's a line
+	&.gradient .track .line
+	{
+		top: 54px;
+		height: 16px;
+		border-radius: 4px;
+	}
+
 	// the one the stick moves
 	&:hover .track .line
 	{
