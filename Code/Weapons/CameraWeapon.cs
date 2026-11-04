@@ -18,12 +18,17 @@ public sealed class CameraWeapon : BaseSandboxWeapon
 	Vector3 focusPoint;
 
 	[RequireComponent, Hide] public CameraFeed Feed { get; set; }
+
+	// The hold pose needs Sandbox.Animation, which the engine we build with doesn't have yet: define
+	// CAMERA_HOLD_ANIMATION once it does. Don't save camera.prefab until then, it would lose its HoldAnimation
+#if CAMERA_HOLD_ANIMATION
 	[Property, Feature( "WorldModel" )] public Sandbox.Animation.Clip HoldAnimation { get; set; }
 
 	Model _poseModel;
 	Sandbox.Animation.Clip _poseClip;
 	(BoneCollection.Bone Bone, Sandbox.Animation.Skeleton.Bone Track)[] _poseBones;
 	Transform[] _poseTransforms;
+#endif
 
 	public override bool WantsHideHud => true;
 
@@ -156,6 +161,7 @@ public sealed class CameraWeapon : BaseSandboxWeapon
 		// nothing!
 	}
 
+#if CAMERA_HOLD_ANIMATION
 	internal void UpdateHoldAnimation( bool prepare )
 	{
 		var controller = Owner?.Controller;
@@ -208,8 +214,10 @@ public sealed class CameraWeapon : BaseSandboxWeapon
 			if ( clothing.BoneMergeTarget.IsValid() && clothing.SceneModel.IsValid() && clothing.BoneMergeTarget.SceneModel.IsValid() )
 				clothing.SceneModel.MergeBones( clothing.BoneMergeTarget.SceneModel );
 	}
+#endif
 }
 
+#if CAMERA_HOLD_ANIMATION
 public sealed class CameraHoldAnimationSystem : GameObjectSystem<CameraHoldAnimationSystem>
 {
 	public CameraHoldAnimationSystem( Scene scene ) : base( scene )
@@ -230,3 +238,4 @@ public sealed class CameraHoldAnimationSystem : GameObjectSystem<CameraHoldAnima
 		foreach ( var camera in Scene.GetAll<CameraWeapon>() ) camera.UpdateHoldAnimation( prepare: false );
 	}
 }
+#endif
