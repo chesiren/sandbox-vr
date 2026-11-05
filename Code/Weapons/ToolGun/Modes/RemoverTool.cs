@@ -51,6 +51,8 @@ public sealed class RemoverTool : ToolMode
 
 		go.Destroy();
 
+		Player.PlayerData?.AddStat( "tool.remover.remove" );
+
 		FirePostToolAction( ToolInput.Primary );
 	}
 
