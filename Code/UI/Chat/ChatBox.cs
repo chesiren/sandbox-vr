@@ -14,6 +14,8 @@ public sealed class ChatBox : PanelComponent, IChatEvent
 
 	const float SubmitDelay = 0.15f;
 
+	const string SecretPhrase = "colmore";
+
 	public static bool IsOpen { get; private set; }
 
 	Panel _box;
@@ -68,10 +70,26 @@ public sealed class ChatBox : PanelComponent, IChatEvent
 
 	void IChatEvent.OnChatMessage( ChatMessageEvent e )
 	{
+		TrackSecretPhrase( e );
+
 		if ( !_history.IsValid() )
 			return;
 
 		Add( ChatEntry.From( e ) );
+	}
+
+	/// <summary>
+	/// Feeds the stat behind the secret_phrase achievement, counted only for the player who said it.
+	/// </summary>
+	static void TrackSecretPhrase( ChatMessageEvent e )
+	{
+		if ( e.Sender is not { } sender || sender.SteamId != Connection.Local?.SteamId )
+			return;
+
+		if ( !(e.Message ?? "").Contains( SecretPhrase, StringComparison.OrdinalIgnoreCase ) )
+			return;
+
+		Sandbox.Services.Stats.Increment( "secret_phrase", 1 );
 	}
 
 	/// <summary>
