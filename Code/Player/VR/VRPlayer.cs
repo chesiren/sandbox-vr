@@ -88,6 +88,8 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 		IsVR = true;
 		_defaultEyeDistance = Controller.EyeDistanceFromTop;
 
+		Sandbox.Services.Stats.Increment( "vr.session", 1 );
+
 		// We aim, look and move from the headset and controllers ourselves
 		Controller.UseLookControls = false;
 		Controller.UseCameraControls = false;

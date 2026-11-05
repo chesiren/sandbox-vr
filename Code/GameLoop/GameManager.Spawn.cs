@@ -20,6 +20,9 @@ public sealed partial class GameManager
 			data["ident"] = ident;
 			Sandbox.Services.Stats.Increment( "spawn", 1, data );
 
+			if ( SpawnlistItem.ParseIdent( ident ).Type == "entity" )
+				Sandbox.Services.Stats.Increment( "spawn.entity", 1 );
+
 			Sound.Play( "sounds/ui/ui.spawn.sound" );
 		}
 
