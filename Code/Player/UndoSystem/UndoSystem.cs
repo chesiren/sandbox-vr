@@ -308,15 +308,16 @@ internal class UndoSystem : GameObjectSystem<UndoSystem>
 
 			Game.ActiveScene?.RunEvent<Global.IUndoEvents>( x => x.OnUndone( e ) );
 
-			if ( sendNotice )
+			var c = Connection.All.FirstOrDefault( x => x.SteamId == SteamId );
+
+			// Only undos that removed something count, so skipped empty entries don't inflate the stat
+			PlayerData.For( c )?.AddStat( "undo.use" );
+
+			if ( sendNotice && c is not null )
 			{
-				var c = Connection.All.FirstOrDefault( x => x.SteamId == SteamId );
-				if ( c is not null )
+				using ( Rpc.FilterInclude( c ) )
 				{
-					using ( Rpc.FilterInclude( c ) )
-					{
-						UndoNotice( Name, Sandbox.Json.Serialize( NameTokens ) );
-					}
+					UndoNotice( Name, Sandbox.Json.Serialize( NameTokens ) );
 				}
 			}
 

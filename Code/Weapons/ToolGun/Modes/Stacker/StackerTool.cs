@@ -402,6 +402,8 @@ public sealed class StackerTool : ToolMode
 
 		undo.Add( clones );
 
+		Player.PlayerData?.AddStat( "tool.stacker.place", clones.Count );
+
 		FirePostToolAction( ToolInput.Primary );
 	}
 }
