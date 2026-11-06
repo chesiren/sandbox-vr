@@ -153,16 +153,16 @@
         "__enabled": true,
         "Flags": 0,
         "ArmSwingScale": 2.5,
-        "LeftHandIkPositionOffset": "-3.47,2.11,7.47",
-        "LeftHandIkOffset": "80.1,-60.74,19.47",
+        "LeftHandIkPositionOffset": "-4.04,0.97,1.56",
+        "LeftHandIkOffset": "32.81,11.77,101.7",
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
         "OnComponentEnabled": null,
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "RightHandIkOffset": "80.1,60.74,160.53",
-        "RightHandIkPositionOffset": "-3.47,-2.11,7.47",
+        "RightHandIkOffset": "32.81,-11.75,78.3",
+        "RightHandIkPositionOffset": "-4.04,-0.97,1.56",
         "ShiftDuration": 0.15,
         "TeleportArcSpeed": 700
       },
@@ -237,6 +237,10 @@
         "PickupRadius": 48,
         "StartingAmmo": [],
         "StartingItems": [
+          {
+            "_type": "gameobject",
+            "prefab": "weapons/hands/hands.prefab"
+          },
           {
             "_type": "gameobject",
             "prefab": "weapons/crowbar/crowbar.prefab"

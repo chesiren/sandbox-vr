@@ -46,6 +46,13 @@ public sealed class ThumbnailCamera : Component
 	[Property, ShowIf( nameof( FitToBounds ), true )]
 	public Vector2 Focus { get; set; }
 
+	/// <summary>
+	/// Fit to what's drawn only, leaving out colliders and triggers that reach past the models - like the grab points
+	/// of the guns worked by hand in VR.
+	/// </summary>
+	[Property, ShowIf( nameof( FitToBounds ), true )]
+	public bool FitRenderersOnly { get; set; }
+
 	protected override void DrawGizmos()
 	{
 		var half = GizmoDistance * MathF.Tan( FieldOfView * 0.5f * MathF.PI / 180f );
@@ -89,6 +96,7 @@ public sealed class ThumbnailCamera : Component
 		var padding = framing.Padding;
 		var zoom = framing.Zoom;
 		var focus = framing.Focus;
+		var renderersOnly = framing.FitRenderersOnly;
 
 		// An editor scene, so nothing in the prefab thinks it's live gameplay (random loadouts etc.)
 		var scene = Scene.CreateEditorScene();
@@ -96,11 +104,14 @@ public sealed class ThumbnailCamera : Component
 		using ( scene.Push() )
 		{
 			var root = GameObject.Clone( prefab, new CloneConfig { Transform = global::Transform.Zero, StartEnabled = true } );
-			var bounds = root.GetBounds();
+			var bounds = renderersOnly ? RendererBounds( root ) ?? root.GetBounds() : root.GetBounds();
 
 			var camera = new GameObject( true, "camera" ).Components.Create<CameraComponent>();
 			camera.WorldTransform = root.WorldTransform.ToWorld( view );
 			camera.FieldOfView = fieldOfView;
+
+			// Something as small as a round is fitted closer than the default near plane, and clipped away
+			camera.ZNear = MathF.Min( camera.ZNear, 0.5f );
 
 			if ( fit )
 				camera.WorldPosition = FitPosition( bounds, camera.WorldRotation, fieldOfView, padding, zoom, focus );
@@ -159,6 +170,22 @@ public sealed class ThumbnailCamera : Component
 		var outline = (top + bottom + 1) * 0.5f;
 		var centre = moment / mass;
 		return (outline + centre) * 0.5f - bitmap.Height * 0.5f;
+	}
+
+	/// <summary>
+	/// The box around the models drawn under <paramref name="root"/>, or null if there are none.
+	/// </summary>
+	private static BBox? RendererBounds( GameObject root )
+	{
+		BBox? bounds = null;
+
+		foreach ( var renderer in root.GetComponentsInChildren<ModelRenderer>() )
+		{
+			if ( renderer.Model is null ) continue;
+			bounds = bounds is { } b ? b.AddBBox( renderer.Bounds ) : renderer.Bounds;
+		}
+
+		return bounds;
 	}
 
 	private static int Depth( GameObject go )

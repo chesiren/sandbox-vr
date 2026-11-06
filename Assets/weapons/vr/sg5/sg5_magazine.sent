@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/sg5/sg5_magazine.prefab",
+  "Title": "SG-5 Magazine",
+  "Description": "30 rounds of 9mm for the SG-5. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

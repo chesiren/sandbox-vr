@@ -33,6 +33,13 @@ public class ScriptedEntity : GameResource, IDefinitionResource
 	[Property]
 	public bool Developer { get; set; }
 
+	/// <summary>
+	/// Only VR players can spawn this, like the guns worked by hand. Everyone still sees it in the spawn menu and in
+	/// the world, see <see cref="VROnlySpawnGate"/>.
+	/// </summary>
+	[Property]
+	public bool VROnly { get; set; }
+
 	public override Bitmap RenderThumbnail( ThumbnailOptions options )
 	{
 		// No prefab - can't make a thumbnail

@@ -74,6 +74,36 @@ SpawnMenuIcon
 		pointer-events: none;
 	}
 
+	// a physical weapon, worked by hand in VR - not the inventory weapon of the same name beside it. Only VR players
+	// can spawn it: everyone else sees it greyed out
+	.vr-only-badge
+	{
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		flex-direction: row;
+		align-items: center;
+		gap: 3px;
+		padding: 2px 6px;
+		border-radius: 4px;
+		background-color: #e8a33d;
+		color: #1a1206;
+		font-size: 0.8rem;
+		font-weight: bold;
+		pointer-events: none;
+
+		i
+		{
+			font-size: 0.95rem;
+		}
+	}
+
+	&.vr-locked
+	{
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
 	// white 1px outline all the way round, the name sits just inside it
 	&::before
 	{

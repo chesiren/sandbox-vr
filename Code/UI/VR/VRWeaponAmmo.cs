@@ -55,6 +55,10 @@ public sealed class VRWeaponAmmo : VRHudPanel
 		var data = _vitals.Read();
 		data.ShowVitals = false;
 
+		// No counter for a physical gun: its rounds are the magazine and the chamber in the hand
+		var holdsGun = HoldsPhysicalGun();
+		if ( holdsGun ) data.ShowAmmo = false;
+
 		_section.Compact = true;
 		_section.Settings = _vitals;
 		_section.Data = data;
@@ -62,7 +66,23 @@ public sealed class VRWeaponAmmo : VRHudPanel
 		var vr = VRPlayer.Local;
 		if ( vr is null || vr.PointingAtUI ) return;
 
-		if ( data.ShowAmmo && data.UsesClips && data.Clip <= 0 && Input.Pressed( "attack1" ) )
+		if ( !holdsGun && data.ShowAmmo && data.UsesClips && data.Clip <= 0 && Input.Pressed( "attack1" ) )
 			VRMode.PulseDominant( 0.25f, 0.2f );
+	}
+
+	/// <summary>
+	/// Either hand holds a physical gun by its grip.
+	/// </summary>
+	static bool HoldsPhysicalGun()
+	{
+		if ( VRPlayer.Local is not { } vr ) return false;
+
+		foreach ( var hand in new[] { vr.DominantGunplayHand, vr.OffGunplayHand } )
+		{
+			if ( !hand.IsValid() || hand.CurrentGrabbable is not { } held || !held.IsValid() ) continue;
+			if ( held.Interactable is PhysicalGun physical && physical.PrimaryGrabPoint == held ) return true;
+		}
+
+		return false;
 	}
 }

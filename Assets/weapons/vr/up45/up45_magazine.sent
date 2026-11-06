@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/up45/up45_magazine.prefab",
+  "Title": "UP-45 Magazine",
+  "Description": "17 rounds of 9mm for the UP-45. Load it round by round. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

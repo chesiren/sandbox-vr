@@ -15,5 +15,8 @@
     "vr.input.no_button": "{action}, no button in VR",
     "vr.menu.settings": "Settings",
     "vr.toggle.on": "On",
-    "vr.toggle.off": "Off"
+    "vr.toggle.off": "Off",
+    "vr.spawnmenu.weapons": "VR",
+    "vr.spawnmenu.vr_only": "Physical weapon, VR players only",
+    "vr.spawnmenu.physical": "Physical weapon: picked up and worked by hand, not an inventory weapon"
 }

@@ -1,0 +1,206 @@
+{
+  "RootObject": {
+    "__guid": "0e5de69e-2f10-450a-86af-7209e2fddba7",
+    "Flags": 0,
+    "Name": "up45_magazine",
+    "Tags": "magazine,interactable,gunplay",
+    "Enabled": true,
+    "NetworkMode": 2,
+    "NetworkInterpolation": true,
+    "Components": [
+      {
+        "__type": "GunplayInteractable",
+        "__guid": "92a790a8-7536-4ce8-8dd6-53a5aea739f9",
+        "MassScale": 1,
+        "Rigidbody": {
+          "_type": "component",
+          "component_id": "d27dc721-ee37-4532-90a7-10210c2d48a3",
+          "go": "0e5de69e-2f10-450a-86af-7209e2fddba7",
+          "component_type": "Rigidbody"
+        }
+      },
+      {
+        "__type": "Sandbox.Rigidbody",
+        "__guid": "d27dc721-ee37-4532-90a7-10210c2d48a3",
+        "AngularDamping": 0,
+        "Gravity": true,
+        "LinearDamping": 0,
+        "Locking": {},
+        "MassOverride": 50,
+        "MotionEnabled": true,
+        "RigidbodyFlags": 0,
+        "StartAsleep": false
+      },
+      {
+        "__type": "Sandbox.BoxCollider",
+        "__guid": "c6a03a45-cdc4-4261-98fa-e569cad9c9b0",
+        "Center": "0,0,0",
+        "IsTrigger": false,
+        "Scale": "3,1,4.5",
+        "Static": false,
+        "Surface": "surfaces/metal.surface"
+      },
+      {
+        "__type": "Attachable",
+        "__guid": "3d7e85fa-01bf-4826-8bde-a50b5431ba04",
+        "AttachSound": "sounds/weapons/vr/up45/up45_magazine_load.sound",
+        "Collider": {
+          "_type": "component",
+          "component_id": "c6a03a45-cdc4-4261-98fa-e569cad9c9b0",
+          "go": "0e5de69e-2f10-450a-86af-7209e2fddba7",
+          "component_type": "BoxCollider"
+        },
+        "DetachSound": "sounds/weapons/vr/up45/up45_magazine_unload.sound",
+        "Interactable": {
+          "_type": "component",
+          "component_id": "92a790a8-7536-4ce8-8dd6-53a5aea739f9",
+          "go": "0e5de69e-2f10-450a-86af-7209e2fddba7",
+          "component_type": "GunplayInteractable"
+        },
+        "Rigidbody": {
+          "_type": "component",
+          "component_id": "d27dc721-ee37-4532-90a7-10210c2d48a3",
+          "go": "0e5de69e-2f10-450a-86af-7209e2fddba7",
+          "component_type": "Rigidbody"
+        }
+      },
+      {
+        "__type": "GunMagazine",
+        "__guid": "121486a9-b6c5-4bb9-ae18-cde9cc5b8088",
+        "AmmoBodygroup": 0,
+        "BulletCapacity": 17,
+        "BulletCount": 0,
+        "BulletPrefab": {
+          "Caliber": "Nine",
+          "SpentCasingBodygroup": {
+            "Value": 1
+          },
+          "Prefab": {
+            "_type": "gameobject",
+            "prefab": "weapons/vr/ammo/bullet_9mm.prefab"
+          }
+        },
+        "Caliber": "Nine",
+        "DefaultBulletCapacity": 17,
+        "IsInfiniteAmmo": false,
+        "Renderer": {
+          "_type": "component",
+          "component_id": "5c401b68-fdf2-4df7-af33-7d396d69a10e",
+          "go": "96ff4590-9342-4ff4-8389-1c8e7dd025d8",
+          "component_type": "SkinnedModelRenderer"
+        }
+      }
+    ],
+    "Children": [
+      {
+        "__guid": "96ff4590-9342-4ff4-8389-1c8e7dd025d8",
+        "Flags": 0,
+        "Name": "Model",
+        "Position": "0.03938294,0.00000001408443,0.000000004694812",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkInterpolation": true,
+        "Components": [
+          {
+            "__type": "Sandbox.SkinnedModelRenderer",
+            "__guid": "5c401b68-fdf2-4df7-af33-7d396d69a10e",
+            "BodyGroups": 2,
+            "CreateBoneObjects": false,
+            "Model": "models/weapons/sbox_pistol_usp/v_usp_magazine.vmdl",
+            "RenderType": "On",
+            "Tint": "1,1,1,1"
+          }
+        ]
+      },
+      {
+        "__guid": "148e4816-9036-4193-bdc4-633ccce89336",
+        "Flags": 0,
+        "Name": "Magazine Grab Point",
+        "Position": "0,-0.2585772,-2.12495",
+        "Tags": "trigger",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkInterpolation": true,
+        "Components": [
+          {
+            "__type": "GrabPoint",
+            "__guid": "8eaa3fdd-a9a6-4062-b9d0-a46b7b1eade3",
+            "Collider": {
+              "_type": "component",
+              "component_id": "a8794cd9-16c4-49bc-a3a6-0359b83075ea",
+              "go": "148e4816-9036-4193-bdc4-633ccce89336",
+              "component_type": "SphereCollider"
+            },
+            "GrabInput": "Grip",
+            "Interactable": {
+              "_type": "component",
+              "component_id": "92a790a8-7536-4ce8-8dd6-53a5aea739f9",
+              "go": "0e5de69e-2f10-450a-86af-7209e2fddba7",
+              "component_type": "GunplayInteractable"
+            },
+            "Preset": {
+              "Thumb": -1,
+              "Index": 1,
+              "Middle": 1,
+              "Ring": 1,
+              "Pinky": 1
+            }
+          },
+          {
+            "__type": "Sandbox.SphereCollider",
+            "__guid": "a8794cd9-16c4-49bc-a3a6-0359b83075ea",
+            "Center": "0,0,0",
+            "IsTrigger": true,
+            "Radius": 1.5,
+            "Static": false
+          }
+        ]
+      },
+      {
+        "__guid": "ae58dfbb-5a89-452c-9a14-8e2c29d788cf",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Thumbnail Camera",
+        "Rotation": "0.07470705275169785,0.04488852596210977,-0.8539055203370572,0.5130781995407753",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "ThumbnailCamera",
+            "__guid": "7db51002-7d05-4256-a6fc-70234581a869",
+            "__enabled": true,
+            "Flags": 0,
+            "FieldOfView": 12,
+            "FitToBounds": true,
+            "Focus": "0,0",
+            "GizmoDistance": 60,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Padding": 0.15,
+            "Zoom": 1,
+            "FitRenderersOnly": true
+          }
+        ],
+        "Children": []
+      }
+    ]
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": [
+    "facepunch.v_usp_magazine#144162"
+  ]
+}

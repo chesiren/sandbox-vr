@@ -3,22 +3,22 @@ public sealed partial class VRPlayer
 	/// <summary>
 	/// Rotation from a controller's grip pose to the body's left hand bone.
 	/// </summary>
-	[Property, Group( "VR Body" )] public Angles LeftHandIkOffset { get; set; } = new( 80.10f, -60.74f, 19.47f );
+	[Property, Group( "VR Body" )] public Angles LeftHandIkOffset { get; set; } = new( 32.81f, 11.77f, 101.70f );
 
 	/// <summary>
 	/// Rotation from a controller's grip pose to the body's right hand bone.
 	/// </summary>
-	[Property, Group( "VR Body" )] public Angles RightHandIkOffset { get; set; } = new( 80.10f, 60.74f, 160.53f );
+	[Property, Group( "VR Body" )] public Angles RightHandIkOffset { get; set; } = new( 32.81f, -11.75f, 78.30f );
 
 	/// <summary>
 	/// Where the left hand bone sits relative to the grip pose, in the grip's space.
 	/// </summary>
-	[Property, Group( "VR Body" )] public Vector3 LeftHandIkPositionOffset { get; set; } = new( -3.47f, 2.11f, 7.47f );
+	[Property, Group( "VR Body" )] public Vector3 LeftHandIkPositionOffset { get; set; } = new( -4.04f, 0.97f, 1.56f );
 
 	/// <summary>
 	/// Where the right hand bone sits relative to the grip pose, in the grip's space.
 	/// </summary>
-	[Property, Group( "VR Body" )] public Vector3 RightHandIkPositionOffset { get; set; } = new( -3.47f, -2.11f, 7.47f );
+	[Property, Group( "VR Body" )] public Vector3 RightHandIkPositionOffset { get; set; } = new( -4.04f, -0.97f, 1.56f );
 
 	/// <summary>
 	/// Eye height of the body model standing at scale 1.
@@ -132,8 +132,9 @@ public sealed partial class VRPlayer
 		}
 
 		// Last: the engine takes these relative to the body as it is now, so turning or moving it after carried them off
-		renderer.SetIk( "hand_left", HandTarget( LeftHand, LeftHandIkOffset, LeftHandIkPositionOffset ) );
-		renderer.SetIk( "hand_right", HandTarget( RightHand, RightHandIkOffset, RightHandIkPositionOffset ) );
+		// A hand holding a physical gun goes on its grip, see VRPlayer.Gunplay
+		renderer.SetIk( "hand_left", GripIkTarget( true ) ?? HandTarget( LeftHand, LeftHandIkOffset, LeftHandIkPositionOffset ) );
+		renderer.SetIk( "hand_right", GripIkTarget( false ) ?? HandTarget( RightHand, RightHandIkOffset, RightHandIkPositionOffset ) );
 		UpdateFingers( renderer );
 		_ikApplied = true;
 	}
@@ -263,8 +264,9 @@ public sealed partial class VRPlayer
 			Scene.Get<VRScope>()?.PlaceNow();
 		}
 
-		// With a menu up the gun is just in the way of the laser, or of the wheel - hide it on our side only
-		var hide = IsLocalVR && (SpawnMenuHost.IsOpen || WheelOpen || VRKeyboard.IsOpen);
+		// With a menu up the gun is just in the way of the laser, or of the wheel - hide it on our side only. With a
+		// physical gun in that hand (VRPlayer.Gunplay) it's put away for everyone.
+		var hide = (IsLocalVR && (SpawnMenuHost.IsOpen || WheelOpen || VRKeyboard.IsOpen)) || DominantHandBusy;
 		if ( hide && _hiddenWeaponParts.Count == 0 )
 		{
 			// Models, but also glows, particles and lights (the physgun's glow)
@@ -327,8 +329,9 @@ public sealed partial class VRPlayer
 	}
 
 	/// <summary>
-	/// The hand bone for a controller grip. The offsets put the hand's hold bone - what weapons hang off - in the palm,
-	/// pointing where the controller aims.
+	/// The hand bone for a controller grip. The offsets put it where the real hand is around the controller - gunbuilder's
+	/// hand pose: the grip pitched 45 degrees and its hand model's bone. Weapons, along where the controller aims, sit in
+	/// that palm within 15 degrees, as the physical guns do.
 	/// </summary>
 	Transform HandTarget( Transform grip, Angles rotationOffset, Vector3 positionOffset )
 	{

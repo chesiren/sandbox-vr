@@ -70,20 +70,31 @@ public sealed partial class VRPlayer
 		// seat's weapons with every push, so those move to the buttons. The menus still click with it.
 		var driving = Player.IsSeated && !SpawnMenuHost.IsOpen;
 
+		// A hand holding a physical gun works the gun with its buttons, see VRPlayer.Gunplay. The HUD's laser still
+		// clicks with the trigger.
+		var mainGunplay = !driving && !PointingAtUI && HoldsGunplay( DominantGunplayHand );
+		var mainTrigger = !driving && !PointingAtUI && TriggerTakenByGunplay( DominantGunplayHand );
+		var offGun = HoldsGun( OffGunplayHand );
+
 		// The HUD's laser clicks with these too, Player keeps them from the weapon while it's on the UI
-		Press( "attack1", driving ? main.ButtonB.IsPressed : _triggerDown );
-		Press( "attack2", driving ? main.ButtonA.IsPressed : main.ButtonB.IsPressed );
+		Press( "attack1", driving ? main.ButtonB.IsPressed : _triggerDown && !mainTrigger );
+		Press( "attack2", driving ? main.ButtonA.IsPressed : main.ButtonB.IsPressed && !mainGunplay );
 
-		Press( "reload", !driving && main.ButtonA.IsPressed );
-		Press( "use", main.Grip.Value > 0.6f || off.Grip.Value > 0.6f );
+		Press( "reload", !driving && main.ButtonA.IsPressed && !mainGunplay );
 
-		UpdateWheelClick( main.JoystickPress.IsPressed, off.JoystickPress.IsPressed );
+		// The grip of a hand taking hold of a gun, a magazine or a round doesn't use or carry
+		Press( "use", (main.Grip.Value > 0.6f && !GripTakenByGunplay( DominantGunplayHand ))
+			|| (off.Grip.Value > 0.6f && !GripTakenByGunplay( OffGunplayHand )) );
+
+		UpdateWheelClick( main.JoystickPress.IsPressed && !HoldsGun( DominantGunplayHand ), off.JoystickPress.IsPressed );
 		WheelStick = main.Joystick.Value;
 
-		Press( "run", off.JoystickPress.IsPressed && !main.JoystickPress.IsPressed );
-		Press( "spawnmenu", off.ButtonA.IsPressed );
-		Press( "inspectmenu", off.ButtonB.IsPressed );
-		Press( "undo", _offTriggerDown && !Player.IsSeated );
+		Press( "run", off.JoystickPress.IsPressed && !main.JoystickPress.IsPressed && !offGun );
+		Press( "spawnmenu", off.ButtonA.IsPressed && !offGun );
+		Press( "inspectmenu", off.ButtonB.IsPressed && !offGun );
+		// No undo while holding a physical gun in either hand: the other hand's trigger racks its slide
+		var gunplayHeld = HoldsGunplay( DominantGunplayHand ) || HoldsGunplay( OffGunplayHand );
+		Press( "undo", _offTriggerDown && !Player.IsSeated && !gunplayHeld && !TriggerTakenByGunplay( OffGunplayHand ) );
 		Press( "noclip", main.JoystickPress.IsPressed && off.JoystickPress.IsPressed );
 		Press( "score", VRHud.ScoreboardOpen );
 

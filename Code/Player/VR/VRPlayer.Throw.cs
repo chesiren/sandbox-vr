@@ -36,6 +36,15 @@ public sealed partial class VRPlayer
 	}
 
 	/// <summary>
+	/// How fast something let go of by one hand should fly, in world space. Local VR player only.
+	/// </summary>
+	public Vector3 HandThrowVelocity( bool left )
+	{
+		var hand = (left ? _leftMotion : _rightMotion).Peak();
+		return Input.VR.Anchor.Rotation * hand * ThrowScale + Controller.Velocity;
+	}
+
+	/// <summary>
 	/// A hand's recent positions. The hand is already slowing down by the time the grip opens, so a throw takes the
 	/// fastest moment of the last few frames rather than the speed at release.
 	/// </summary>
