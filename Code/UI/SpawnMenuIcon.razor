@@ -19,6 +19,10 @@
     {
         <div class="developer-badge">🪲</div>
     }
+    @if ( VROnly )
+    {
+        <div class="vr-only-badge"><i>back_hand</i>VR</div>
+    }
     @if ( !string.IsNullOrWhiteSpace( Title ) && !HideText )
     {
         <div class="title">@Title</div>
@@ -47,13 +51,29 @@
     /// <summary>
     /// We want to drag from this panel
     /// </summary>
-    public override bool WantsDrag => true;
+    public override bool WantsDrag => !VRLocked;
+
+    /// <summary>
+    /// Worked by hand in VR, like the physical guns: badged so they don't pass for the inventory weapons beside them.
+    /// </summary>
+    bool VROnly;
+
+    /// <summary>
+    /// Only VR players can spawn this and we're not one: it's shown greyed out and does nothing.
+    /// </summary>
+    bool VRLocked;
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
 
         (Type, Path, Source) = SpawnlistItem.ParseIdent( Ident );
+
+        VROnly = VROnlySpawnGate.IsVROnly( Ident );
+        VRLocked = VROnly && !VRMode.IsActive;
+        SetClass( "vr-only", VROnly );
+        SetClass( "vr-locked", VRLocked );
+        if ( VROnly ) Tooltip = VRLocked ? "#vr.spawnmenu.vr_only" : "#vr.spawnmenu.physical";
 
         if ( Type == "builder" )
         {
@@ -131,7 +151,7 @@
 
     protected override int BuildHash()
     {
-        return HashCode.Combine( Ident, Icon, Title, HideText, Developer, PreviewMaterial );
+        return HashCode.Combine( Ident, Icon, Title, HideText, Developer, PreviewMaterial, VROnly, VRLocked );
     }
 
     protected override async void OnDragStart( DragEvent e )
@@ -167,6 +187,8 @@
             OpenMenu();
             return;
         }
+
+        if ( VRLocked ) return;
 
         // Work out what we can locally first, the host might not have this content (e.g. mounts)
         var metadata = await ISpawner.ResolveMetadata( Type, Path );

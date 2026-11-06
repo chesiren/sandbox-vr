@@ -232,6 +232,10 @@ public sealed partial class PlayerInventory : BaseInventoryComponent, Local.IPla
 		if ( item is not BaseSandboxWeapon weapon )
 			return true;
 
+		// Empty hands are always there, there's nothing to drop
+		if ( weapon is HandsWeapon )
+			return false;
+
 		var dropEvent = new PlayerDropEvent { Player = Player, Weapon = weapon };
 		Local.IPlayerEvents.PostToGameObject( Player.GameObject, e => e.OnDrop( dropEvent ) );
 		Global.IPlayerEvents.Post( e => e.OnPlayerDrop( dropEvent ) );

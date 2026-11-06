@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/up45/up45.prefab",
+  "Title": "UP-45",
+  "Description": "A pistol worked by hand: put a magazine in, rack the slide, fire. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

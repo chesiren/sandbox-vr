@@ -68,7 +68,8 @@ public sealed class VRAimDot : Component
 
 		if ( weapon.IsValid() )
 		{
-			if ( weapon is CameraWeapon ) return;
+			// A camera, empty hands, or a physical gun in the hand instead of the weapon (it has its own laser): nothing to aim
+			if ( weapon is CameraWeapon or HandsWeapon || vr.DominantHandBusy ) return;
 
 			var aim = VRMode.DominantHand.AimTransform;
 

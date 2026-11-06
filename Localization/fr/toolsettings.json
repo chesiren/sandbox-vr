@@ -127,6 +127,7 @@
     "tool.wire.signal_input": "Entrée de signal sur {component}.",
     "tool.wire.signal_output": "Sortie de signal sur {component}.",
     "weapon.name.camera": "Caméra",
+    "weapon.name.hands": "Mains vides",
     "weapon.name.crowbar": "Pied-de-biche",
     "weapon.name.physgun": "Pistolet physique"
 }

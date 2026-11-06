@@ -18,17 +18,9 @@ public sealed partial class VRPlayer
 
 	void UpdateFingerPose()
 	{
-		LeftFingers = PackCurls( Input.VR.LeftHand );
-		RightFingers = PackCurls( Input.VR.RightHand );
-	}
-
-	static int PackCurls( VRController hand )
-	{
-		var packed = 0;
-		for ( var i = 0; i < 5; i++ )
-			packed |= (int)(hand.GetFingerCurl( i ).Clamp( 0f, 1f ) * 63f) << (i * 6);
-
-		return packed;
+		// Holding a gun, the fingers close round it as its grab point says, see VRPlayer.Gunplay
+		LeftFingers = PackCurls( Input.VR.LeftHand, _leftGunplayHand?.ActivePreset );
+		RightFingers = PackCurls( Input.VR.RightHand, _rightGunplayHand?.ActivePreset );
 	}
 
 	static float UnpackCurl( int packed, int finger ) => ((packed >> (finger * 6)) & 63) / 63f;

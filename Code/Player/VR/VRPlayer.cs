@@ -100,10 +100,14 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 			Scene.Camera.TargetEye = StereoTargetEye.Both;
 
 		_ = VRHud.Enable( Scene );
+
+		CreateGunplayHands();
 	}
 
 	protected override void OnDestroy()
 	{
+		DestroyGunplayHands();
+
 		if ( !IsLocalVR ) return;
 
 		if ( Controller.IsValid() )
@@ -123,6 +127,7 @@ public sealed partial class VRPlayer : Component, ICameraModifier, PlayerControl
 		UpdateFingerPose();
 		UpdateBodyScale();
 		UpdateEyes();
+		UpdateGunplayHands();
 
 		// VRInputSystem maps the controllers at the start of the frame; a scene loaded before it existed
 		// (hotloading it in) doesn't have one, so map here instead

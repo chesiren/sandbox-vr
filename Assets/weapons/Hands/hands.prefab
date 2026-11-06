@@ -1,0 +1,62 @@
+{
+  "RootObject": {
+    "__guid": "6e99de0c-2ff6-4bcc-bdde-ce43f540d3c5",
+    "__version": 2,
+    "Flags": 0,
+    "Name": "hands",
+    "Position": "0,0,0",
+    "Rotation": "0,0,0,1",
+    "Scale": "1,1,1",
+    "Tags": "",
+    "Enabled": true,
+    "NetworkMode": 2,
+    "NetworkFlags": 0,
+    "NetworkOrphaned": 0,
+    "NetworkTransmit": true,
+    "OwnerTransfer": 1,
+    "Components": [
+      {
+        "__type": "HandsWeapon",
+        "__guid": "70d26c65-56ea-4868-be3b-71f7516cd188",
+        "__enabled": true,
+        "Flags": 0,
+        "DisplayName": "#weapon.name.hands",
+        "Handedness": "Both",
+        "HoldType": "none",
+        "PreferredSlot": 0,
+        "SlotOrder": -1,
+        "Value": 0,
+        "UsesAmmo": false,
+        "UsesClips": false,
+        "AutoReload": false,
+        "Npc": {
+          "MinRange": 0,
+          "MaxRange": 0,
+          "BurstMin": 0,
+          "BurstMax": 0,
+          "RestMin": 0,
+          "RestMax": 0,
+          "SpreadScale": 1,
+          "CanBePickedUp": false
+        },
+        "UsableByNpcs": false
+      }
+    ],
+    "Children": [],
+    "__properties": {
+      "NetworkInterpolation": true,
+      "PhysicsMode": "Physics3D",
+      "TimeScale": 1,
+      "WantsSystemScene": true,
+      "Metadata": {}
+    },
+    "__variables": []
+  },
+  "ResourceVersion": 2,
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "DontBreakAsTemplate": false,
+  "__references": [],
+  "__version": 2
+}

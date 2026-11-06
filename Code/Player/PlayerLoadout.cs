@@ -105,10 +105,29 @@ public sealed class PlayerLoadout : Component, Local.IPlayerEvents, Global.IPlay
 		GiveLoadoutWeapons( json );
 
 		GiveStarterItemsIfEmpty();
+		GiveHandsIfMissing();
 
 		var best = Inventory.GetBestWeapon();
 		if ( best.IsValid() )
 			Inventory.SwitchWeapon( best );
+	}
+
+	/// <summary>
+	/// Empty hands are a starter item, but a hotbar saved before they were one doesn't have them.
+	/// </summary>
+	private void GiveHandsIfMissing()
+	{
+		if ( !Networking.IsHost || Inventory.HasWeapon<HandsWeapon>() ) return;
+
+		_isRestoringLoadout = true;
+		try
+		{
+			Inventory.Pickup( "weapons/hands/hands.prefab", false );
+		}
+		finally
+		{
+			_isRestoringLoadout = false;
+		}
 	}
 
 	private void GiveStarterItemsIfEmpty()

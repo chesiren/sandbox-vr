@@ -173,6 +173,7 @@
     "tool.wire.signal_input": "Signal input on {component}.",
     "tool.wire.signal_output": "Signal output on {component}.",
     "weapon.name.camera": "Camera",
+    "weapon.name.hands": "Hands",
     "weapon.name.crowbar": "Crowbar",
     "weapon.name.physgun": "Physics Gun"
 }

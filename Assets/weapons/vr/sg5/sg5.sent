@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/sg5/sg5.prefab",
+  "Title": "SG-5",
+  "Description": "A submachine gun worked by hand, held with both hands. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

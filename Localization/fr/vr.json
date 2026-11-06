@@ -15,5 +15,8 @@
     "vr.input.no_button": "{action}, pas de bouton en VR",
     "vr.menu.settings": "Réglages",
     "vr.toggle.on": "Oui",
-    "vr.toggle.off": "Non"
+    "vr.toggle.off": "Non",
+    "vr.spawnmenu.weapons": "VR",
+    "vr.spawnmenu.vr_only": "Arme physique, réservée aux joueurs VR",
+    "vr.spawnmenu.physical": "Arme physique : se prend et se manipule à la main, ce n’est pas une arme d’inventaire"
 }
