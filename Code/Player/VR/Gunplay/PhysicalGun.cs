@@ -46,6 +46,22 @@ public sealed class PhysicalGun : GunplayInteractable
 	/// </summary>
 	[Property, Group( "Stats" )] public float BulletSize { get; set; } = 1;
 
+	/// <summary>
+	/// Bullets per shot, more than one for a shotgun's pellets. Each deals <see cref="Damage"/>.
+	/// </summary>
+	[Property, Group( "Stats" )] public int Pellets { get; set; } = 1;
+
+	/// <summary>
+	/// How far the bullets stray from the barrel's line, in degrees.
+	/// </summary>
+	[Property, Group( "Stats" )] public float Spread { get; set; } = 0;
+
+	/// <summary>
+	/// Worked by hand after every shot, like a pump or a bolt: the casing stays in the chamber until the
+	/// <see cref="SlideReleaseSystem"/>'s part is pulled back, and the next round goes in as it goes forward.
+	/// </summary>
+	[Property, Group( "Stats" )] public bool ManualAction { get; set; }
+
 	[Property, Group( "Sounds" )] public SoundEvent ShootSound { get; set; }
 
 	[Property, Group( "Sounds" )] public SoundEvent DryFireSound { get; set; }
@@ -63,6 +79,54 @@ public sealed class PhysicalGun : GunplayInteractable
 	[Property] public SlideReleaseSystem SlideReleaseSystem { get; set; }
 
 	/// <summary>
+	/// A magazine built into the gun, like a shotgun's tube, when it has no magazine that comes out.
+	/// </summary>
+	[Property] public InternalMagazine InternalMagazine { get; set; }
+
+	/// <summary>
+	/// A revolver's cylinder, in place of a chamber.
+	/// </summary>
+	[Property] public RevolverCylinder Cylinder { get; set; }
+
+	/// <summary>
+	/// Where the next round's fired from.
+	/// </summary>
+	public IGunChamber ActiveChamber => Cylinder.IsValid() ? Cylinder : Chamber.IsValid() ? Chamber : null;
+
+	/// <summary>
+	/// What's fired instead of bullets, like a rocket. The host makes it at the muzzle.
+	/// </summary>
+	[Property, Group( "Projectile" )] public GameObject ProjectilePrefab { get; set; }
+
+	[Property, Group( "Projectile" )] public float ProjectileSpeed { get; set; } = 1024f;
+
+	/// <summary>
+	/// A magazine going in chambers its round straight away, like a rocket into a launcher: there's nothing to rack.
+	/// </summary>
+	[Property, Group( "Projectile" )] public bool ChambersOnInsert { get; set; }
+
+	/// <summary>
+	/// An emptied magazine is used up and goes, like the rocket that was in the tube.
+	/// </summary>
+	[Property, Group( "Projectile" )] public bool ConsumesEmptyMagazine { get; set; }
+
+	/// <summary>
+	/// The last rocket fired, steered at what the muzzle points at while the trigger stays down.
+	/// </summary>
+	[Sync( SyncFlags.FromHost )] RpgProjectile Projectile { get; set; }
+
+	/// <summary>
+	/// A shot throws its casing out of the ejection port: not when it's worked by hand, not from a revolver's cylinder,
+	/// not for a rocket.
+	/// </summary>
+	bool EjectsOnShot => !ManualAction && !Cylinder.IsValid() && ProjectilePrefab is null;
+
+	/// <summary>
+	/// Where the chamber's fed from: the magazine in the gun, or the one built into it.
+	/// </summary>
+	public RoundStore AmmoSource => Magazine.IsValid() ? Magazine : InternalMagazine.IsValid() ? InternalMagazine : null;
+
+	/// <summary>
 	/// The magazine in the gun, if any.
 	/// </summary>
 	public GunMagazine Magazine { get; private set; }
@@ -74,7 +138,7 @@ public sealed class PhysicalGun : GunplayInteractable
 	{
 		get
 		{
-			if ( Magazine.IsValid() && Magazine.BulletPrefab is { } fromMagazine ) return fromMagazine;
+			if ( AmmoSource is { BulletPrefab: { } fromMagazine } ) return fromMagazine;
 			if ( RoundPrefab?.GetComponent<LooseRound>() is { } loose ) return loose.Bullet with { Prefab = RoundPrefab };
 			return null;
 		}
@@ -107,7 +171,12 @@ public sealed class PhysicalGun : GunplayInteractable
 		if ( attachable.GetComponent<GunMagazine>() is { } magazine )
 			Magazine = magazine;
 
-		if ( !IsProxy ) VRMode.Pulse( GripHand?.Controller, 0.3f, 0.3f );
+		if ( IsProxy ) return;
+
+		VRMode.Pulse( GripHand?.Controller, 0.3f, 0.3f );
+
+		if ( ChambersOnInsert )
+			TryFeedFromMagazine();
 	}
 
 	protected override void OnAttachableRemoved( Attachable attachable, AttachmentPoint attachmentPoint )
@@ -131,16 +200,25 @@ public sealed class PhysicalGun : GunplayInteractable
 	/// </summary>
 	public bool TryFeedFromMagazine()
 	{
-		if ( !Chamber.IsValid() ) return false;
-		return Chamber.Feed( Magazine ) > 0;
+		if ( ActiveChamber is not { } chamber || AmmoSource is not { } source ) return false;
+		return chamber.Feed( source ) > 0;
 	}
 
 	/// <summary>
-	/// Throws out the round in the chamber, unfired, for the slide being pulled back. Owner only.
+	/// Throws out what's in the chamber, for the slide being pulled back: the casing of the round just fired, or the round
+	/// in it, unfired. Owner only.
 	/// </summary>
 	internal void TryEjectFromChamber()
 	{
-		if ( Chamber?.Eject() is null || !EjectionPort.IsValid() ) return;
+		if ( ActiveChamber is not { } chamber ) return;
+
+		if ( chamber.EjectSpentCasing() )
+		{
+			BroadcastCasing();
+			return;
+		}
+
+		if ( chamber.Eject() is null || !EjectionPort.IsValid() ) return;
 
 		var velocity = (EjectionPort.WorldRotation.Right * 150f + EjectionPort.WorldRotation.Up * 100f) + (Rigidbody?.Velocity ?? 0f);
 		SpawnLooseRound( EjectionPort.WorldPosition, EjectionPort.WorldRotation, velocity );
@@ -175,6 +253,10 @@ public sealed class PhysicalGun : GunplayInteractable
 			return false;
 		}
 
+		// A bolt that isn't home doesn't fire, and doesn't click either
+		if ( ManualAction && SlideReleaseSystem.IsValid() && !SlideReleaseSystem.IsClosed )
+			return false;
+
 		return TimeSinceShoot >= RPMToSeconds();
 	}
 
@@ -197,6 +279,9 @@ public sealed class PhysicalGun : GunplayInteractable
 
 		if ( Automatic ? triggerDown : pulled )
 			TryShoot();
+
+		if ( triggerDown && ProjectilePrefab is not null )
+			GuideProjectile();
 
 		if ( controller.ButtonB.IsPressed )
 			TryDetachMagazine();
@@ -225,7 +310,7 @@ public sealed class PhysicalGun : GunplayInteractable
 
 		TimeSinceShoot = 0;
 
-		if ( Chamber?.Eject() is null )
+		if ( ActiveChamber?.Eject() is null )
 		{
 			TryDryShoot();
 			return;
@@ -237,7 +322,22 @@ public sealed class PhysicalGun : GunplayInteractable
 			VRMode.Pulse( support, 0.5f, 0.5f );
 
 		var ray = WeaponRay;
-		Shoot( ray.Position, ray.Forward );
+		Shoot( ray.Position, ray.Forward, Game.Random.Int( 0, int.MaxValue - 1 ), EjectsOnShot );
+
+		// The rocket's gone from the tube
+		if ( ConsumesEmptyMagazine && Magazine.IsValid() && !Magazine.HasAmmo )
+		{
+			var spent = Magazine;
+			spent.Attachable.Detach();
+			DestroyOnHost( spent.GameObject );
+		}
+
+		// Worked by hand: the casing waits in the chamber for the pump or the bolt
+		if ( ManualAction )
+		{
+			ActiveChamber.LeaveSpentCasing();
+			return;
+		}
 
 		// The next round comes up from the magazine, or the slide locks back on an empty one
 		if ( !TryFeedFromMagazine() )
@@ -245,41 +345,127 @@ public sealed class PhysicalGun : GunplayInteractable
 	}
 
 	/// <summary>
+	/// The directions of a shot's bullets, from its seed: the same on every machine, so effects and damage agree.
+	/// </summary>
+	IEnumerable<Vector3> BulletDirections( Vector3 forward, int seed )
+	{
+		var count = Math.Max( Pellets, 1 );
+		if ( Spread <= 0f )
+		{
+			for ( var i = 0; i < count; i++ ) yield return forward;
+			yield break;
+		}
+
+		var random = new Random( seed );
+		var look = Rotation.LookAt( forward );
+		for ( var i = 0; i < count; i++ )
+		{
+			// Evenly over the cone's disc, not bunched in its middle
+			var angle = MathF.Sqrt( (float)random.NextDouble() ) * Spread;
+			var around = (float)random.NextDouble() * 360f;
+			yield return look * (Rotation.FromRoll( around ) * Rotation.FromYaw( angle )).Forward;
+		}
+	}
+
+	/// <summary>
+	/// Clients can't destroy networked objects: the host does it.
+	/// </summary>
+	[Rpc.Host]
+	static void DestroyOnHost( GameObject gameObject )
+	{
+		if ( gameObject.IsValid() && gameObject.GetComponent<GunMagazine>().IsValid() )
+			gameObject.Destroy();
+	}
+
+	/// <summary>
+	/// The host makes the rocket at the muzzle, fired by whoever pulled the trigger.
+	/// </summary>
+	void LaunchProjectile( Ray ray, Player shooter )
+	{
+		if ( ProjectilePrefab is null ) return;
+
+		var go = ProjectilePrefab.Clone( new Transform( ray.Position + ray.Forward * 8f, Rotation.LookAt( ray.Forward ) ) );
+		if ( go.GetComponent<RpgProjectile>() is not { } projectile )
+		{
+			go.Destroy();
+			return;
+		}
+
+		projectile.Instigator = shooter;
+		go.NetworkSpawn();
+		projectile.UpdateDirection( ray.Forward, ProjectileSpeed );
+		Projectile = projectile;
+	}
+
+	/// <summary>
+	/// While the trigger stays down after a rocket's fired, it flies at what the muzzle points at. Owner only.
+	/// </summary>
+	void GuideProjectile()
+	{
+		if ( !Projectile.IsValid() || !MuzzleGameObject.IsValid() ) return;
+
+		var ray = WeaponRay;
+		var tr = Scene.Trace.Ray( ray, 16384f )
+			.IgnoreGameObjectHierarchy( GameObject.Root )
+			.WithoutTags( "trigger", "projectile" )
+			.Run();
+
+		Projectile.UpdateWithTarget( tr.Hit ? tr.HitPosition : ray.Position + ray.Forward * 16384f, ProjectileSpeed );
+	}
+
+	/// <summary>
+	/// A casing thrown out of the chamber by hand, on every machine.
+	/// </summary>
+	[Rpc.Broadcast]
+	void BroadcastCasing() => EjectCasing();
+
+	/// <summary>
 	/// A shot, on every machine: its effects everywhere, and its damage on the host.
 	/// </summary>
 	[Rpc.Broadcast]
-	void Shoot( Vector3 origin, Vector3 direction )
+	void Shoot( Vector3 origin, Vector3 direction, int seed, bool ejectCasing )
 	{
-		var ray = new Ray( origin, direction.Normal );
 		var shooter = Player.FindForConnection( Rpc.Caller );
 
-		if ( Networking.IsHost || !Networking.IsActive )
+		// Only a VR player's hands fire these
+		var dealsDamage = (Networking.IsHost || !Networking.IsActive) && (Rpc.Caller.IsHost || VRPlayer.Get( shooter ) is not null);
+		var attacker = shooter.IsValid() ? shooter.GameObject : GameObject;
+
+		if ( ProjectilePrefab is not null )
 		{
-			// Only a VR player's hands fire these
-			if ( Rpc.Caller.IsHost || VRPlayer.Get( shooter ) is not null )
-			{
-				var attacker = shooter.IsValid() ? shooter.GameObject : GameObject;
-				BaseCombatWeapon.ShootBullet( Scene, ray, MaxRange, BulletSize, Damage, Force, attacker, GameObject, attacker );
-			}
+			if ( dealsDamage )
+				LaunchProjectile( new Ray( origin, direction.Normal ), shooter );
+
+			DoShootEffects();
+			return;
 		}
 
-		var trace = Scene.Trace.Ray( ray, MaxRange )
-			.Size( BulletSize )
-			.IgnoreGameObjectHierarchy( GameObject.Root )
-			.WithoutTags( "trigger" )
-			.UseHitboxes();
+		foreach ( var bullet in BulletDirections( direction.Normal, seed ) )
+		{
+			var ray = new Ray( origin, bullet );
 
-		if ( shooter.IsValid() )
-			trace = trace.IgnoreGameObjectHierarchy( shooter.GameObject );
+			if ( dealsDamage )
+				BaseCombatWeapon.ShootBullet( Scene, ray, MaxRange, BulletSize, Damage, Force, attacker, GameObject, attacker );
 
-		var tr = trace.Run();
+			var trace = Scene.Trace.Ray( ray, MaxRange )
+				.Size( BulletSize )
+				.IgnoreGameObjectHierarchy( GameObject.Root )
+				.WithoutTags( "trigger" )
+				.UseHitboxes();
 
-		if ( tr.Hit )
-			CreateImpactEffects( tr.GameObject, tr.Surface, tr.EndPosition, tr.Normal );
+			if ( shooter.IsValid() )
+				trace = trace.IgnoreGameObjectHierarchy( shooter.GameObject );
+
+			var tr = trace.Run();
+
+			if ( tr.Hit )
+				CreateImpactEffects( tr.GameObject, tr.Surface, tr.EndPosition, tr.Normal );
+
+			DoTracer( ray.Position, tr.EndPosition );
+		}
 
 		DoShootEffects();
-		DoTracer( ray.Position, tr.EndPosition );
-		EjectCasing();
+		if ( ejectCasing ) EjectCasing();
 	}
 
 	void EjectCasing()

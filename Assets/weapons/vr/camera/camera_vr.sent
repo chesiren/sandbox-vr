@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/camera/camera_vr.prefab",
+  "Title": "Camera",
+  "Description": "Its screen shows what the lens sees. The trigger takes a photo, the stick zooms. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

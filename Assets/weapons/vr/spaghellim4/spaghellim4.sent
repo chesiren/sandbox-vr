@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/spaghellim4/spaghellim4.prefab",
+  "Title": "Spaghelli M4",
+  "Description": "A semi-automatic shotgun worked by hand: push shells into the loading port, pull the bolt handle, fire. Hold the forend with your other hand. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

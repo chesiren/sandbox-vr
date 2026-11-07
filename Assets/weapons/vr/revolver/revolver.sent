@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/revolver/revolver.prefab",
+  "Title": "Ironwood .357",
+  "Description": "A revolver worked by hand: A swings the cylinder out, B or the muzzle up empties it, push rounds in, A or a flick of the wrist closes it. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

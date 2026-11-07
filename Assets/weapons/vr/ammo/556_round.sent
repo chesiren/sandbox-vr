@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/ammo/round_556.prefab",
+  "Title": "5.56mm Round",
+  "Description": "Push it into a 5.56 magazine, or into the chamber with the bolt back. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/ammo/round_357.prefab",
+  "Title": ".357 Round",
+  "Description": "Push it into an open revolver cylinder. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

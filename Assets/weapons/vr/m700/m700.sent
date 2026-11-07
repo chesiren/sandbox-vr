@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/m700/m700.prefab",
+  "Title": "M700",
+  "Description": "A bolt-action rifle worked by hand: open the bolt, push rounds in from the top, close it, fire, and work the bolt again. Look through the scope. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

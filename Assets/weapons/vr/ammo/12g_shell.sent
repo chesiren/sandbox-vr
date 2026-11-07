@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/ammo/shell_12g.prefab",
+  "Title": "12ga Shell",
+  "Description": "Push it into a shotgun loading port. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

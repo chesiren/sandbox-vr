@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/m4a1/m4a1_magazine.prefab",
+  "Title": "AR-4 Magazine",
+  "Description": "Thirty 5.56mm rounds. Push it into the AR-4. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

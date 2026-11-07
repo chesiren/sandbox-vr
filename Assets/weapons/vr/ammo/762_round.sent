@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/ammo/round_762.prefab",
+  "Title": "7.62mm Round",
+  "Description": "Push it into a bolt-action rifle with the bolt open. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

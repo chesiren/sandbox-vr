@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/grenade/grenade_vr.prefab",
+  "Title": "Hand Grenade",
+  "Description": "Pull the pin with your other hand, then throw it: it goes off three seconds after it leaves your hand. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

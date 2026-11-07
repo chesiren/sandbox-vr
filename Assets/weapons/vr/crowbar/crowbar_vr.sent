@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/crowbar/crowbar_vr.prefab",
+  "Title": "Crowbar",
+  "Description": "Swing it: the harder you hit, the more it hurts. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}
