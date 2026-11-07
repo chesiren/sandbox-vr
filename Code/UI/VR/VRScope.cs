@@ -52,6 +52,11 @@ public sealed class VRScope : VRHudPanel
 	Panel _glass;
 	bool _showing;
 
+	/// <summary>
+	/// The physical gun's scope we're showing, rather than the inventory sniper's.
+	/// </summary>
+	ScopeAnchor _anchor;
+
 	protected override void OnEnabled()
 	{
 		base.OnEnabled();
@@ -93,6 +98,16 @@ public sealed class VRScope : VRHudPanel
 	{
 		if ( !_showing ) return;
 
+		if ( _anchor.IsValid() )
+		{
+			var glass = _anchor.WorldTransform;
+			PlaceAt( glass.Position, Rotation.LookAt( -glass.Rotation.Forward, glass.Rotation.Up ), _anchor.Width );
+
+			_camera.WorldPosition = glass.Position + glass.Rotation.Forward * _anchor.CameraReach;
+			_camera.WorldRotation = glass.Rotation;
+			return;
+		}
+
 		// The pose the weapon's placed from, see VRPlayer.PlaceHeldWeapon
 		var aim = VRPlayer.Local?.Aim ?? VRMode.DominantHand.AimTransform;
 		var position = aim.Position + aim.Rotation.Up * Height + aim.Rotation.Left * Side + aim.Rotation.Forward * Forward;
@@ -110,12 +125,14 @@ public sealed class VRScope : VRHudPanel
 
 		var vr = VRPlayer.Local;
 		var sniper = vr?.Player.GetComponent<PlayerInventory>()?.ActiveWeapon as SniperWeapon;
+		_anchor = ScopeAnchor.Held( vr );
 
-		// The weapon's hidden for these, see VRPlayer's body
-		_showing = sniper.IsValid() && !SpawnMenuHost.IsOpen && !vr.WheelOpen && !VRKeyboard.IsOpen;
+		// The weapon's hidden for these, see VRPlayer's body. A physical gun stays in the hand.
+		var menus = vr is null || SpawnMenuHost.IsOpen || vr.WheelOpen || VRKeyboard.IsOpen;
+		_showing = _anchor.IsValid() || (sniper.IsValid() && !menus);
 		_camera.Enabled = _showing;
 
 		if ( _showing )
-			_camera.FieldOfView = FieldOfView;
+			_camera.FieldOfView = _anchor.IsValid() ? _anchor.FieldOfView : FieldOfView;
 	}
 }

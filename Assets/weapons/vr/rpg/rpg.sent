@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/rpg/rpg.prefab",
+  "Title": "Ashford R-7",
+  "Description": "A launcher worked by hand: push a rocket into the back of the tube and fire. Keep the trigger down to steer the rocket. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

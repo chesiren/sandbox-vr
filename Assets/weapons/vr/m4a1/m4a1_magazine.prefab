@@ -1,0 +1,367 @@
+{
+  "RootObject": {
+    "__guid": "2dee2e70-56cc-4521-bad2-88514c3f9b12",
+    "__version": 2,
+    "Flags": 0,
+    "Name": "m4a1_magazine",
+    "Position": "0,0,0",
+    "Rotation": "0,0,0,1",
+    "Scale": "1,1,1",
+    "Tags": "magazine,gunplay",
+    "Enabled": true,
+    "NetworkMode": 2,
+    "NetworkFlags": 0,
+    "NetworkOrphaned": 0,
+    "NetworkTransmit": true,
+    "OwnerTransfer": 1,
+    "Components": [
+      {
+        "__type": "GunplayInteractable",
+        "__guid": "4c65ae16-1fed-4d6d-bd56-60ade0088271",
+        "__enabled": true,
+        "Flags": 0,
+        "MassScale": 1,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "Rigidbody": {
+          "_type": "component",
+          "component_id": "bac9d9f0-39fb-4bed-aff0-382eaff0ce8d",
+          "go": "2dee2e70-56cc-4521-bad2-88514c3f9b12",
+          "component_type": "Rigidbody"
+        }
+      },
+      {
+        "__type": "Sandbox.Rigidbody",
+        "__guid": "bac9d9f0-39fb-4bed-aff0-382eaff0ce8d",
+        "__enabled": true,
+        "Flags": 0,
+        "AngularDamping": 0,
+        "EnableImpactDamage": true,
+        "EnhancedCcd": false,
+        "Gravity": true,
+        "GravityScale": 1,
+        "ImpactDamage": 0,
+        "InertiaScale": 1,
+        "LinearDamping": 0,
+        "Locking": {
+          "X": false,
+          "Y": false,
+          "Z": false,
+          "Pitch": false,
+          "Yaw": false,
+          "Roll": false
+        },
+        "MassCenterOverride": "0,0,0",
+        "MassOverride": 50,
+        "MinImpactDamageSpeed": 500,
+        "MotionEnabled": true,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "OverrideMassCenter": false,
+        "RigidbodyFlags": 0,
+        "SleepThreshold": 2,
+        "StartAsleep": false
+      },
+      {
+        "__type": "GunMagazine",
+        "__guid": "644f22b0-f882-47cb-af6d-057d8b31fbe4",
+        "__enabled": true,
+        "Flags": 0,
+        "AmmoBodygroup": 1,
+        "BulletCapacity": 30,
+        "BulletCount": 0,
+        "BulletPrefab": {
+          "IsSpent": false,
+          "Caliber": "FiveFiveSix",
+          "SpentCasingBodygroup": {
+            "Index": 0,
+            "Value": 1
+          },
+          "Prefab": {
+            "_type": "gameobject",
+            "prefab": "weapons/vr/ammo/round_556.prefab"
+          }
+        },
+        "Caliber": "FiveFiveSix",
+        "DefaultBulletCapacity": 30,
+        "IsInfiniteAmmo": false,
+        "OnChamberSound": null,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "Renderer": {
+          "_type": "component",
+          "component_id": "743c6da7-36e0-44be-bb56-99a7c9b166da",
+          "go": "27361422-f10a-482b-8c4c-ec29b0612ba5",
+          "component_type": "SkinnedModelRenderer"
+        }
+      },
+      {
+        "__type": "Attachable",
+        "__guid": "c81a9e3e-3a15-4ce4-9f55-6d06bcfb0876",
+        "__enabled": true,
+        "Flags": 0,
+        "AttachSound": {
+          "Id": "36ee7bcd-ebc0-4df8-a252-dd81d6ed6744",
+          "Path": "weapons/m4a1/reload/m4a1_mag_in.sound"
+        },
+        "Collider": {
+          "_type": "component",
+          "component_id": "aa130113-1ed1-4e82-8567-2c6629bc9c14",
+          "go": "2dee2e70-56cc-4521-bad2-88514c3f9b12",
+          "component_type": "BoxCollider"
+        },
+        "DetachSound": {
+          "Id": "c048c4e3-c071-42e9-8501-f8592d696d18",
+          "Path": "weapons/m4a1/reload/m4a1_mag_out.sound"
+        },
+        "Interactable": {
+          "_type": "component",
+          "component_id": "4c65ae16-1fed-4d6d-bd56-60ade0088271",
+          "go": "2dee2e70-56cc-4521-bad2-88514c3f9b12",
+          "component_type": "GunplayInteractable"
+        },
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "Rigidbody": {
+          "_type": "component",
+          "component_id": "bac9d9f0-39fb-4bed-aff0-382eaff0ce8d",
+          "go": "2dee2e70-56cc-4521-bad2-88514c3f9b12",
+          "component_type": "Rigidbody"
+        }
+      },
+      {
+        "__type": "Sandbox.BoxCollider",
+        "__guid": "aa130113-1ed1-4e82-8567-2c6629bc9c14",
+        "__enabled": true,
+        "Flags": 0,
+        "Center": "-0.936904192,3.29574414E-06,2.2637136",
+        "ColliderFlags": 0,
+        "Elasticity": null,
+        "Friction": null,
+        "IsTrigger": false,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "OnObjectTriggerEnter": null,
+        "OnObjectTriggerExit": null,
+        "OnTriggerEnter": null,
+        "OnTriggerExit": null,
+        "RollingResistance": null,
+        "Scale": "2.5999999,1,6.5",
+        "Static": false,
+        "Surface": null,
+        "SurfaceVelocity": "0,0,0"
+      }
+    ],
+    "Children": [
+      {
+        "__guid": "27361422-f10a-482b-8c4c-ec29b0612ba5",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Model",
+        "Position": "-3.02351403,3.56198461E-06,-2.06698537",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.SkinnedModelRenderer",
+            "__guid": "743c6da7-36e0-44be-bb56-99a7c9b166da",
+            "__enabled": true,
+            "Flags": 0,
+            "AnimationGraph": {
+              "Id": "cac56fc9-32ba-4781-93f2-b5138bfae5e1",
+              "Path": "weapons/vr/empty.vanmgrph"
+            },
+            "BodyGroups": 2,
+            "BoneMergeTarget": null,
+            "CreateAttachments": false,
+            "CreateBoneObjects": false,
+            "DeformationMode": "Normal",
+            "LodOverride": null,
+            "MaterialGroup": null,
+            "MaterialOverride": null,
+            "Materials": null,
+            "Model": {
+              "Id": "0843ef28-00fc-0000-c200-000000000000",
+              "Path": "models/weapons/sbox_assault_m4a1/v_m4a1.vmdl"
+            },
+            "Morphs": {},
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Parameters": {},
+            "PlaybackRate": 1,
+            "RenderOptions": {
+              "GameLayer": true,
+              "OverlayLayer": false,
+              "BloomLayer": false,
+              "AfterUILayer": false
+            },
+            "RenderType": "On",
+            "Sequence": {
+              "Name": null,
+              "Looping": true,
+              "Blending": false
+            },
+            "Tint": "1,1,1,1",
+            "UseAnimGraph": true
+          }
+        ],
+        "Children": []
+      },
+      {
+        "__guid": "2f253604-607b-4d1e-95b8-5b650718bd1e",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Magazine Grab Point",
+        "Position": "-0.936904192,3.29574414E-06,2.2637136",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "trigger",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "GrabPoint",
+            "__guid": "6a14fb6b-5824-41c4-a27b-d7f6afa4725b",
+            "__enabled": true,
+            "Flags": 0,
+            "Collider": {
+              "_type": "component",
+              "component_id": "7e3d78c8-cad9-44e8-9aba-342c624d6fc4",
+              "go": "2f253604-607b-4d1e-95b8-5b650718bd1e",
+              "component_type": "SphereCollider"
+            },
+            "GrabInput": "Grip",
+            "Interactable": {
+              "_type": "component",
+              "component_id": "4c65ae16-1fed-4d6d-bd56-60ade0088271",
+              "go": "2dee2e70-56cc-4521-bad2-88514c3f9b12",
+              "component_type": "GunplayInteractable"
+            },
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "OnGrabEndEvent": null,
+            "OnGrabStartEvent": null,
+            "Preset": {
+              "Thumb": -1,
+              "Index": 1,
+              "Middle": 1,
+              "Ring": 1,
+              "Pinky": 1
+            },
+            "PrimaryGrabPoint": null
+          },
+          {
+            "__type": "Sandbox.SphereCollider",
+            "__guid": "7e3d78c8-cad9-44e8-9aba-342c624d6fc4",
+            "__enabled": true,
+            "Flags": 0,
+            "Center": "0,0,0",
+            "ColliderFlags": 0,
+            "Elasticity": null,
+            "Friction": null,
+            "IsTrigger": true,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "OnObjectTriggerEnter": null,
+            "OnObjectTriggerExit": null,
+            "OnTriggerEnter": null,
+            "OnTriggerExit": null,
+            "Radius": 1.5,
+            "RollingResistance": null,
+            "Static": false,
+            "Surface": null,
+            "SurfaceVelocity": "0,0,0"
+          }
+        ],
+        "Children": []
+      },
+      {
+        "__guid": "093f4012-254e-4564-ba05-ce3abfd60946",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Thumbnail Camera",
+        "Position": "0,0,0",
+        "Rotation": "0.0747070536,0.0448885262,-0.853905499,0.513078213",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "ThumbnailCamera",
+            "__guid": "d09512eb-94cc-4e57-b588-d2dc3ced9b03",
+            "__enabled": true,
+            "Flags": 0,
+            "FieldOfView": 12,
+            "FitRenderersOnly": true,
+            "FitToBounds": true,
+            "Focus": "0,0",
+            "GizmoDistance": 60,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Padding": 0.15,
+            "Zoom": 1
+          }
+        ],
+        "Children": []
+      }
+    ]
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

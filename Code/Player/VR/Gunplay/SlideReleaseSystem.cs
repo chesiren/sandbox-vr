@@ -19,6 +19,11 @@ public sealed class SlideReleaseSystem : Component
 	/// </summary>
 	public bool IsPulled => PointInteractable.CompletionValue.AlmostEqual( 1f ) || (IsProxy && PointInteractable.SyncedCompletion.AlmostEqual( 1f ));
 
+	/// <summary>
+	/// Is the slide or bolt all the way home?
+	/// </summary>
+	public bool IsClosed => IsProxy ? PointInteractable.SyncedCompletion.AlmostEqual( 0f, 0.05f ) : PointInteractable.CompletionValue.AlmostEqual( 0f, 0.05f );
+
 	public GunplayHand Hand => InputGrabPoint?.HeldHand;
 
 	protected override void OnStart()

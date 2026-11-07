@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/m4a1/m4a1.prefab",
+  "Title": "AR-4",
+  "Description": "An automatic rifle worked by hand: put a magazine in, pull the charging handle, fire. Hold the handguard with your other hand. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

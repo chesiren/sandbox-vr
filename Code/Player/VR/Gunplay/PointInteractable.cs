@@ -48,7 +48,15 @@ public sealed class PointInteractable : BaseGunplayInteractable
 	/// </summary>
 	[Property] public Angles AnglesAtOne { get; set; }
 
-	public GunplayHand Hand => PrimaryGrabPoint?.Hand;
+	/// <summary>
+	/// A grab point of the gun itself that moves this part, like a shotgun's pump: the hand on it holds and aims the gun
+	/// with the other one, and pulls the part along as it goes. None: the part has its own grab point.
+	/// </summary>
+	[Property, Group( "Setup" )] public GrabPoint DrivenBy { get; set; }
+
+	IGrabbable HandleGrabPoint => DrivenBy.IsValid() ? DrivenBy : PrimaryGrabPoint;
+
+	public GunplayHand Hand => HandleGrabPoint?.Hand;
 
 	public Transform InitialBoneLocalTransform { get; set; }
 
@@ -98,11 +106,14 @@ public sealed class PointInteractable : BaseGunplayInteractable
 
 		if ( Renderer.IsValid() && Start.IsValid() && End.IsValid() && BoneGameObject.IsValid() )
 		{
+			// We move the bone, not the model's animation
+			BoneGameObject.Flags |= GameObjectFlags.ProceduralBone;
+
 			DistanceBetweenStartAndEnd = Vector3.DistanceBetween( End.WorldPosition, Start.WorldPosition );
 			InitialBoneLocalTransform = BoneGameObject.LocalTransform;
 		}
 
-		if ( PrimaryGrabPoint is GrabPoint grabPoint )
+		if ( HandleGrabPoint is GrabPoint grabPoint )
 			grabPoint.OnGrabEndEvent += OnGrabEnd;
 
 		if ( IsProxy ) completionValue = SyncedCompletion;
@@ -110,7 +121,7 @@ public sealed class PointInteractable : BaseGunplayInteractable
 
 	protected override void OnDestroy()
 	{
-		if ( PrimaryGrabPoint is GrabPoint grabPoint && grabPoint.IsValid() )
+		if ( HandleGrabPoint is GrabPoint grabPoint && grabPoint.IsValid() )
 			grabPoint.OnGrabEndEvent -= OnGrabEnd;
 	}
 
@@ -142,12 +153,14 @@ public sealed class PointInteractable : BaseGunplayInteractable
 			CompletionValue = localHand.Position.x.Remap( 0, -DistanceBetweenStartAndEnd, 0, 1, true );
 
 			// The grab point, and so the hand on it, slides with the part
-			PrimaryGrabPoint.GameObject.WorldPosition = Vector3.Lerp( Start.WorldPosition, End.WorldPosition, completionValue );
+			HandleGrabPoint.GameObject.WorldPosition = Vector3.Lerp( Start.WorldPosition, End.WorldPosition, completionValue );
 		}
 
-		BoneGameObject.LocalTransform = new Transform( CalcLocalPosition(), Rotation.Identity, 1 );
-
+		// The bone keeps how the model turns it, like a stock that's mirrored round
+		var rotation = InitialBoneLocalTransform.Rotation;
 		if ( completionValue.AlmostEqual( 1f ) )
-			BoneGameObject.LocalRotation = AnglesAtOne.ToRotation();
+			rotation *= AnglesAtOne.ToRotation();
+
+		BoneGameObject.LocalTransform = new Transform( CalcLocalPosition(), rotation, 1 );
 	}
 }

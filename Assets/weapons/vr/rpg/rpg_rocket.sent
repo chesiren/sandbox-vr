@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/rpg/rpg_rocket.prefab",
+  "Title": "Ashford R-7 Rocket",
+  "Description": "Push it into the back of the Ashford R-7. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

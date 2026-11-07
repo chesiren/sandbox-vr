@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/ammo/round_45.prefab",
+  "Title": ".45 Round",
+  "Description": "Push it into a .45 magazine, or into the chamber with the slide back. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

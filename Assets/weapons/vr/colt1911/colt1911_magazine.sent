@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/colt1911/colt1911_magazine.prefab",
+  "Title": "Heritage .45 Magazine",
+  "Description": "Seven .45 rounds. Push it into the Heritage .45. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

@@ -9,7 +9,15 @@ public enum RoundCaliber
 	[Title( "9mm" )]
 	Nine,
 	[Title( "12ga" )]
-	TwelveGauge
+	TwelveGauge,
+	[Title( ".45 ACP" )]
+	FortyFive,
+	[Title( ".357 Magnum" )]
+	ThreeFiftySeven,
+	[Title( "7.62x51mm" )]
+	SevenSixTwo,
+	[Title( "84mm rocket" )]
+	Rocket
 }
 
 /// <summary>

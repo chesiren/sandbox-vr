@@ -3,12 +3,18 @@
 /// loose round in while the slide's back. Ported from gunbuilder's WeaponChamber. The gun's owner keeps it; how many
 /// rounds are in it is synced, so whoever takes the gun next carries on from there.
 /// </summary>
-public sealed class GunChamber : Component, Component.ITriggerListener
+public sealed class GunChamber : Component, IGunChamber, Component.ITriggerListener
 {
 	/// <summary>
 	/// How many rounds are chambered.
 	/// </summary>
 	[Sync, Property, ReadOnly] public int ChamberCount { get; private set; }
+
+	/// <summary>
+	/// A fired casing is still in it, for a gun worked by hand (<see cref="PhysicalGun.ManualAction"/>): it stays until the
+	/// pump or the bolt is pulled back, and nothing else goes in until then.
+	/// </summary>
+	[Sync, Property, ReadOnly] public bool HasSpentCasing { get; private set; }
 
 	/// <summary>
 	/// How many rounds fit, more than one for something like a shotgun.
@@ -32,7 +38,9 @@ public sealed class GunChamber : Component, Component.ITriggerListener
 
 	Round ChamberedRound => _round ?? GetComponentInParent<PhysicalGun>()?.RoundTemplate;
 
-	bool CanInsert => ChamberCount < ChamberCapacity;
+	bool CanInsert => !HasSpentCasing && ChamberCount < ChamberCapacity;
+
+	public bool HasRound => ChamberCount > 0;
 
 	/// <summary>
 	/// Takes the chambered round out. Owner only.
@@ -43,6 +51,26 @@ public sealed class GunChamber : Component, Component.ITriggerListener
 
 		ChamberCount--;
 		return ChamberedRound is { } round ? round with { IsSpent = false } : null;
+	}
+
+	/// <summary>
+	/// The round just fired leaves its casing behind. Owner only.
+	/// </summary>
+	public void LeaveSpentCasing()
+	{
+		if ( !IsProxy ) HasSpentCasing = true;
+	}
+
+	/// <summary>
+	/// Takes the fired casing out. Owner only.
+	/// </summary>
+	/// <returns>There was one.</returns>
+	public bool EjectSpentCasing()
+	{
+		if ( IsProxy || !HasSpentCasing ) return false;
+
+		HasSpentCasing = false;
+		return true;
 	}
 
 	/// <summary>
