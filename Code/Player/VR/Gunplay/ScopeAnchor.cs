@@ -15,9 +15,10 @@ public sealed class ScopeAnchor : Component
 	[Property] public float FieldOfView { get; set; } = 9f;
 
 	/// <summary>
-	/// How far along the barrel the camera is, past the gun so it isn't in the picture.
+	/// How far past the muzzle the camera is, so the gun isn't in the picture. It looks along the barrel, so the cross
+	/// is on where the bullet goes.
 	/// </summary>
-	[Property] public float CameraReach { get; set; } = 40f;
+	[Property] public float CameraReach { get; set; } = 4f;
 
 	/// <summary>
 	/// The scope of the gun one of our hands holds by its grip, if it has one.

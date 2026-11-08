@@ -71,34 +71,6 @@
         "StartAsleep": false
       },
       {
-        "__type": "Sandbox.ModelCollider",
-        "__guid": "5bd4fa96-f50c-43c0-acf1-1e1607eaff3c",
-        "__enabled": true,
-        "Flags": 0,
-        "ColliderFlags": 0,
-        "Elasticity": null,
-        "Friction": null,
-        "IsTrigger": false,
-        "Model": {
-          "Id": "3428e429-2c89-4366-bb92-276f7031c8e7",
-          "Path": "models/weapons/sbox_melee_crowbar/w_crowbar.vmdl"
-        },
-        "OnComponentDestroy": null,
-        "OnComponentDisabled": null,
-        "OnComponentEnabled": null,
-        "OnComponentFixedUpdate": null,
-        "OnComponentStart": null,
-        "OnComponentUpdate": null,
-        "OnObjectTriggerEnter": null,
-        "OnObjectTriggerExit": null,
-        "OnTriggerEnter": null,
-        "OnTriggerExit": null,
-        "RollingResistance": null,
-        "Static": false,
-        "Surface": null,
-        "SurfaceVelocity": "0,0,0"
-      },
-      {
         "__type": "MeleeImpact",
         "__guid": "c84d0b32-4c01-44a3-ae78-120af7a9830a",
         "__enabled": true,
@@ -123,7 +95,12 @@
         "OnComponentEnabled": null,
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
-        "OnComponentUpdate": null
+        "OnComponentUpdate": null,
+        "HitPoints": [
+          "0,0,10",
+          "0,0,19",
+          "0,0,26"
+        ]
       }
     ],
     "Children": [
@@ -133,7 +110,7 @@
         "Flags": 0,
         "Name": "Model",
         "Position": "0,0,0",
-        "Rotation": "0,0,0,1",
+        "Rotation": "0,0,1,0",
         "Scale": "1,1,1",
         "Tags": "",
         "Enabled": true,
@@ -185,6 +162,53 @@
             },
             "Tint": "1,1,1,1",
             "UseAnimGraph": true
+          }
+        ],
+        "Children": []
+      },
+      {
+        "__guid": "2d8a91f7-f50f-4bb9-b2c9-9914db469d96",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Collider",
+        "Position": "0,0,0",
+        "Rotation": "0,0,1,0",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.ModelCollider",
+            "__guid": "0218f676-e1de-4cbd-bd80-4bfb70de3146",
+            "__enabled": true,
+            "Flags": 0,
+            "ColliderFlags": 0,
+            "Elasticity": null,
+            "Friction": null,
+            "IsTrigger": false,
+            "Model": {
+              "Id": "3428e429-2c89-4366-bb92-276f7031c8e7",
+              "Path": "models/weapons/sbox_melee_crowbar/w_crowbar.vmdl"
+            },
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "OnObjectTriggerEnter": null,
+            "OnObjectTriggerExit": null,
+            "OnTriggerEnter": null,
+            "OnTriggerExit": null,
+            "RollingResistance": null,
+            "Static": false,
+            "Surface": null,
+            "SurfaceVelocity": "0,0,0"
           }
         ],
         "Children": []

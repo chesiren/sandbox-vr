@@ -1,6 +1,6 @@
 {
   "RootObject": {
-    "__guid": "682eb878-1949-4047-a474-5ee1059e65d6",
+    "__guid": "97c6ede9-07f0-483e-8fa2-e25fcf5751f5",
     "__version": 2,
     "Flags": 0,
     "Name": "spaghellim4",
@@ -17,7 +17,7 @@
     "Components": [
       {
         "__type": "PhysicalGun",
-        "__guid": "d0217e8d-d1e2-4a3f-8b1a-338b06ac2cf4",
+        "__guid": "fdba2413-7b61-4706-9e9f-a5edee77c962",
         "__enabled": true,
         "Flags": 0,
         "Automatic": false,
@@ -25,10 +25,13 @@
         "BulletSize": 1,
         "Chamber": {
           "_type": "component",
-          "component_id": "453e5853-dd4c-429c-81c9-ea62927995e6",
-          "go": "b4a3d104-7910-4c52-95a1-3bffeef4ba9a",
+          "component_id": "3a88c3c3-fd19-4ca4-bf65-6e4c76179352",
+          "go": "68f9464c-33fb-4c28-8e1a-f56337076cb3",
           "component_type": "GunChamber"
         },
+        "ChambersOnInsert": false,
+        "ConsumesEmptyMagazine": false,
+        "Cylinder": null,
         "Damage": 8,
         "DryFireSound": {
           "Id": "066c6fdf-2cb5-44dc-b97e-630b53d8ed25",
@@ -36,14 +39,14 @@
         },
         "EjectionPort": {
           "_type": "gameobject",
-          "go": "b4a3d104-7910-4c52-95a1-3bffeef4ba9a"
+          "go": "68f9464c-33fb-4c28-8e1a-f56337076cb3"
         },
         "Force": 200,
         "HorizontalRecoil": "-200 200",
         "InternalMagazine": {
           "_type": "component",
-          "component_id": "72bfa54e-6037-4175-9d74-556d8905be1d",
-          "go": "ccbb508f-771d-4c5d-8a1f-bfb98d6adf39",
+          "component_id": "cbb22fa3-bec0-45b8-9f3f-42e1ec59d0ed",
+          "go": "1c0190dc-59ec-4b5d-880a-96decaaedb93",
           "component_type": "InternalMagazine"
         },
         "ManualAction": false,
@@ -51,7 +54,7 @@
         "MaxRange": 2048,
         "MuzzleGameObject": {
           "_type": "gameobject",
-          "go": "6b2ead29-8514-4081-868f-8105993c633f"
+          "go": "845e7d15-5c3b-42a4-a779-afd5b7c54035"
         },
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
@@ -60,10 +63,12 @@
         "OnComponentStart": null,
         "OnComponentUpdate": null,
         "Pellets": 8,
+        "ProjectilePrefab": null,
+        "ProjectileSpeed": 1024,
         "Rigidbody": {
           "_type": "component",
-          "component_id": "2632cbf6-2268-4a1e-9b24-daee6b588e7e",
-          "go": "682eb878-1949-4047-a474-5ee1059e65d6",
+          "component_id": "7d7a7e30-7401-467f-9235-ea14b85b6d58",
+          "go": "97c6ede9-07f0-483e-8fa2-e25fcf5751f5",
           "component_type": "Rigidbody"
         },
         "RoundPrefab": {
@@ -77,8 +82,8 @@
         },
         "SlideReleaseSystem": {
           "_type": "component",
-          "component_id": "34dcc63f-b87d-4063-8b4e-50b23e24ff7e",
-          "go": "da5d482a-1ba2-411c-b617-0ba1f6538bcd",
+          "component_id": "cb407162-553b-4c74-9cdc-a6c172bb8607",
+          "go": "898bb196-6764-4bff-8533-f15f19eca294",
           "component_type": "SlideReleaseSystem"
         },
         "Spread": 3,
@@ -89,7 +94,7 @@
       },
       {
         "__type": "Sandbox.Rigidbody",
-        "__guid": "2632cbf6-2268-4a1e-9b24-daee6b588e7e",
+        "__guid": "7d7a7e30-7401-467f-9235-ea14b85b6d58",
         "__enabled": true,
         "Flags": 0,
         "AngularDamping": 0,
@@ -122,39 +127,11 @@
         "RigidbodyFlags": 0,
         "SleepThreshold": 2,
         "StartAsleep": false
-      },
-      {
-        "__type": "Sandbox.ModelCollider",
-        "__guid": "1101816f-f4e1-424f-a5c2-86d9f7d7b0eb",
-        "__enabled": true,
-        "Flags": 0,
-        "ColliderFlags": 0,
-        "Elasticity": null,
-        "Friction": null,
-        "IsTrigger": false,
-        "Model": {
-          "Id": "e6c4cfb6-0671-4292-b523-1bc6cdf499fb",
-          "Path": "models/weapons/sbox_shotgun_spaghellim4/w_spaghellim4.vmdl"
-        },
-        "OnComponentDestroy": null,
-        "OnComponentDisabled": null,
-        "OnComponentEnabled": null,
-        "OnComponentFixedUpdate": null,
-        "OnComponentStart": null,
-        "OnComponentUpdate": null,
-        "OnObjectTriggerEnter": null,
-        "OnObjectTriggerExit": null,
-        "OnTriggerEnter": null,
-        "OnTriggerExit": null,
-        "RollingResistance": null,
-        "Static": false,
-        "Surface": null,
-        "SurfaceVelocity": "0,0,0"
       }
     ],
     "Children": [
       {
-        "__guid": "340d44a8-f612-4c13-aeca-1cdbb155f043",
+        "__guid": "9913db68-c051-4b87-ab7c-2b63bf354dca",
         "__version": 2,
         "Flags": 0,
         "Name": "Model",
@@ -171,7 +148,7 @@
         "Components": [
           {
             "__type": "Sandbox.SkinnedModelRenderer",
-            "__guid": "0cee0d7a-60e8-411e-90a0-bec1b546ea43",
+            "__guid": "8fe92e62-7412-4c50-8b0f-50422ed321d0",
             "__enabled": true,
             "Flags": 0,
             "AnimationGraph": {
@@ -218,7 +195,7 @@
         ],
         "Children": [
           {
-            "__guid": "f18cee88-800d-40e2-8a18-ae9d22980eda",
+            "__guid": "16c4f7b7-0e72-4522-bd57-6ffc225f08fb",
             "__version": 2,
             "Flags": 0,
             "Name": "weapon_root",
@@ -235,7 +212,7 @@
             "Components": [],
             "Children": [
               {
-                "__guid": "7c436ba5-966e-4f42-ba97-91b16ccac027",
+                "__guid": "1c860387-634a-473f-8106-a41667e905a5",
                 "__version": 2,
                 "Flags": 0,
                 "Name": "weapon_root_children",
@@ -252,7 +229,7 @@
                 "Components": [],
                 "Children": [
                   {
-                    "__guid": "aff71d1f-d14c-4141-804a-aca463ffe58b",
+                    "__guid": "698a4ef0-b0f8-488c-b2eb-b83cfe6ba6ac",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "muzzle",
@@ -270,7 +247,7 @@
                     "Children": []
                   },
                   {
-                    "__guid": "47387873-7a49-40e2-8057-44dfd3fc3739",
+                    "__guid": "741f8076-3423-4a49-a128-c5ef74edc0b1",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "weapon_IK_hand_L",
@@ -287,7 +264,7 @@
                     "Components": [],
                     "Children": [
                       {
-                        "__guid": "905fd664-889b-414b-ba22-183f72fb52c6",
+                        "__guid": "a5551c5b-bad8-44b0-859f-7f7830ff4447",
                         "__version": 2,
                         "Flags": 0,
                         "Name": "hand_L_to_weapon_ikrule",
@@ -307,7 +284,7 @@
                     ]
                   },
                   {
-                    "__guid": "8d43892a-c388-4b6c-93d6-53cb0f92f3b8",
+                    "__guid": "d31e4f2e-1f2e-4660-b655-e1d5f68901c2",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "bolt",
@@ -325,7 +302,7 @@
                     "Children": []
                   },
                   {
-                    "__guid": "26ff0538-bee0-4094-8e06-a23b3e1f43bd",
+                    "__guid": "52c7b41d-a6d4-4c43-8c22-b3b653f9814b",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "trigger",
@@ -343,7 +320,7 @@
                     "Children": []
                   },
                   {
-                    "__guid": "1c368daa-1596-4df8-8a26-40e9b6e408d3",
+                    "__guid": "4c80b5ce-3091-4caf-b717-789759bd6e1a",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "stock",
@@ -361,7 +338,7 @@
                     "Children": []
                   },
                   {
-                    "__guid": "b48d9922-91d4-47f5-8243-aae6d27268a1",
+                    "__guid": "4741fc30-1dc8-4860-b032-15a1cb93731a",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "weapon_IK_hand_R",
@@ -378,7 +355,7 @@
                     "Components": [],
                     "Children": [
                       {
-                        "__guid": "1a6a1c4e-06b8-453f-ac9f-3444888f84b6",
+                        "__guid": "bfbf345d-6ad2-4268-ba9e-90e4c9b73cd4",
                         "__version": 2,
                         "Flags": 0,
                         "Name": "hand_R_to_weapon_ikrule",
@@ -398,7 +375,7 @@
                     ]
                   },
                   {
-                    "__guid": "55804e2a-b7bc-4286-ac2b-753fa595d4a0",
+                    "__guid": "a752dcb0-92d7-4499-a8c3-6272939d393c",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "carrier",
@@ -416,7 +393,7 @@
                     "Children": []
                   },
                   {
-                    "__guid": "a6a90118-3330-4cc7-a323-6005c043a27f",
+                    "__guid": "fb5dae2d-a389-4f45-a714-ef8a76519126",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "release",
@@ -434,7 +411,7 @@
                     "Children": []
                   },
                   {
-                    "__guid": "6c08c775-58ed-4cff-b01d-d6d1cbd08769",
+                    "__guid": "e3968e79-75aa-49b1-8cef-5d7bb5b3560e",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "shell01",
@@ -452,7 +429,7 @@
                     "Children": []
                   },
                   {
-                    "__guid": "ef218a77-71b5-490c-9cce-7dded06403dd",
+                    "__guid": "153f90cd-d5ee-47e9-abf1-2da71cfac62e",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "shell02",
@@ -474,7 +451,7 @@
             ]
           },
           {
-            "__guid": "52c7cd33-a76b-4173-9dd3-9736fd5a9140",
+            "__guid": "ad04577e-d121-4fdb-ba3a-dc81da7425c2",
             "__version": 2,
             "Flags": 0,
             "Name": "root",
@@ -491,7 +468,7 @@
             "Components": [],
             "Children": [
               {
-                "__guid": "c7291a73-81d8-4c24-b3ec-91e7db15c487",
+                "__guid": "8255efeb-fcc1-461c-8754-f94d4abf108e",
                 "__version": 2,
                 "Flags": 0,
                 "Name": "clavicle_R",
@@ -508,7 +485,7 @@
                 "Components": [],
                 "Children": [
                   {
-                    "__guid": "686c8a36-9aec-425e-bbec-a3cd34e10108",
+                    "__guid": "7c462cc4-1f52-4eda-af54-681248868afa",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "arm_upper_R",
@@ -525,7 +502,7 @@
                     "Components": [],
                     "Children": [
                       {
-                        "__guid": "ce71aa25-4c3f-4209-bb83-4258995a30d2",
+                        "__guid": "536ff23b-109c-4e1c-ac8a-6c045c33f52d",
                         "__version": 2,
                         "Flags": 0,
                         "Name": "arm_lower_R",
@@ -542,7 +519,7 @@
                         "Components": [],
                         "Children": [
                           {
-                            "__guid": "9138f10b-af02-42f3-9dea-aa8a44501820",
+                            "__guid": "29efd96b-f616-4c3a-af2c-99c06014b4b2",
                             "__version": 2,
                             "Flags": 0,
                             "Name": "hand_R",
@@ -559,7 +536,7 @@
                             "Components": [],
                             "Children": [
                               {
-                                "__guid": "3797b368-baa9-4169-830b-dd0d56092bce",
+                                "__guid": "bc92f2f5-0d17-4506-916e-1226310e8131",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_index_meta_R",
@@ -576,7 +553,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "294f688f-7fbe-4647-899d-91c66f60da45",
+                                    "__guid": "97763e05-f6d4-4c09-a9b8-dd622135bd7e",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_index_0_R",
@@ -593,7 +570,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "5fc567ae-f404-4836-aa0f-f1b3bf98c7b5",
+                                        "__guid": "991cddc4-54a4-4b1e-8ed5-6c1a113ce5a9",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_index_1_R",
@@ -610,7 +587,7 @@
                                         "Components": [],
                                         "Children": [
                                           {
-                                            "__guid": "4a7a4486-71f7-4bf6-a34e-5ef8d92e55d4",
+                                            "__guid": "3ddbf3d7-8027-4f8e-91a4-0eccb8783613",
                                             "__version": 2,
                                             "Flags": 0,
                                             "Name": "finger_index_2_R",
@@ -634,7 +611,7 @@
                                 ]
                               },
                               {
-                                "__guid": "ae7c7fd4-ec78-4662-b8b4-a74d4140fb81",
+                                "__guid": "5d1f9097-b823-420a-acf8-e6730c963b9c",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_middle_meta_R",
@@ -651,7 +628,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "04d79fcc-dab5-4d8e-8019-6f3e1176b852",
+                                    "__guid": "d5fe7e2e-2208-4669-9504-a233d6bafd6a",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_middle_0_R",
@@ -668,7 +645,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "6957efb9-2888-4b41-9096-385e7d7a6cd8",
+                                        "__guid": "1dad4ef9-7d30-44b4-8a0b-d3eb96df4ee5",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_middle_1_R",
@@ -685,7 +662,7 @@
                                         "Components": [],
                                         "Children": [
                                           {
-                                            "__guid": "278079ee-1b61-4b54-8e65-f0eee509f768",
+                                            "__guid": "fc7f217b-aa71-45e5-874f-f42e4452d99d",
                                             "__version": 2,
                                             "Flags": 0,
                                             "Name": "finger_middle_2_R",
@@ -709,7 +686,7 @@
                                 ]
                               },
                               {
-                                "__guid": "c0b240b5-3527-4ca1-90a6-57229aef6cd3",
+                                "__guid": "f9fc9180-eeba-4729-b021-2b26c1c31180",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_ring_meta_R",
@@ -726,7 +703,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "bad04c9c-9ca8-4291-8c53-a05669d5bbd1",
+                                    "__guid": "aa901d43-edab-4777-a669-7dbea72f08b0",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_ring_0_R",
@@ -743,7 +720,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "12ac22de-124e-47ac-99a3-fc672f6ce500",
+                                        "__guid": "c1fb8601-21e0-43ce-b40f-155506cbb746",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_ring_1_R",
@@ -760,7 +737,7 @@
                                         "Components": [],
                                         "Children": [
                                           {
-                                            "__guid": "57d8e018-c2c1-423e-bfeb-a79ca2c8a6a1",
+                                            "__guid": "387f8055-9901-4222-8507-84b8722f7cf8",
                                             "__version": 2,
                                             "Flags": 0,
                                             "Name": "finger_ring_2_R",
@@ -784,7 +761,7 @@
                                 ]
                               },
                               {
-                                "__guid": "861f0bf5-ab69-4761-892d-da4ca1c2b0d9",
+                                "__guid": "e360076e-b77a-43b6-b834-df4c53d1c4c9",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_pinky_meta_R",
@@ -801,7 +778,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "1f2fb288-cd87-4d73-8eb8-ac1572f927f3",
+                                    "__guid": "d56d0ad5-859d-43a9-933c-f919be738408",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_pinky_0_R",
@@ -818,7 +795,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "0cc97dd3-adde-4bbb-8a7f-01037272e125",
+                                        "__guid": "60118158-0a8f-4ac7-9945-56b30997262c",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_pinky_1_R",
@@ -835,7 +812,7 @@
                                         "Components": [],
                                         "Children": [
                                           {
-                                            "__guid": "fb5d5a10-f378-42ef-9603-66ccff95ae10",
+                                            "__guid": "4d852ef2-0a92-49ce-9fad-011fcd6f0636",
                                             "__version": 2,
                                             "Flags": 0,
                                             "Name": "finger_pinky_2_R",
@@ -859,7 +836,7 @@
                                 ]
                               },
                               {
-                                "__guid": "646a91c7-957e-4c1a-9c71-9c7c7200528a",
+                                "__guid": "72beb1b2-6ae9-41de-b383-fe78ecbc5458",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "hand_L_to_R_ikrule",
@@ -877,7 +854,7 @@
                                 "Children": []
                               },
                               {
-                                "__guid": "8356dd9c-f6cd-4d13-9315-d2fcc6433122",
+                                "__guid": "0d94d62b-5af6-4ced-9230-f402e23f665e",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_thumb_0_R",
@@ -894,7 +871,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "71e10ed7-3b8f-468e-99a4-8f08893a2a92",
+                                    "__guid": "788883eb-3cfe-4100-93f9-87d92c8f489c",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_thumb_1_R",
@@ -911,7 +888,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "58339dca-f91c-4dae-8ade-65f27cba3bce",
+                                        "__guid": "30903564-0aac-4d1f-9a2f-46a73c70e702",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_thumb_2_R",
@@ -935,7 +912,7 @@
                             ]
                           },
                           {
-                            "__guid": "b24b2bf2-a8f9-48bd-b5d2-94ec28d14427",
+                            "__guid": "6805e423-d3b0-47fa-80fb-0f4ae35be60c",
                             "__version": 2,
                             "Flags": 0,
                             "Name": "arm_lower_R_twistctrl0",
@@ -952,7 +929,7 @@
                             "Components": [],
                             "Children": [
                               {
-                                "__guid": "1202e1a5-f651-40f9-9c5e-1dd3b829d7be",
+                                "__guid": "b8b6f95b-0aa8-482f-9753-6c169261c40a",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "arm_lower_R_twist0",
@@ -970,7 +947,7 @@
                                 "Children": []
                               },
                               {
-                                "__guid": "0412b14f-594d-476d-9d44-8c63dd23071f",
+                                "__guid": "ca78d203-24a1-4050-b23c-1f9ac95feaab",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "arm_lower_R_twistctrl1",
@@ -987,7 +964,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "108f1f09-b97d-4445-80ea-3b6be9a38b8c",
+                                    "__guid": "4edbccd5-e5ee-4f73-b444-bfc66b9ab26b",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "arm_lower_R_twistctrl2",
@@ -1004,7 +981,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "b5cf310f-0553-47ff-a419-440e2fb79f41",
+                                        "__guid": "7cfc3e5f-46bd-453d-a7a9-650bdb7d39de",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "arm_lower_R_twist2",
@@ -1024,7 +1001,7 @@
                                     ]
                                   },
                                   {
-                                    "__guid": "7b9727de-4dcc-41c4-be7e-947377076922",
+                                    "__guid": "6a287af2-9be4-4a24-addf-4beec5321b16",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "arm_lower_R_twist1",
@@ -1052,7 +1029,7 @@
                 ]
               },
               {
-                "__guid": "66eaedc4-ce64-4f2f-931b-aaf54f5a4e8f",
+                "__guid": "18996c98-e1a3-4b59-b8c0-5baf1c4c23c6",
                 "__version": 2,
                 "Flags": 0,
                 "Name": "clavicle_L",
@@ -1069,7 +1046,7 @@
                 "Components": [],
                 "Children": [
                   {
-                    "__guid": "2beee91a-3170-4090-8051-5d434c001cd5",
+                    "__guid": "283a2179-61df-46d4-8414-e4abff225075",
                     "__version": 2,
                     "Flags": 0,
                     "Name": "arm_upper_L",
@@ -1086,7 +1063,7 @@
                     "Components": [],
                     "Children": [
                       {
-                        "__guid": "226a62f2-7aaf-43b6-9353-d3ba0713c4f0",
+                        "__guid": "3741f99a-8bde-45c6-887e-e720d36ed213",
                         "__version": 2,
                         "Flags": 0,
                         "Name": "arm_lower_L",
@@ -1103,7 +1080,7 @@
                         "Components": [],
                         "Children": [
                           {
-                            "__guid": "48d63c54-0247-4154-b69d-5b06844bf8b0",
+                            "__guid": "94f4b17d-8f10-46dd-96eb-3d63e8157d4a",
                             "__version": 2,
                             "Flags": 0,
                             "Name": "hand_L",
@@ -1120,7 +1097,7 @@
                             "Components": [],
                             "Children": [
                               {
-                                "__guid": "ec2b01f6-3c18-4383-9c38-889d184b0e36",
+                                "__guid": "40d757db-e3e4-45a1-b9d6-2565d2d7dbd1",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_index_meta_L",
@@ -1137,7 +1114,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "2ffdd292-ca02-48a4-a65b-3a6e1a59406a",
+                                    "__guid": "9cffa388-a932-4ae1-9d65-4e374049179c",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_index_0_L",
@@ -1154,7 +1131,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "56a07cff-c76d-4f1f-ba57-9190f2f19a1f",
+                                        "__guid": "47e64ac9-ff00-434f-b3e8-b680e660c0ed",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_index_1_L",
@@ -1171,7 +1148,7 @@
                                         "Components": [],
                                         "Children": [
                                           {
-                                            "__guid": "56707391-9a7c-43f3-8cf0-bc5dd5ad9eb1",
+                                            "__guid": "58b21f59-001b-46e0-b17a-fa376a5c0d77",
                                             "__version": 2,
                                             "Flags": 0,
                                             "Name": "finger_index_2_L",
@@ -1195,7 +1172,7 @@
                                 ]
                               },
                               {
-                                "__guid": "64697cd4-35e9-43b4-873d-ea94cbace1c7",
+                                "__guid": "2149932f-eaeb-42f7-990f-2b4896bb50ef",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_middle_meta_L",
@@ -1212,7 +1189,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "83d24eba-0ff1-4696-89de-b6c5c2272477",
+                                    "__guid": "a503e61a-48cc-464a-b318-5cda70ca75fa",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_middle_0_L",
@@ -1229,7 +1206,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "4fff2a97-154b-4c78-b668-b02ff9c8c240",
+                                        "__guid": "48f44620-1f8d-4641-849d-35fa25571707",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_middle_1_L",
@@ -1246,7 +1223,7 @@
                                         "Components": [],
                                         "Children": [
                                           {
-                                            "__guid": "34a24a39-8d04-4631-96be-207860d6e044",
+                                            "__guid": "c71fe80a-6c33-4e4e-a52a-36ddf9aae175",
                                             "__version": 2,
                                             "Flags": 0,
                                             "Name": "finger_middle_2_L",
@@ -1270,7 +1247,7 @@
                                 ]
                               },
                               {
-                                "__guid": "a97a5d85-d64b-4271-a4f3-703fd2993cf6",
+                                "__guid": "89ade2e6-dfff-4734-b4d9-c2786f796bc0",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_ring_meta_L",
@@ -1287,7 +1264,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "9c13b21e-8b71-48da-84ec-16d43b5d9a56",
+                                    "__guid": "8b483ac6-7d8b-4017-a069-d6576f977401",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_ring_0_L",
@@ -1304,7 +1281,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "e3074f7a-b563-44ed-87a7-aa4c3c378ab8",
+                                        "__guid": "116adfb2-6963-458d-b061-bcb1733b548a",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_ring_1_L",
@@ -1321,7 +1298,7 @@
                                         "Components": [],
                                         "Children": [
                                           {
-                                            "__guid": "635337de-9881-4a1c-aead-950b90f6cb9a",
+                                            "__guid": "31824af2-7790-4d83-8fb5-91a97835f500",
                                             "__version": 2,
                                             "Flags": 0,
                                             "Name": "finger_ring_2_L",
@@ -1345,7 +1322,7 @@
                                 ]
                               },
                               {
-                                "__guid": "fe155378-499c-4541-bc61-637ec9c1e45c",
+                                "__guid": "6e74c8f4-a888-4339-8b89-fcbd9d2604fc",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_pinky_meta_L",
@@ -1362,7 +1339,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "9c0242ef-9589-4a2c-9c26-560459b794ae",
+                                    "__guid": "cb0e72e8-3cb7-4a7b-86e4-ffe94fb5c67b",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_pinky_0_L",
@@ -1379,7 +1356,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "a4b29634-d834-4b10-92cb-f56b3bb49615",
+                                        "__guid": "3d73e7b6-edcc-4774-b700-bad717c4bff8",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_pinky_1_L",
@@ -1396,7 +1373,7 @@
                                         "Components": [],
                                         "Children": [
                                           {
-                                            "__guid": "fcd22dcf-d9b6-4c27-852d-11a9662a558c",
+                                            "__guid": "74ab7913-0aa2-422b-880a-29f9b02da7b1",
                                             "__version": 2,
                                             "Flags": 0,
                                             "Name": "finger_pinky_2_L",
@@ -1420,7 +1397,7 @@
                                 ]
                               },
                               {
-                                "__guid": "0c727a4f-03c8-4240-8353-b05e67cf4ce0",
+                                "__guid": "b2e68c88-0547-484f-b85b-de292f3f8d24",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "hand_R_to_L_ikrule",
@@ -1438,7 +1415,7 @@
                                 "Children": []
                               },
                               {
-                                "__guid": "05b91b23-dac9-4ca6-8216-2c04420fcdf4",
+                                "__guid": "e88bfa3a-0c84-4235-a9b3-9bcd20fc672f",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "finger_thumb_0_L",
@@ -1455,7 +1432,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "4bdeaa78-7523-4de8-b39f-ab446dea3fae",
+                                    "__guid": "b65c383a-09fa-4a5a-9172-d0707df25981",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "finger_thumb_1_L",
@@ -1472,7 +1449,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "f0c6e83a-95d2-47c5-9b41-0ff4583ba87c",
+                                        "__guid": "c7e6d94d-7612-4b1e-b238-530361dd4000",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "finger_thumb_2_L",
@@ -1496,7 +1473,7 @@
                             ]
                           },
                           {
-                            "__guid": "597b1ad5-9e44-4504-b074-13a526599a66",
+                            "__guid": "fcec36ef-f3d5-49fa-9430-55486fe442d7",
                             "__version": 2,
                             "Flags": 0,
                             "Name": "arm_lower_L_twistctrl0",
@@ -1513,7 +1490,7 @@
                             "Components": [],
                             "Children": [
                               {
-                                "__guid": "6941e1a0-02ee-4d7d-9ea6-ea9d114da543",
+                                "__guid": "dc288abd-934d-472e-9d56-06f5046cc7d0",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "arm_lower_L_twistctrl1",
@@ -1530,7 +1507,7 @@
                                 "Components": [],
                                 "Children": [
                                   {
-                                    "__guid": "e49a7079-b7bb-477a-a86f-15c52dba6416",
+                                    "__guid": "08eacf9a-8d69-4b72-8859-99d1ac14c273",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "arm_lower_L_twistctrl2",
@@ -1547,7 +1524,7 @@
                                     "Components": [],
                                     "Children": [
                                       {
-                                        "__guid": "f5b4c6c2-1c6c-41ba-b7b8-3df1bfde632b",
+                                        "__guid": "e2723d95-786a-4eb5-a269-5f965721ff1b",
                                         "__version": 2,
                                         "Flags": 0,
                                         "Name": "arm_lower_L_twist2",
@@ -1567,7 +1544,7 @@
                                     ]
                                   },
                                   {
-                                    "__guid": "b78e93d5-8aaf-4a8a-b5ba-cf664f5ed914",
+                                    "__guid": "c0263e94-8425-481d-b17a-d737a576119d",
                                     "__version": 2,
                                     "Flags": 0,
                                     "Name": "arm_lower_L_twist1",
@@ -1587,7 +1564,7 @@
                                 ]
                               },
                               {
-                                "__guid": "d99d7d0f-9175-460c-8bf4-784c047b655f",
+                                "__guid": "6c2a1e3f-e2a4-4a5e-ac9a-3e010aea0d4c",
                                 "__version": 2,
                                 "Flags": 0,
                                 "Name": "arm_lower_L_twist0",
@@ -1615,7 +1592,7 @@
             ]
           },
           {
-            "__guid": "cb4b9e63-945f-4753-b295-4cce089d9ec6",
+            "__guid": "853a9a13-997d-432d-a10c-3545c57e8654",
             "__version": 2,
             "Flags": 0,
             "Name": "camera",
@@ -1635,7 +1612,7 @@
         ]
       },
       {
-        "__guid": "690edc25-6c47-4f8f-b8a0-c4de83ee1eca",
+        "__guid": "2f3e0ce9-38dd-4394-a14f-79543ae37745",
         "__version": 2,
         "Flags": 0,
         "Name": "spaghellim4 Primary Grab",
@@ -1652,20 +1629,20 @@
         "Components": [
           {
             "__type": "GrabPoint",
-            "__guid": "c07ac415-81ae-4d58-860f-df54c8cc3e97",
+            "__guid": "5a2af097-6794-44f9-b0db-fac7c4a22e86",
             "__enabled": true,
             "Flags": 0,
             "Collider": {
               "_type": "component",
-              "component_id": "967b6d4f-b346-40d9-a08c-b9b753a7a33a",
-              "go": "690edc25-6c47-4f8f-b8a0-c4de83ee1eca",
+              "component_id": "7e82b40f-678a-4797-a8bd-e1910dc71eaf",
+              "go": "2f3e0ce9-38dd-4394-a14f-79543ae37745",
               "component_type": "SphereCollider"
             },
             "GrabInput": "Grip",
             "Interactable": {
               "_type": "component",
-              "component_id": "d0217e8d-d1e2-4a3f-8b1a-338b06ac2cf4",
-              "go": "682eb878-1949-4047-a474-5ee1059e65d6",
+              "component_id": "fdba2413-7b61-4706-9e9f-a5edee77c962",
+              "go": "97c6ede9-07f0-483e-8fa2-e25fcf5751f5",
               "component_type": "PhysicalGun"
             },
             "OnComponentDestroy": null,
@@ -1687,7 +1664,7 @@
           },
           {
             "__type": "Sandbox.SphereCollider",
-            "__guid": "967b6d4f-b346-40d9-a08c-b9b753a7a33a",
+            "__guid": "7e82b40f-678a-4797-a8bd-e1910dc71eaf",
             "__enabled": true,
             "Flags": 0,
             "Center": "0,0,0",
@@ -1715,7 +1692,7 @@
         "Children": []
       },
       {
-        "__guid": "a45488cc-f308-4735-9bb8-bea4b4e146d5",
+        "__guid": "2911b4f2-8630-48e9-8fac-c625fb911409",
         "__version": 2,
         "Flags": 0,
         "Name": "spaghellim4 Secondary Grab",
@@ -1732,20 +1709,20 @@
         "Components": [
           {
             "__type": "GrabPoint",
-            "__guid": "abe48249-6a96-4157-80da-d31de64d9b45",
+            "__guid": "5ce6cbc4-d5e1-44ca-9e7b-af07c5189437",
             "__enabled": true,
             "Flags": 0,
             "Collider": {
               "_type": "component",
-              "component_id": "b4341853-b804-4227-b4b8-ee70fb84bff9",
-              "go": "a45488cc-f308-4735-9bb8-bea4b4e146d5",
+              "component_id": "744cc077-b0b9-4142-91c0-a1051ccb0ad8",
+              "go": "2911b4f2-8630-48e9-8fac-c625fb911409",
               "component_type": "SphereCollider"
             },
             "GrabInput": "Grip",
             "Interactable": {
               "_type": "component",
-              "component_id": "d0217e8d-d1e2-4a3f-8b1a-338b06ac2cf4",
-              "go": "682eb878-1949-4047-a474-5ee1059e65d6",
+              "component_id": "fdba2413-7b61-4706-9e9f-a5edee77c962",
+              "go": "97c6ede9-07f0-483e-8fa2-e25fcf5751f5",
               "component_type": "PhysicalGun"
             },
             "OnComponentDestroy": null,
@@ -1765,14 +1742,14 @@
             },
             "PrimaryGrabPoint": {
               "_type": "component",
-              "component_id": "c07ac415-81ae-4d58-860f-df54c8cc3e97",
-              "go": "690edc25-6c47-4f8f-b8a0-c4de83ee1eca",
+              "component_id": "5a2af097-6794-44f9-b0db-fac7c4a22e86",
+              "go": "2f3e0ce9-38dd-4394-a14f-79543ae37745",
               "component_type": "GrabPoint"
             }
           },
           {
             "__type": "Sandbox.SphereCollider",
-            "__guid": "b4341853-b804-4227-b4b8-ee70fb84bff9",
+            "__guid": "744cc077-b0b9-4142-91c0-a1051ccb0ad8",
             "__enabled": true,
             "Flags": 0,
             "Center": "0,0,0",
@@ -1800,7 +1777,7 @@
         "Children": []
       },
       {
-        "__guid": "6b2ead29-8514-4081-868f-8105993c633f",
+        "__guid": "845e7d15-5c3b-42a4-a779-afd5b7c54035",
         "__version": 2,
         "Flags": 0,
         "Name": "Muzzle",
@@ -1818,7 +1795,7 @@
         "Children": []
       },
       {
-        "__guid": "e41708d7-0542-482e-b690-1d5e67c7e800",
+        "__guid": "9c6452ac-01b0-4016-beb0-1b5316bd70ff",
         "__version": 2,
         "Flags": 0,
         "Name": "Laser Pointer",
@@ -1835,7 +1812,7 @@
         "Components": [
           {
             "__type": "LaserPointerComponent",
-            "__guid": "ec79c84c-4bdf-492f-be82-ce81037bd482",
+            "__guid": "d60bc8b3-6fce-4f66-9d2c-e93c8f39c3db",
             "__enabled": true,
             "Flags": 0,
             "DotSize": 0.6,
@@ -1854,7 +1831,7 @@
         "Children": []
       },
       {
-        "__guid": "50047014-44d7-42a1-97d4-a30e6d6e1287",
+        "__guid": "21fb92e8-c0b4-4ab1-bb41-a7d7bc0c5c64",
         "__version": 2,
         "Flags": 0,
         "Name": "HAND DEBUG",
@@ -1872,7 +1849,7 @@
         "Children": []
       },
       {
-        "__guid": "a10c1a14-9b5e-408c-9808-f6292f00905e",
+        "__guid": "312cbc6d-1e86-4ab5-8ed7-dd4f574d5d07",
         "__version": 2,
         "Flags": 0,
         "Name": "Bolt Grab Mechanic",
@@ -1889,7 +1866,7 @@
         "Components": [],
         "Children": [
           {
-            "__guid": "1c004898-6034-4e48-9143-008b83c4e87c",
+            "__guid": "549e5e59-70fb-4326-ad9e-831c0db0857c",
             "__version": 2,
             "Flags": 0,
             "Name": "spaghellim4 Bolt Grab Start",
@@ -1907,7 +1884,7 @@
             "Children": []
           },
           {
-            "__guid": "6b19aad3-01ae-4ac6-bd61-788342958fcb",
+            "__guid": "019ce393-bedc-4326-8748-bab045c0c269",
             "__version": 2,
             "Flags": 0,
             "Name": "spaghellim4 Bolt Grab End",
@@ -1925,7 +1902,7 @@
             "Children": []
           },
           {
-            "__guid": "da5d482a-1ba2-411c-b617-0ba1f6538bcd",
+            "__guid": "898bb196-6764-4bff-8533-f15f19eca294",
             "__version": 2,
             "Flags": 0,
             "Name": "spaghellim4 Bolt Grab",
@@ -1942,20 +1919,20 @@
             "Components": [
               {
                 "__type": "GrabPoint",
-                "__guid": "a0037bde-cda1-4ba5-ac5c-6b863f5927ce",
+                "__guid": "a94b7475-689c-4841-9b3b-9678c8eb23a6",
                 "__enabled": true,
                 "Flags": 0,
                 "Collider": {
                   "_type": "component",
-                  "component_id": "006b4a91-8982-45e2-9cce-f0ead3abb04e",
-                  "go": "da5d482a-1ba2-411c-b617-0ba1f6538bcd",
+                  "component_id": "1e090e73-55c3-4fe4-a9ff-0d8809ec6939",
+                  "go": "898bb196-6764-4bff-8533-f15f19eca294",
                   "component_type": "SphereCollider"
                 },
                 "GrabInput": "Trigger",
                 "Interactable": {
                   "_type": "component",
-                  "component_id": "07e86879-03b5-4db5-99e2-9fbcd5d240c0",
-                  "go": "da5d482a-1ba2-411c-b617-0ba1f6538bcd",
+                  "component_id": "4dda2517-2fa3-4514-bd46-9d9759dabec2",
+                  "go": "898bb196-6764-4bff-8533-f15f19eca294",
                   "component_type": "PointInteractable"
                 },
                 "OnComponentDestroy": null,
@@ -1977,18 +1954,18 @@
               },
               {
                 "__type": "PointInteractable",
-                "__guid": "07e86879-03b5-4db5-99e2-9fbcd5d240c0",
+                "__guid": "4dda2517-2fa3-4514-bd46-9d9759dabec2",
                 "__enabled": true,
                 "Flags": 0,
                 "AnglesAtOne": "0,0,0",
                 "BoneGameObject": {
                   "_type": "gameobject",
-                  "go": "8d43892a-c388-4b6c-93d6-53cb0f92f3b8"
+                  "go": "d31e4f2e-1f2e-4660-b655-e1d5f68901c2"
                 },
                 "DrivenBy": null,
                 "End": {
                   "_type": "gameobject",
-                  "go": "1c004898-6034-4e48-9143-008b83c4e87c"
+                  "go": "549e5e59-70fb-4326-ad9e-831c0db0857c"
                 },
                 "OnCompletionValue": null,
                 "OnComponentDestroy": null,
@@ -2003,15 +1980,15 @@
                 },
                 "Renderer": {
                   "_type": "component",
-                  "component_id": "0cee0d7a-60e8-411e-90a0-bec1b546ea43",
-                  "go": "340d44a8-f612-4c13-aeca-1cdbb155f043",
+                  "component_id": "8fe92e62-7412-4c50-8b0f-50422ed321d0",
+                  "go": "9913db68-c051-4b87-ab7c-2b63bf354dca",
                   "component_type": "SkinnedModelRenderer"
                 },
                 "ResetOnRelease": true,
                 "Rigidbody": null,
                 "Start": {
                   "_type": "gameobject",
-                  "go": "6b19aad3-01ae-4ac6-bd61-788342958fcb"
+                  "go": "019ce393-bedc-4326-8748-bab045c0c269"
                 },
                 "ZeroSound": {
                   "Id": "017911dc-07e5-43d3-b069-2d4fdbaacc85",
@@ -2020,7 +1997,7 @@
               },
               {
                 "__type": "Sandbox.SphereCollider",
-                "__guid": "006b4a91-8982-45e2-9cce-f0ead3abb04e",
+                "__guid": "1e090e73-55c3-4fe4-a9ff-0d8809ec6939",
                 "__enabled": true,
                 "Flags": 0,
                 "Center": "0,0,0",
@@ -2046,13 +2023,13 @@
               },
               {
                 "__type": "SlideReleaseSystem",
-                "__guid": "34dcc63f-b87d-4063-8b4e-50b23e24ff7e",
+                "__guid": "cb407162-553b-4c74-9cdc-a6c172bb8607",
                 "__enabled": true,
                 "Flags": 0,
                 "InputGrabPoint": {
                   "_type": "component",
-                  "component_id": "c07ac415-81ae-4d58-860f-df54c8cc3e97",
-                  "go": "690edc25-6c47-4f8f-b8a0-c4de83ee1eca",
+                  "component_id": "5a2af097-6794-44f9-b0db-fac7c4a22e86",
+                  "go": "2f3e0ce9-38dd-4394-a14f-79543ae37745",
                   "component_type": "GrabPoint"
                 },
                 "OnComponentDestroy": null,
@@ -2063,8 +2040,8 @@
                 "OnComponentUpdate": null,
                 "Weapon": {
                   "_type": "component",
-                  "component_id": "d0217e8d-d1e2-4a3f-8b1a-338b06ac2cf4",
-                  "go": "682eb878-1949-4047-a474-5ee1059e65d6",
+                  "component_id": "fdba2413-7b61-4706-9e9f-a5edee77c962",
+                  "go": "97c6ede9-07f0-483e-8fa2-e25fcf5751f5",
                   "component_type": "PhysicalGun"
                 }
               }
@@ -2074,7 +2051,7 @@
         ]
       },
       {
-        "__guid": "b4a3d104-7910-4c52-95a1-3bffeef4ba9a",
+        "__guid": "68f9464c-33fb-4c28-8e1a-f56337076cb3",
         "__version": 2,
         "Flags": 0,
         "Name": "Chamber",
@@ -2091,13 +2068,13 @@
         "Components": [
           {
             "__type": "GunChamber",
-            "__guid": "453e5853-dd4c-429c-81c9-ea62927995e6",
+            "__guid": "3a88c3c3-fd19-4ca4-bf65-6e4c76179352",
             "__enabled": true,
             "Flags": 0,
             "Bolt": {
               "_type": "component",
-              "component_id": "07e86879-03b5-4db5-99e2-9fbcd5d240c0",
-              "go": "da5d482a-1ba2-411c-b617-0ba1f6538bcd",
+              "component_id": "4dda2517-2fa3-4514-bd46-9d9759dabec2",
+              "go": "898bb196-6764-4bff-8533-f15f19eca294",
               "component_type": "PointInteractable"
             },
             "ChamberCapacity": 1,
@@ -2113,7 +2090,7 @@
           },
           {
             "__type": "Sandbox.SphereCollider",
-            "__guid": "3b94d6c4-1ffc-4fa6-9037-3f7a182e1f8f",
+            "__guid": "1f12690a-af08-4441-a6e5-bee2898820c0",
             "__enabled": true,
             "Flags": 0,
             "Center": "0,0,0",
@@ -2141,7 +2118,7 @@
         "Children": []
       },
       {
-        "__guid": "0d8bce8c-5870-4b58-89dc-663f3f0ab847",
+        "__guid": "84bf2de5-e5c5-4f73-9023-4825c60e6fd3",
         "__version": 2,
         "Flags": 0,
         "Name": "Thumbnail Camera",
@@ -2158,7 +2135,7 @@
         "Components": [
           {
             "__type": "ThumbnailCamera",
-            "__guid": "969b8026-e8cf-437e-bd98-38163763aac1",
+            "__guid": "de44be17-9517-4138-9d61-972fcd874942",
             "__enabled": true,
             "Flags": 0,
             "FieldOfView": 12,
@@ -2179,7 +2156,7 @@
         "Children": []
       },
       {
-        "__guid": "ccbb508f-771d-4c5d-8a1f-bfb98d6adf39",
+        "__guid": "1c0190dc-59ec-4b5d-880a-96decaaedb93",
         "__version": 2,
         "Flags": 0,
         "Name": "Loading Port",
@@ -2196,7 +2173,7 @@
         "Components": [
           {
             "__type": "Sandbox.BoxCollider",
-            "__guid": "167cb8d9-104f-4ce2-b2d9-18b7a908dd76",
+            "__guid": "63e1e324-45c0-4b54-8055-e1249cf36a8c",
             "__enabled": true,
             "Flags": 0,
             "Center": "0,0,0",
@@ -2222,7 +2199,7 @@
           },
           {
             "__type": "InternalMagazine",
-            "__guid": "72bfa54e-6037-4175-9d74-556d8905be1d",
+            "__guid": "cbb22fa3-bec0-45b8-9f3f-42e1ec59d0ed",
             "__enabled": true,
             "Flags": 0,
             "BulletCapacity": 6,
@@ -2253,6 +2230,53 @@
             "OnComponentFixedUpdate": null,
             "OnComponentStart": null,
             "OnComponentUpdate": null
+          }
+        ],
+        "Children": []
+      },
+      {
+        "__guid": "0f262ece-e5d8-4fb3-9fc1-82864f042374",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Collider",
+        "Position": "5.13999987,0,0",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.ModelCollider",
+            "__guid": "4341653e-e972-4a50-9f68-6b606438f366",
+            "__enabled": true,
+            "Flags": 0,
+            "ColliderFlags": 0,
+            "Elasticity": null,
+            "Friction": null,
+            "IsTrigger": false,
+            "Model": {
+              "Id": "8284ee4b-4fbf-4a7d-8ff7-bff82c190045",
+              "Path": "models/weapons/sbox_shotgun_spaghellim4/w_spaghellim4.vmdl"
+            },
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "OnObjectTriggerEnter": null,
+            "OnObjectTriggerExit": null,
+            "OnTriggerEnter": null,
+            "OnTriggerExit": null,
+            "RollingResistance": null,
+            "Static": false,
+            "Surface": null,
+            "SurfaceVelocity": "0,0,0"
           }
         ],
         "Children": []

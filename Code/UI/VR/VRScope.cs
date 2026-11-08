@@ -103,8 +103,13 @@ public sealed class VRScope : VRHudPanel
 			var glass = _anchor.WorldTransform;
 			PlaceAt( glass.Position, Rotation.LookAt( -glass.Rotation.Forward, glass.Rotation.Up ), _anchor.Width );
 
-			_camera.WorldPosition = glass.Position + glass.Rotation.Forward * _anchor.CameraReach;
-			_camera.WorldRotation = glass.Rotation;
+			// Along the barrel, like the screen sniper's: the cross is on where the bullet goes, not on a line a couple of
+			// inches above it
+			var line = _anchor.GetComponentInParent<PhysicalGun>()?.MuzzleGameObject is { } muzzle && muzzle.IsValid()
+				? muzzle.WorldTransform
+				: glass;
+			_camera.WorldPosition = line.Position + line.Rotation.Forward * _anchor.CameraReach;
+			_camera.WorldRotation = line.Rotation;
 			return;
 		}
 
