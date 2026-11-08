@@ -443,20 +443,12 @@ public sealed class PhysicalGun : GunplayInteractable
 		foreach ( var bullet in BulletDirections( direction.Normal, seed ) )
 		{
 			var ray = new Ray( origin, bullet );
+			var tr = BulletTrace( ray, shooter );
 
+			// Our own trace, past the gun: the engine's only leaves out the shooter, and the bullet, as wide as it is,
+			// started out in the gun's own barrel and hit that
 			if ( dealsDamage )
-				BaseCombatWeapon.ShootBullet( Scene, ray, MaxRange, BulletSize, Damage, Force, attacker, GameObject, attacker );
-
-			var trace = Scene.Trace.Ray( ray, MaxRange )
-				.Size( BulletSize )
-				.IgnoreGameObjectHierarchy( GameObject.Root )
-				.WithoutTags( "trigger" )
-				.UseHitboxes();
-
-			if ( shooter.IsValid() )
-				trace = trace.IgnoreGameObjectHierarchy( shooter.GameObject );
-
-			var tr = trace.Run();
+				BaseCombatWeapon.ShootBullet( tr, Damage, Force, attacker, GameObject, null, true );
 
 			if ( tr.Hit )
 				CreateImpactEffects( tr.GameObject, tr.Surface, tr.EndPosition, tr.Normal );
@@ -467,6 +459,25 @@ public sealed class PhysicalGun : GunplayInteractable
 		DoShootEffects();
 		if ( ejectCasing ) EjectCasing();
 	}
+
+	/// <summary>
+	/// A bullet's path, past this gun and whoever fired it.
+	/// </summary>
+	internal static SceneTraceResult BulletTrace( Scene scene, Ray ray, float range, float size, GameObject self, Player shooter )
+	{
+		var trace = scene.Trace.Ray( ray, range )
+			.Size( size )
+			.IgnoreGameObjectHierarchy( self.Root )
+			.WithoutTags( "trigger" )
+			.UseHitboxes();
+
+		if ( shooter.IsValid() )
+			trace = trace.IgnoreGameObjectHierarchy( shooter.GameObject );
+
+		return trace.Run();
+	}
+
+	SceneTraceResult BulletTrace( Ray ray, Player shooter ) => BulletTrace( Scene, ray, MaxRange, BulletSize, GameObject, shooter );
 
 	void EjectCasing()
 	{

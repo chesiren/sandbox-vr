@@ -37,7 +37,7 @@
           "Roll": false
         },
         "MassCenterOverride": "0,0,0",
-        "MassOverride": 50,
+        "MassOverride": 1,
         "MinImpactDamageSpeed": 500,
         "MotionEnabled": true,
         "OnComponentDestroy": null,
@@ -87,7 +87,8 @@
         "Damage": 125,
         "Force": 1,
         "Fuse": 3,
-        "MassScale": 1,
+        "MassScale": 0.5,
+        "ThrowScale": 1.4,
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
         "OnComponentEnabled": null,

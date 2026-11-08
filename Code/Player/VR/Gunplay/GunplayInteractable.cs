@@ -16,6 +16,12 @@ public class GunplayInteractable : BaseGunplayInteractable
 	[Property] public float MassScale { get; set; } = 1.0f;
 
 	/// <summary>
+	/// How much faster than the hand it flies when let go of mid-swing: above 1 for something light to throw, like a
+	/// grenade.
+	/// </summary>
+	[Property] public float ThrowScale { get; set; } = 1.0f;
+
+	/// <summary>
 	/// Can <paramref name="attachable"/> go into one of our attachment points?
 	/// </summary>
 	public virtual bool CanAccept( Attachable attachable ) => true;
@@ -68,7 +74,7 @@ public class GunplayInteractable : BaseGunplayInteractable
 		FreezeMotion( false );
 
 		if ( hand.IsValid() )
-			Rigidbody.Velocity = hand.ThrowVelocity;
+			Rigidbody.Velocity = hand.ThrowVelocity * ThrowScale;
 	}
 
 	/// <summary>
