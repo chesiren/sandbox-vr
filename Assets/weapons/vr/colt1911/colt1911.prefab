@@ -21,7 +21,8 @@
         "__enabled": true,
         "Flags": 0,
         "Automatic": false,
-        "BaseRecoilDecay": 3,
+        "KickBack": 0.6,
+        "KickRecovery": 12,
         "BulletSize": 1,
         "Chamber": {
           "_type": "component",
@@ -39,7 +40,7 @@
           "go": "752cadad-4047-43c0-941e-ec5cbe64ea35"
         },
         "Force": 300,
-        "HorizontalRecoil": "-200 200",
+        "KickYaw": "-1 1",
         "InternalMagazine": null,
         "ManualAction": false,
         "MassScale": 1,
@@ -80,7 +81,8 @@
         "TracerColor": "1,0.85,0.6,0.5",
         "TracerLifetime": 0.05,
         "TracerWidth": 0.15,
-        "VerticalRecoil": "400 1000"
+        "KickPitch": "4 6",
+        "MaxKick": 8
       },
       {
         "__type": "Sandbox.Rigidbody",
@@ -2079,6 +2081,7 @@
               {
                 "__type": "SlideReleaseSystem",
                 "__guid": "6fb576b8-eca8-431e-97b2-314ec9521b0d",
+                "CyclesOnShot": true,
                 "__enabled": true,
                 "Flags": 0,
                 "InputGrabPoint": {

@@ -11,7 +11,8 @@
       {
         "__type": "PhysicalGun",
         "__guid": "a55f4947-1612-4f52-9bb0-7e954737d158",
-        "BaseRecoilDecay": 3,
+        "KickBack": 0.25,
+        "KickRecovery": 16,
         "BulletSize": 1,
         "Chamber": {
           "_type": "component",
@@ -24,7 +25,7 @@
           "_type": "gameobject",
           "go": "b1379b7d-d9b1-4897-9340-b9834e9df13a"
         },
-        "HorizontalRecoil": "-200.00,200.00,1",
+        "KickYaw": "-0.4 0.4",
         "MassScale": 1,
         "MaxRange": 4096,
         "MuzzleGameObject": {
@@ -46,7 +47,8 @@
           "go": "fb2c8129-c0b3-499f-93af-11d3d16c133d",
           "component_type": "SlideReleaseSystem"
         },
-        "VerticalRecoil": "300.00,600.00,1",
+        "KickPitch": "0.8 1.2",
+        "MaxKick": 2.5,
         "RoundPrefab": {
           "_type": "gameobject",
           "prefab": "weapons/vr/ammo/bullet_9mm.prefab"

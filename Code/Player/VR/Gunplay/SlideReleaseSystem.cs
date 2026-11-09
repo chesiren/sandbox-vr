@@ -26,6 +26,20 @@ public sealed class SlideReleaseSystem : Component
 
 	public GunplayHand Hand => InputGrabPoint?.HeldHand;
 
+	/// <summary>
+	/// Runs back and home on its own with each shot, like a pistol's slide. Not a rifle's charging handle, which stays put.
+	/// </summary>
+	[Property] public bool CyclesOnShot { get; set; }
+
+	/// <summary>
+	/// A shot's movement, on every machine.
+	/// </summary>
+	public void OnShot()
+	{
+		if ( CyclesOnShot )
+			PointInteractable.PlayCycle();
+	}
+
 	protected override void OnStart()
 	{
 		PointInteractable.OnCompletionValue += OnCompletionValue;

@@ -131,11 +131,39 @@ public sealed class PointInteractable : BaseGunplayInteractable
 			CompletionValue = 0;
 	}
 
+	const float CycleBackTime = 0.02f;
+	const float CycleReturnTime = 0.04f;
+
+	TimeSince? _sinceCycle;
+
+	/// <summary>
+	/// Runs it back and home again, for the look of a shot. <see cref="CompletionValue"/> stays put, so nothing ejects or
+	/// feeds. Not while a hand holds it.
+	/// </summary>
+	public void PlayCycle()
+	{
+		if ( !Hand.IsValid() )
+			_sinceCycle = 0;
+	}
+
+	/// <summary>
+	/// How far back the last shot has it, 0 to 1.
+	/// </summary>
+	float CycleAmount()
+	{
+		if ( _sinceCycle is not { } since ) return 0f;
+		if ( since < CycleBackTime ) return since / CycleBackTime;
+		if ( since < CycleBackTime + CycleReturnTime ) return 1f - (since - CycleBackTime) / CycleReturnTime;
+
+		_sinceCycle = null;
+		return 0f;
+	}
+
 	Vector3 CalcLocalPosition()
 	{
 		var pos = InitialBoneLocalTransform.Position;
 		var direction = (End.LocalPosition - Start.LocalPosition).Normal;
-		return pos + direction * (DistanceBetweenStartAndEnd * completionValue);
+		return pos + direction * (DistanceBetweenStartAndEnd * MathF.Min( 1f, completionValue + CycleAmount() ));
 	}
 
 	protected override void OnPreRender()

@@ -21,7 +21,8 @@
         "__enabled": true,
         "Flags": 0,
         "Automatic": false,
-        "BaseRecoilDecay": 3,
+        "KickBack": 1.2,
+        "KickRecovery": 8,
         "BulletSize": 1,
         "Chamber": {
           "_type": "component",
@@ -39,7 +40,7 @@
         },
         "EjectionPort": null,
         "Force": 300,
-        "HorizontalRecoil": "-200 200",
+        "KickYaw": "-0.5 0.5",
         "InternalMagazine": null,
         "ManualAction": false,
         "MassScale": 1.6,
@@ -77,7 +78,8 @@
         "TracerColor": "1,0.85,0.6,0.5",
         "TracerLifetime": 0.05,
         "TracerWidth": 0.15,
-        "VerticalRecoil": "1500 2200"
+        "KickPitch": "3 4",
+        "MaxKick": 6
       },
       {
         "__type": "Sandbox.Rigidbody",

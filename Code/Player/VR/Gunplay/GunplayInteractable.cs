@@ -102,6 +102,11 @@ public class GunplayInteractable : BaseGunplayInteractable
 		return targetRotation;
 	}
 
+	/// <summary>
+	/// Shifts where this is held, in world space, like a gun's kick back along its barrel.
+	/// </summary>
+	protected virtual Vector3 GetHoldOffset() => Vector3.Zero;
+
 	protected void PositionInteractable()
 	{
 		var primary = PrimaryGrabPoint;
@@ -109,7 +114,7 @@ public class GunplayInteractable : BaseGunplayInteractable
 
 		// Bring the grab point, not the middle of the body, onto the hand
 		var holdPos = hand.HoldPosition;
-		var target = holdPos - (primary.GameObject.WorldPosition - Rigidbody.WorldPosition);
+		var target = holdPos - (primary.GameObject.WorldPosition - Rigidbody.WorldPosition) + GetHoldOffset();
 
 		var velocity = Rigidbody.Velocity;
 		Vector3.SmoothDamp( Rigidbody.WorldPosition, target, ref velocity, 0.2f * MassScale, Time.Delta );

@@ -66,9 +66,35 @@ public sealed class PhysicalGun : GunplayInteractable
 
 	[Property, Group( "Sounds" )] public SoundEvent DryFireSound { get; set; }
 
-	[Property, Group( "Recoil" )] public RangedFloat VerticalRecoil { get; set; } = new( 300, 600 );
-	[Property, Group( "Recoil" )] public RangedFloat HorizontalRecoil { get; set; } = new( -200, 200 );
-	[Property, Group( "Recoil" )] public float BaseRecoilDecay { get; set; } = 3f;
+	/// <summary>
+	/// How far the muzzle climbs on each shot, in degrees.
+	/// </summary>
+	[Property, Group( "Recoil" )] public RangedFloat KickPitch { get; set; } = new( 1f, 1.5f );
+
+	/// <summary>
+	/// How far the muzzle swings left or right on each shot, in degrees.
+	/// </summary>
+	[Property, Group( "Recoil" )] public RangedFloat KickYaw { get; set; } = new( -0.5f, 0.5f );
+
+	/// <summary>
+	/// How far the gun jumps back along its barrel on each shot, in inches.
+	/// </summary>
+	[Property, Group( "Recoil" )] public float KickBack { get; set; } = 0.3f;
+
+	/// <summary>
+	/// How fast the kick settles, per second: a third of it is left after 1 / this.
+	/// </summary>
+	[Property, Group( "Recoil" )] public float KickRecovery { get; set; } = 16f;
+
+	/// <summary>
+	/// The most the muzzle climbs, in degrees, however long the trigger's held.
+	/// </summary>
+	[Property, Group( "Recoil" )] public float MaxKick { get; set; } = 3f;
+
+	/// <summary>
+	/// A gun with a front grip held by one hand kicks this much harder, and settles half as fast.
+	/// </summary>
+	[Property, Group( "Recoil" )] public float OneHandedKickScale { get; set; } = 2f;
 
 	[Property, Group( "Effects" )] public Color TracerColor { get; set; } = new Color( 1f, 0.85f, 0.6f, 0.5f );
 	[Property, Group( "Effects" )] public float TracerWidth { get; set; } = 0.15f;
@@ -147,7 +173,17 @@ public sealed class PhysicalGun : GunplayInteractable
 	TimeSince TimeSinceShoot { get; set; }
 	TimeUntil TimeUntilNextDryFire { get; set; }
 
-	Vector2 CurrentRecoilAmount { get; set; }
+	/// <summary>
+	/// The muzzle's swing (x) and climb (y) away from the hand's aim, in degrees. On the holder's machine.
+	/// </summary>
+	Vector2 _kick;
+
+	/// <summary>
+	/// How far back along the barrel the gun's pushed from the hand, in inches.
+	/// </summary>
+	float _kickBack;
+
+	bool? _hasFrontGrip;
 
 	/// <summary>
 	/// The grip hand's trigger was down last frame, for a fresh pull on a gun that isn't <see cref="Automatic"/>.
@@ -187,7 +223,45 @@ public sealed class PhysicalGun : GunplayInteractable
 
 	protected override Rotation GetHoldRotation()
 	{
-		return base.GetHoldRotation() * Rotation.From( -CurrentRecoilAmount.y * Time.Delta, CurrentRecoilAmount.x * Time.Delta, 0 );
+		return base.GetHoldRotation() * Rotation.From( -_kick.y, _kick.x, 0 );
+	}
+
+	protected override Vector3 GetHoldOffset()
+	{
+		return MuzzleGameObject.IsValid() ? MuzzleGameObject.WorldRotation.Backward * _kickBack : Vector3.Zero;
+	}
+
+	protected override void OnFixedUpdate()
+	{
+		// Settled on the physics step that applies it, so the recovery doesn't hang on the frame rate
+		var settle = MathF.Exp( -CalcRecoilDecay() * Time.Delta );
+		_kick *= settle;
+		_kickBack *= settle;
+
+		base.OnFixedUpdate();
+	}
+
+	/// <summary>
+	/// A long gun held by its grip alone, its front grip free.
+	/// </summary>
+	bool IsUnsupported => SecondaryGrabPoint is null
+		&& (_hasFrontGrip ??= GetComponentsInChildren<GrabPoint>( true ).Any( x => x.Tags.Has( "secondary" ) ));
+
+	float CalcKickScale() => IsUnsupported ? OneHandedKickScale : 1f;
+
+	float CalcRecoilDecay() => IsUnsupported ? KickRecovery * 0.5f : KickRecovery;
+
+	/// <summary>
+	/// Throws the gun off the hand's aim; the hold springs it back. Owner only.
+	/// </summary>
+	void AddKick()
+	{
+		var scale = CalcKickScale();
+		var kick = new Vector2( Game.Random.Float( KickYaw.Min, KickYaw.Max ), Game.Random.Float( KickPitch.Min, KickPitch.Max ) );
+
+		// Bounded, so a held trigger can't walk the muzzle off the hand's aim
+		_kick = (_kick + kick * scale).ClampLength( MaxKick * scale );
+		_kickBack = MathF.Min( _kickBack + KickBack * scale, KickBack * scale * 2f );
 	}
 
 	void TryDetachMagazine()
@@ -262,8 +336,6 @@ public sealed class PhysicalGun : GunplayInteractable
 
 	protected override void OnUpdate()
 	{
-		CurrentRecoilAmount = CurrentRecoilAmount.LerpTo( 0, Time.Delta * BaseRecoilDecay );
-
 		if ( IsProxy || GripHand is not { } hand || hand.Controller is not { } controller )
 		{
 			_triggerWasDown = false;
@@ -295,12 +367,6 @@ public sealed class PhysicalGun : GunplayInteractable
 		TimeUntilNextDryFire = 0.5f;
 	}
 
-	Vector2 CalcRecoil() => new()
-	{
-		y = Game.Random.Float( VerticalRecoil.Min, VerticalRecoil.Max ),
-		x = Game.Random.Float( HorizontalRecoil.Min, HorizontalRecoil.Max )
-	};
-
 	/// <summary>
 	/// Fires the chambered round, if there is one. Owner only.
 	/// </summary>
@@ -316,12 +382,14 @@ public sealed class PhysicalGun : GunplayInteractable
 			return;
 		}
 
-		CurrentRecoilAmount += CalcRecoil();
+		// The shot leaves where the hand aims: only the ones after it feel its kick
+		var ray = WeaponRay;
+		AddKick();
+
 		VRMode.Pulse( GripHand?.Controller, 0.8f, 0.6f );
 		if ( SecondaryGrabPoint?.Hand?.Controller is { } support )
 			VRMode.Pulse( support, 0.5f, 0.5f );
 
-		var ray = WeaponRay;
 		Shoot( ray.Position, ray.Forward, Game.Random.Int( 0, int.MaxValue - 1 ), EjectsOnShot );
 
 		// The rocket's gone from the tube
@@ -457,6 +525,7 @@ public sealed class PhysicalGun : GunplayInteractable
 		}
 
 		DoShootEffects();
+		SlideReleaseSystem?.OnShot();
 		if ( ejectCasing ) EjectCasing();
 	}
 
