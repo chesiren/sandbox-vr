@@ -13,7 +13,8 @@ public static class VRInputNames
 		["jump"] = (false, "stick_up"),
 		["run"] = (true, "stick_click"),
 		["spawnmenu"] = (true, "a"),
-		["inspectmenu"] = (true, "b"),
+		["inspectmenu"] = (true, "a"),
+		["voice"] = (true, "b"),
 		["undo"] = (true, "trigger"),
 	};
 

@@ -1,17 +1,15 @@
 @import "/UI/Theme.scss";
 
-// the inspected object's card, in the menus' own look and sized for a headset: 37px here is about 1 degree of view
+// the inspected object's card, in the spawn menu's own look and sized for a headset: 37px here is about 1 degree of view
 VRInspectCard
 {
 	@include ui-block;
 
-	// the same colours as the block, with less showing through: whatever's behind it isn't a flat screen's backdrop
-	background-image: linear-gradient( to bottom, rgba( 30, 32, 36, 0.96 ), rgba( 32, 48, 68, 0.96 ) );
-
+	// Under the bar that switches menus, where the spawn menu sits too, see VRMenus.scss
 	position: absolute;
-	top: 90px;
-	right: 40px;
-	bottom: 40px;
+	top: 136px;
+	left: 40px;
+	bottom: 83px;
 	width: 900px;
 	padding: 14px;
 	gap: 12px;
@@ -23,13 +21,17 @@ VRInspectCard
 	pointer-events: all;
 	z-index: 200;
 
+	// The spawn menu's section colours, rather than a window's blue title
 	> .title-bar
 	{
 		@include ui-title-bar;
+		@include ui-section;
+		background-color: transparent;
 		height: 84px;
 		padding: 0 10px 0 20px;
 		gap: 12px;
 		font-size: 34px;
+		color: $ui-text-strong;
 
 		> .name
 		{
@@ -53,6 +55,7 @@ VRInspectCard
 			&.active
 			{
 				@include ui-selected;
+				background-image: none;
 			}
 		}
 	}
@@ -116,14 +119,18 @@ VRInspectCard
 
 		> .tab
 		{
-			@include ui-tab-button;
+			@include ui-button-face;
 			flex-grow: 1;
 			height: 80px;
+			align-items: center;
+			justify-content: center;
 			font-size: 28px;
+			font-weight: 600;
 
 			&.active
 			{
-				height: 80px;
+				@include ui-selected;
+				background-image: none;
 				pointer-events: none;
 			}
 		}

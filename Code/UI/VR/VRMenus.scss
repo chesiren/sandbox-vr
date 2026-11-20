@@ -5,12 +5,62 @@
 
 // --- the shell --------------------------------------------------------------------------------
 
+// The spawn menu and the inspector share a button, this bar switches between them. Both menus hang under it on the
+// left, over the hint bar.
+SpawnMenuHost .vr-nav
+{
+	@include ui-block;
+	position: absolute;
+	top: 20px;
+	left: 40px;
+	flex-direction: row;
+	gap: 6px;
+	pointer-events: all;
+	z-index: 5;
+
+	> .tab
+	{
+		@include ui-button-face;
+		flex-direction: row;
+		align-items: center;
+		gap: 12px;
+		height: $vr-control;
+		padding: 0px 32px;
+		font-family: $body-font;
+		font-size: 28px;
+		font-weight: 600;
+
+		> .icon
+		{
+			font-size: 34px;
+		}
+
+		> *
+		{
+			pointer-events: none;
+		}
+
+		&.active
+		{
+			@include ui-selected;
+			background-image: none;
+			pointer-events: none;
+		}
+	}
+}
+
+.vr SpawnMenu
+{
+	justify-content: flex-start;
+}
+
 .vr SpawnMenu .container
 {
 	width: 1720px;
 	min-width: 0px;
 	max-width: 100%;
-	padding-top: 20px;
+	margin-left: 40px;
+	padding-top: 136px; // under the bar
 	padding-bottom: 83px; // the hint bar goes under it
 	gap: 10px;
 

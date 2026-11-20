@@ -35,8 +35,8 @@ public sealed partial class VRPlayer
 	/// <item>Dominant hand: trigger fires (attack1), B is attack2, A reloads, grip uses/carries (held to carry,
 	/// letting go throws with the swing; B turns what's carried with the wrist), stick click opens the weapon
 	/// wheel, stick turns, up jumps, down crouches.</item>
-	/// <item>Off hand: stick moves (or aims teleport/shift), stick click runs, A holds the spawn menu,
-	/// B holds the inspect menu, trigger undoes. Both stick clicks together toggle noclip.</item>
+	/// <item>Off hand: stick moves (or aims teleport/shift), stick click runs, A holds the spawn menu or the inspect
+	/// menu, whichever was up last, B holds voice chat, trigger undoes. Both stick clicks together toggle noclip.</item>
 	/// <item>Seated: dominant trigger accelerates, off hand trigger brakes and reverses, off hand stick steers, see
 	/// <see cref="DriveInput"/>. Stick up is the handbrake, B is attack1 (the horn, the seat's weapons), A is attack2.</item>
 	/// </list>
@@ -90,8 +90,10 @@ public sealed partial class VRPlayer
 		WheelStick = main.Joystick.Value;
 
 		Press( "run", off.JoystickPress.IsPressed && !main.JoystickPress.IsPressed && !offGun );
+		// The spawn menu and the inspector share A, each has a button over to the other - see SpawnMenuHost.ShowVRMenu
 		Press( "spawnmenu", off.ButtonA.IsPressed && !offGun );
-		Press( "inspectmenu", off.ButtonB.IsPressed && !offGun );
+		Press( "inspectmenu", false );
+		Press( "voice", off.ButtonB.IsPressed && !offGun );
 		// No undo while holding a physical gun in either hand: the other hand's trigger racks its slide
 		var gunplayHeld = HoldsGunplay( DominantGunplayHand ) || HoldsGunplay( OffGunplayHand );
 		Press( "undo", _offTriggerDown && !Player.IsSeated && !gunplayHeld && !TriggerTakenByGunplay( OffGunplayHand ) );
