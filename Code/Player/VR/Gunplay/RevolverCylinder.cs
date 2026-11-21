@@ -244,7 +244,8 @@ public sealed class RevolverCylinder : Component, IGunChamber, Component.ITrigge
 	{
 		if ( IsProxy || !IsOpen ) return;
 
-		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round || round.IsProxy ) return;
+		// Ours or another player's round, see RoundStore
+		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round ) return;
 		if ( Gun?.RoundTemplate is not { } template || round.Bullet.Caliber != template.Caliber ) return;
 
 		round.GetComponent<GunplayInteractable>()?.ClearAllInteractions();

@@ -15,7 +15,7 @@ public sealed class PhysicalCamera : GunplayInteractable
 
 	[Property] public SoundEvent ShutterSound { get; set; }
 
-	[Property, Range( 10, 100 )] public float FieldOfView { get; set; } = 50f;
+	[Property, Sync, Range( 10, 100 )] public float FieldOfView { get; set; } = 50f;
 
 	[Property] public RangedFloat Zoom { get; set; } = new( 15, 90 );
 

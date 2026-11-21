@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 /// Something VR hands hold by its <see cref="GrabPoint"/>s: a gun, a magazine, a round, or a moving part of a gun like
 /// its slide. Ported from gunbuilder.
 /// <para>Over the network the hand that takes hold of it takes ownership of the object, then moves it and keeps its
-/// state, and everyone else follows. Only VR hands hold these: the carry (use) never picks them up, so a desktop player
+/// state, and everyone else follows. What another player holds can't be taken out of their hand. Only VR hands hold these: the carry (use) never picks them up, so a desktop player
 /// can't take or equip one.</para>
 /// </summary>
 public class BaseGunplayInteractable : Component, ICarryEvent
@@ -29,6 +29,22 @@ public class BaseGunplayInteractable : Component, ICarryEvent
 	/// Is a hand holding this, on this machine?
 	/// </summary>
 	public virtual bool IsHeld => heldGrabbables.Any( x => x.IsHeld );
+
+	/// <summary>
+	/// A hand holds this on its owner's machine. Synced, so nobody else takes it out of that hand.
+	/// </summary>
+	[Sync] public bool HeldByOwner { get; private set; }
+
+	/// <summary>
+	/// Is another player's hand holding this, or any other part of the same object, like the gun a slide's on?
+	/// </summary>
+	public bool IsHeldByOther()
+	{
+		if ( !IsProxy ) return false;
+
+		var root = GameObject.Network.RootGameObject;
+		return root.IsValid() && root.GetComponentsInChildren<BaseGunplayInteractable>().Any( x => x.HeldByOwner );
+	}
 
 	/// <summary>
 	/// The grab point that isn't tagged secondary.
@@ -62,6 +78,7 @@ public class BaseGunplayInteractable : Component, ICarryEvent
 		if ( TimeSinceInteract < InteractDelay ) return false;
 		if ( grabbable.IsHeld ) return false;
 		if ( hand.IsHolding() ) return false;
+		if ( IsHeldByOther() ) return false;
 
 		return grabbable.CanStartGrabbing( this, hand );
 	}
@@ -87,6 +104,7 @@ public class BaseGunplayInteractable : Component, ICarryEvent
 			hand.CurrentGrabbable = grabbable;
 
 		heldGrabbables.Add( grabbable );
+		UpdateHeldByOwner();
 		OnInteract( grabbable, hand );
 
 		return true;
@@ -105,10 +123,33 @@ public class BaseGunplayInteractable : Component, ICarryEvent
 			hand.CurrentGrabbable = null;
 
 		heldGrabbables.Remove( grabbable );
+		UpdateHeldByOwner();
 		OnStopInteract( grabbable, hand );
 
 		return true;
 	}
+
+	protected override void OnFixedUpdate()
+	{
+		if ( IsProxy ) return;
+
+		// Ours now and still marked held, but by nobody here: whoever held it left, or something else took it from them
+		if ( HeldByOwner && !IsHeld )
+		{
+			HeldByOwner = false;
+			OnHolderLost();
+		}
+	}
+
+	void UpdateHeldByOwner()
+	{
+		if ( !IsProxy ) HeldByOwner = IsHeld;
+	}
+
+	/// <summary>
+	/// We took this over from a holder who never let go of it, like a player who left with it in their hand.
+	/// </summary>
+	protected virtual void OnHolderLost() { }
 
 	protected virtual void OnStopInteract( IGrabbable grabbable, GunplayHand hand )
 	{
@@ -121,13 +162,20 @@ public class BaseGunplayInteractable : Component, ICarryEvent
 	}
 
 	/// <summary>
-	/// Makes this machine the owner of the object, so it can move it and change its state.
+	/// Makes this machine the owner of the object, and of what's attached to it, so it can move them and change their
+	/// state.
 	/// </summary>
 	public void TakeOwnership()
 	{
 		var root = GameObject.Network.RootGameObject;
-		if ( root.IsValid() && root.Network.Active && root.IsProxy )
+		if ( !root.IsValid() || !root.Network.Active ) return;
+
+		if ( root.IsProxy )
 			root.Network.TakeOwnership();
+
+		// The magazine in a gun feeds it: racking the slide of a gun someone else put down takes theirs as well
+		foreach ( var point in root.GetComponentsInChildren<AttachmentPoint>() )
+			point.CurrentAttachable?.Interactable?.TakeOwnership();
 	}
 
 	public void FreezeMotion( bool frozen = true )

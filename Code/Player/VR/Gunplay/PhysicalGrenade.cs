@@ -49,13 +49,27 @@ public sealed class PhysicalGrenade : GunplayInteractable
 	{
 		base.OnStopInteract( grabbable, hand );
 
-		// Out of the hand with the pin out: the spoon flies off
-		if ( !IsProxy && PinPulled && !Armed && !IsHeld )
-		{
-			Armed = true;
-			GunplaySounds.Play( SpoonSound, WorldPosition );
-			Arm( Thrower, Fuse );
-		}
+		if ( !IsHeld ) ReleaseSpoon();
+	}
+
+	protected override void OnHolderLost()
+	{
+		base.OnHolderLost();
+
+		// Whoever held it left with the pin out: it's out of their hand all the same
+		ReleaseSpoon();
+	}
+
+	/// <summary>
+	/// Out of the hand with the pin out: the spoon flies off. Owner only.
+	/// </summary>
+	void ReleaseSpoon()
+	{
+		if ( IsProxy || !PinPulled || Armed ) return;
+
+		Armed = true;
+		GunplaySounds.Play( SpoonSound, WorldPosition );
+		Arm( Thrower, Fuse );
 	}
 
 	/// <summary>

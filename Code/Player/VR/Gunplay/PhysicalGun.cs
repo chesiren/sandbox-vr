@@ -1,8 +1,8 @@
 /// <summary>
 /// A gun held and worked by VR hands: a magazine goes in its <see cref="AttachmentPoint"/>, the slide feeds the
 /// <see cref="GunChamber"/>, and the trigger of the hand on its grip fires. Ported from gunbuilder's Weapon.
-/// <para>The holder's machine owns the gun and decides every shot. The shot is sent to everyone for its effects, and
-/// the host deals the damage, as the player who fired, like any other weapon.</para>
+/// <para>The holder's machine owns the gun and decides every shot. The shot is sent to everyone for its effects, the
+/// holder's machine says what its bullets hit, and the host deals the damage, as the player who fired.</para>
 /// </summary>
 public sealed class PhysicalGun : GunplayInteractable
 {
@@ -390,7 +390,11 @@ public sealed class PhysicalGun : GunplayInteractable
 		if ( SecondaryGrabPoint?.Hand?.Controller is { } support )
 			VRMode.Pulse( support, 0.5f, 0.5f );
 
-		Shoot( ray.Position, ray.Forward, Game.Random.Int( 0, int.MaxValue - 1 ), EjectsOnShot );
+		var seed = Game.Random.Int( 0, int.MaxValue - 1 );
+		Shoot( ray.Position, ray.Forward, seed, EjectsOnShot );
+
+		if ( ProjectilePrefab is null )
+			ClaimHits( ray, seed );
 
 		// The rocket's gone from the tube
 		if ( ConsumesEmptyMagazine && Magazine.IsValid() && !Magazine.HasAmmo )
@@ -488,35 +492,87 @@ public sealed class PhysicalGun : GunplayInteractable
 	void BroadcastCasing() => EjectCasing();
 
 	/// <summary>
-	/// A shot, on every machine: its effects everywhere, and its damage on the host.
+	/// Whoever fired is a VR player, or the host.
+	/// </summary>
+	static bool IsVRCaller( out Player shooter )
+	{
+		shooter = Player.FindForConnection( Rpc.Caller );
+		return Rpc.Caller.IsHost || VRPlayer.Get( shooter ) is not null;
+	}
+
+	/// <summary>
+	/// The shooter's machine says what each bullet hit, as it saw it: the host's view of a moving target is a ping
+	/// behind, and a trace there missed what the shooter had in their sights. Owner only.
+	/// </summary>
+	void ClaimHits( Ray ray, int seed )
+	{
+		var shooter = GripHand?.Owner?.Player;
+
+		foreach ( var bullet in BulletDirections( ray.Forward, seed ) )
+		{
+			var tr = BulletTrace( new Ray( ray.Position, bullet ), shooter );
+			if ( !tr.Hit ) continue;
+
+			// Where on the target, so the host finds that spot wherever the target is on its machine
+			var target = tr.GameObject;
+			var point = target.IsValid() ? target.WorldTransform.PointToLocal( tr.HitPosition ) : tr.HitPosition;
+			ClaimHit( target, point, ray.Position, bullet );
+		}
+	}
+
+	/// <summary>
+	/// The host deals a bullet's damage, as the player who fired: traced again from the muzzle at the spot the shooter
+	/// hit on the target, or along the bullet's path for a target the host doesn't know.
+	/// </summary>
+	[Rpc.Host]
+	void ClaimHit( GameObject target, Vector3 localPoint, Vector3 origin, Vector3 direction )
+	{
+		if ( !IsVRCaller( out var shooter ) ) return;
+
+		var attacker = shooter.IsValid() ? shooter.GameObject : GameObject;
+		var tr = BulletTrace( new Ray( origin, direction.Normal ), shooter );
+
+		if ( target.IsValid() )
+		{
+			var aim = target.WorldTransform.PointToWorld( localPoint );
+			if ( origin.Distance( aim ) > MaxRange + 64f ) return;
+
+			var claimed = BulletTrace( new Ray( origin, (aim - origin).Normal ), shooter );
+
+			// A little wider for a spot that's moved under the bullet with the target's animation
+			if ( claimed.GameObject?.Root != target.Root )
+				claimed = BulletTrace( Scene, new Ray( origin, (aim - origin).Normal ), MaxRange, MathF.Max( BulletSize, 4f ), GameObject, shooter );
+
+			if ( claimed.Hit ) tr = claimed;
+		}
+
+		// Our own trace, past the gun: the engine's only leaves out the shooter, and the bullet, as wide as it is,
+		// started out in the gun's own barrel and hit that
+		BaseCombatWeapon.ShootBullet( tr, Damage, Force, attacker, GameObject, null, true );
+	}
+
+	/// <summary>
+	/// A shot, on every machine: its effects everywhere. A rocket's made by the host; a bullet's damage comes from
+	/// <see cref="ClaimHit"/>.
 	/// </summary>
 	[Rpc.Broadcast]
 	void Shoot( Vector3 origin, Vector3 direction, int seed, bool ejectCasing )
 	{
-		var shooter = Player.FindForConnection( Rpc.Caller );
-
-		// Only a VR player's hands fire these
-		var dealsDamage = (Networking.IsHost || !Networking.IsActive) && (Rpc.Caller.IsHost || VRPlayer.Get( shooter ) is not null);
-		var attacker = shooter.IsValid() ? shooter.GameObject : GameObject;
-
 		if ( ProjectilePrefab is not null )
 		{
-			if ( dealsDamage )
+			if ( (Networking.IsHost || !Networking.IsActive) && IsVRCaller( out var shooter ) )
 				LaunchProjectile( new Ray( origin, direction.Normal ), shooter );
 
 			DoShootEffects();
 			return;
 		}
 
+		var caller = Player.FindForConnection( Rpc.Caller );
+
 		foreach ( var bullet in BulletDirections( direction.Normal, seed ) )
 		{
 			var ray = new Ray( origin, bullet );
-			var tr = BulletTrace( ray, shooter );
-
-			// Our own trace, past the gun: the engine's only leaves out the shooter, and the bullet, as wide as it is,
-			// started out in the gun's own barrel and hit that
-			if ( dealsDamage )
-				BaseCombatWeapon.ShootBullet( tr, Damage, Force, attacker, GameObject, null, true );
+			var tr = BulletTrace( ray, caller );
 
 			if ( tr.Hit )
 				CreateImpactEffects( tr.GameObject, tr.Surface, tr.EndPosition, tr.Normal );

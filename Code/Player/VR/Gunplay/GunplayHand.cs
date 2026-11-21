@@ -143,7 +143,8 @@ public sealed class GunplayHand : Component, Component.ITriggerListener
 		return Best( candidates, tr.HitPosition );
 	}
 
-	bool CanTake( IGrabbable grabbable ) => grabbable.IsValid() && !grabbable.IsHeld && grabbable.GameObject.Active && !IsUnheldSupport( grabbable );
+	bool CanTake( IGrabbable grabbable ) => grabbable.IsValid() && !grabbable.IsHeld && grabbable.GameObject.Active && !IsUnheldSupport( grabbable )
+		&& !(grabbable.Interactable?.IsHeldByOther() ?? false);
 
 	/// <summary>
 	/// A support grip, like the SG-5's front one, on a gun nobody holds by its grip yet. It can't carry the gun on its own,
@@ -207,9 +208,13 @@ public sealed class GunplayHand : Component, Component.ITriggerListener
 			return;
 		}
 
-		// Something else took it from us (another player, or it went into a gun)
+		// Something else took it from us (it went into a gun)
 		if ( CurrentGrabbable is not null && (!CurrentGrabbable.IsValid() || CurrentGrabbable.Hand != this) )
 			CurrentGrabbable = null;
+
+		// Someone else owns it now: they grabbed it at the same moment and won, or moved it with a tool
+		if ( CurrentGrabbable.IsValid() && CurrentGrabbable.Interactable is { IsProxy: true } )
+			StopGrabbing( true );
 
 		var grabbable = TryFindGrabbable();
 		Target = CurrentGrabbable.IsValid() ? null : grabbable;

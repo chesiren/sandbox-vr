@@ -48,11 +48,13 @@ public sealed class Attachable : Component
 	{
 		Tags.Set( "attached", false );
 
-		// Back to physics, unless a hand's holding it (that moves it itself)
-		if ( Rigidbody.IsValid() && !(Interactable?.IsHeld ?? false) && !IsProxy )
-		{
+		// Back to physics, unless a hand's holding it (that moves it itself). On everyone, so whoever takes it over
+		// next, like the host when its owner leaves, doesn't find it frozen in the air
+		if ( Rigidbody.IsValid() && !(Interactable?.IsHeld ?? false) )
 			Rigidbody.MotionEnabled = true;
 
+		if ( Rigidbody.IsValid() && !(Interactable?.IsHeld ?? false) && !IsProxy )
+		{
 			// Carry on with what it was attached to, rather than stopping dead in the air
 			var parentBody = attachmentPoint?.Interactable?.Rigidbody;
 			Rigidbody.Velocity = parentBody.IsValid() ? parentBody.Velocity : Vector3.Zero;

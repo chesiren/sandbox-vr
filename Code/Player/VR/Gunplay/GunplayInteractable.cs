@@ -54,10 +54,6 @@ public class GunplayInteractable : BaseGunplayInteractable
 	{
 		base.OnInteract( grabbable, hand );
 
-		// What's attached to us is moved by us now
-		foreach ( var point in GetComponentsInChildren<AttachmentPoint>() )
-			point.CurrentAttachable?.Interactable?.TakeOwnership();
-
 		// Keyframed while held: the hand moves it by its velocity
 		FreezeMotion();
 	}
@@ -66,7 +62,8 @@ public class GunplayInteractable : BaseGunplayInteractable
 	{
 		base.OnStopInteract( grabbable, hand );
 
-		if ( heldGrabbables.Count > 0 || !Rigidbody.IsValid() ) return;
+		// Let go of because someone else took it: they move it now
+		if ( heldGrabbables.Count > 0 || !Rigidbody.IsValid() || IsProxy ) return;
 
 		// Something attached to a gun stays put; otherwise it falls, with the hand's swing as a throw
 		if ( GetComponent<Attachable>() is { IsAttached: true } ) return;
@@ -125,8 +122,17 @@ public class GunplayInteractable : BaseGunplayInteractable
 		Rigidbody.AngularVelocity = angularVelocity;
 	}
 
+	protected override void OnHolderLost()
+	{
+		// Keyframed in a hand that's gone: let it fall
+		if ( GetComponent<Attachable>() is not { IsAttached: true } )
+			FreezeMotion( false );
+	}
+
 	protected override void OnFixedUpdate()
 	{
+		base.OnFixedUpdate();
+
 		if ( IsProxy ) return;
 
 		// The primary grab point is what holds it; a hand on the secondary alone doesn't

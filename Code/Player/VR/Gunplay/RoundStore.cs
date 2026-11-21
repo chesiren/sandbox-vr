@@ -93,8 +93,8 @@ public abstract class RoundStore : Component, IAmmoSource, Component.ITriggerLis
 	{
 		if ( IsProxy || !CanLoadByHand ) return;
 
-		// A round pushed in by a hand: whoever holds it owns it, and has to own this too
-		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round || round.IsProxy ) return;
+		// A round pushed in by a hand, ours or another player's, like the owner of a gun takes a magazine handed into it
+		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round ) return;
 		if ( IsFull || !IsCompatibleBullet( round.Bullet ) ) return;
 
 		if ( Push( round.Pop().ToArray() ) <= 0 ) return;

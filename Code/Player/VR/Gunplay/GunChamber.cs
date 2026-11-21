@@ -96,7 +96,8 @@ public sealed class GunChamber : Component, IGunChamber, Component.ITriggerListe
 	{
 		if ( IsProxy ) return;
 
-		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round || round.IsProxy ) return;
+		// Ours or another player's round, see RoundStore
+		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round ) return;
 
 		// Only with the slide all the way back
 		if ( Bolt.IsValid() && !Bolt.CompletionValue.AlmostEqual( 1f ) ) return;
