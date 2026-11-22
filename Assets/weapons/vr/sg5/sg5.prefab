@@ -28,6 +28,10 @@
         "KickYaw": "-0.4 0.4",
         "MassScale": 1,
         "MaxRange": 4096,
+        "MuzzleEffect": {
+          "_type": "gameobject",
+          "prefab": "prefabs/effects/default_muzzleflash.prefab"
+        },
         "MuzzleGameObject": {
           "_type": "gameobject",
           "go": "e9c754c3-f1b8-4b67-8655-69b6d1211212"

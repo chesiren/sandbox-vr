@@ -53,6 +53,10 @@
         "ManualAction": true,
         "MassScale": 1.4,
         "MaxRange": 8192,
+        "MuzzleEffect": {
+          "_type": "gameobject",
+          "prefab": "prefabs/effects/default_muzzleflash.prefab"
+        },
         "MuzzleGameObject": {
           "_type": "gameobject",
           "go": "2cf0eac4-5bb8-479d-b6ce-0348352cfc19"

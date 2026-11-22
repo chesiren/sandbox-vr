@@ -100,6 +100,11 @@ public sealed class PhysicalGun : GunplayInteractable
 	[Property, Group( "Effects" )] public float TracerWidth { get; set; } = 0.15f;
 	[Property, Group( "Effects" )] public float TracerLifetime { get; set; } = 0.05f;
 
+	/// <summary>
+	/// The flash made at the muzzle on each shot, on every machine. It removes itself.
+	/// </summary>
+	[Property, Group( "Effects" )] public GameObject MuzzleEffect { get; set; }
+
 	[Property] public GunChamber Chamber { get; set; }
 
 	[Property] public SlideReleaseSystem SlideReleaseSystem { get; set; }
@@ -679,11 +684,33 @@ public sealed class PhysicalGun : GunplayInteractable
 
 	void DoShootEffects()
 	{
+		DoMuzzleEffect();
+
 		if ( ShootSound is null ) return;
 
 		// At the muzzle, for the shooter too. Not ListenLocal: that puts the listener at 0,0,0, so the muzzle's world
 		// position read as that far from the shooter's head, and the shot faded out with the distance.
 		Sound.Play( ShootSound, MuzzleGameObject.WorldPosition );
+	}
+
+	void DoMuzzleEffect()
+	{
+		if ( MuzzleEffect is null || !MuzzleGameObject.IsValid() ) return;
+
+		var flash = MuzzleEffect.Clone( new CloneConfig
+		{
+			Parent = MuzzleGameObject,
+			Transform = new Transform( Vector3.Zero ),
+			StartEnabled = false
+		} );
+		flash.NetworkMode = NetworkMode.Never;
+		flash.Flags |= GameObjectFlags.NotSaved;
+
+		// Its particles are in world space, so a gun swung in the hand would leave the flash hanging behind it
+		foreach ( var effect in flash.GetComponentsInChildren<ParticleEffect>( true ) )
+			effect.LocalSpace = 1.0f;
+
+		flash.Enabled = true;
 	}
 
 	void DoTracer( Vector3 startPosition, Vector3 endPosition )
