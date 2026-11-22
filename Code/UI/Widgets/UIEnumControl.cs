@@ -28,7 +28,7 @@ public class UIEnumControl : BaseControl
 
 		var list = options.Select( o => new UIDropdown.Item( o.Title, o.ObjectValue ) ).ToList();
 
-		// a laser's better off with the choices already there than with a list to open
+		// A laser's better off with the choices already there than with a list to open
 		var segmented = list.Count == 2 || VRMode.IsActive && list.Count <= MaxVRSegments;
 
 		SetClass( "segmented", segmented );

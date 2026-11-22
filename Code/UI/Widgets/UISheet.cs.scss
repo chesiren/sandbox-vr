@@ -200,7 +200,7 @@ UISheet
 			}
 		}
 
-		// the words on a checkbox's row, it's a button of its own in VR
+		// The words on a checkbox's row, it's a button of its own in VR
 		> .state
 		{
 			display: none;
@@ -208,7 +208,7 @@ UISheet
 	}
 }
 
-// in a headset every name goes on a line above its control, whatever the width of the page
+// In a headset every name goes on a line above its control, whatever the width of the page
 .vr UISheet
 {
 	font-size: $vr-font;
@@ -262,7 +262,7 @@ UISheet
 			flex-wrap: wrap;
 		}
 
-		// the whole row is the button, and says what it's set to
+		// The whole row is the button, and says what it's set to
 		&.toggle
 		{
 			@include ui-button-face;

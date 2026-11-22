@@ -68,7 +68,7 @@
         // In VR things with nothing to hit get no icon to click, see ContextMenuHost.DrawHandles: the laser goes near them
         if ( VRMode.IsActive && HandleAlong( screenRay, go.IsValid() ? tr.Distance : float.MaxValue ) is { } handle )
         {
-            // its own object, not its network root, like a click on its icon
+            // Its own object, not its network root, like a click on its icon
             if ( hovered != handle.GameObject )
             {
                 hovered = handle.GameObject;

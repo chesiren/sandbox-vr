@@ -165,7 +165,7 @@ menulist.menulist
 	}
 }
 
-// the engine's button for choosing a resource, which any sheet can have
+// The engine's button for choosing a resource, which any sheet can have
 .vr ResourcePickerButton
 {
 	flex-shrink: 0;
@@ -198,7 +198,7 @@ menulist.menulist
 	}
 }
 
-// the laser shakes too much to keep one up, and it would open under the screen's mouse: see VRHintBar
+// The laser shakes too much to keep one up, and it would open under the screen's mouse: see VRHintBar
 .vr panel.tooltip, .vr UIHintPanel
 {
 	display: none;

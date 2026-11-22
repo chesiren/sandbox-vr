@@ -9,6 +9,9 @@ public abstract class RoundStore : Component, IAmmoSource, Component.ITriggerLis
 	/// </summary>
 	[Sync, Property, ReadOnly] public int BulletCount { get; protected set; }
 
+	/// <summary>
+	/// How many rounds fit in it.
+	/// </summary>
 	[Property] public int BulletCapacity { get; set; } = 30;
 
 	/// <summary>
@@ -108,5 +111,8 @@ public abstract class RoundStore : Component, IAmmoSource, Component.ITriggerLis
 		round.Remove();
 	}
 
+	/// <summary>
+	/// A loose round was pushed in by hand.
+	/// </summary>
 	protected virtual void OnLoadedByHand() { }
 }

@@ -3,6 +3,9 @@
 /// </summary>
 public static class GunplaySounds
 {
+	/// <summary>
+	/// Plays <paramref name="sound"/> at <paramref name="position"/> on every machine.
+	/// </summary>
 	public static void Play( SoundEvent sound, Vector3 position )
 	{
 		if ( sound is null ) return;

@@ -32,7 +32,7 @@
     {
         base.OnAfterTreeRender( firstTime );
 
-        // in VR this is a section of its own, with a whole empty page beside the list otherwise
+        // In VR this is a section of its own, with a whole empty page beside the list otherwise
         if ( firstTime && VRMode.IsActive && GetGroups().FirstOrDefault()?.Items.FirstOrDefault() is { } first )
             OnSelectPage( first.Value );
     }

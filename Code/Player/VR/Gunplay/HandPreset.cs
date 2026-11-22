@@ -21,7 +21,13 @@ public sealed class HandPreset
 		Pinky = pinky;
 	}
 
+	/// <summary>
+	/// Every finger closed round the grip.
+	/// </summary>
 	public static HandPreset Grip => new( 1f, 1f, 1f, 1f, 1f );
+	/// <summary>
+	/// Closed round the grip, with the index finger left to the controller for the trigger.
+	/// </summary>
 	public static HandPreset GripWithoutIndexFinger => new( -1f, 1f, 1f, 1f, 1f );
 
 	/// <summary>

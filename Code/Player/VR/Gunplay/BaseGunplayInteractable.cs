@@ -69,12 +69,18 @@ public class BaseGunplayInteractable : Component, ICarryEvent, IPhysgunEvent, IT
 		}
 	}
 
+	/// <summary>
+	/// Turns every grab point on or off, so hands can or can't take hold of this.
+	/// </summary>
 	public void SetGrabPointsEnabled( bool enabled )
 	{
 		foreach ( var grabPoint in GrabbableDirectory )
 			grabPoint.GameObject.Enabled = enabled;
 	}
 
+	/// <summary>
+	/// Can <paramref name="hand"/> take hold of this by <paramref name="grabbable"/>? Not straight after letting go, nor while someone else holds it.
+	/// </summary>
 	protected virtual bool CanInteract( IGrabbable grabbable, GunplayHand hand )
 	{
 		if ( grabbable is null ) return false;
@@ -86,6 +92,9 @@ public class BaseGunplayInteractable : Component, ICarryEvent, IPhysgunEvent, IT
 		return grabbable.CanStartGrabbing( this, hand );
 	}
 
+	/// <summary>
+	/// Can <paramref name="hand"/> let go of <paramref name="grabbable"/>? Not straight after taking hold.
+	/// </summary>
 	protected virtual bool CanStopInteract( IGrabbable grabbable, GunplayHand hand )
 	{
 		if ( TimeSinceInteract < InteractDelay ) return false;
@@ -154,11 +163,17 @@ public class BaseGunplayInteractable : Component, ICarryEvent, IPhysgunEvent, IT
 	/// </summary>
 	protected virtual void OnHolderLost() { }
 
+	/// <summary>
+	/// A hand let go of one of its grab points.
+	/// </summary>
 	protected virtual void OnStopInteract( IGrabbable grabbable, GunplayHand hand )
 	{
 		TimeSinceInteract = 0;
 	}
 
+	/// <summary>
+	/// A hand took hold of one of its grab points.
+	/// </summary>
 	protected virtual void OnInteract( IGrabbable grabbable, GunplayHand hand )
 	{
 		TimeSinceInteract = 0;
@@ -181,6 +196,9 @@ public class BaseGunplayInteractable : Component, ICarryEvent, IPhysgunEvent, IT
 			point.CurrentAttachable?.Interactable?.TakeOwnership();
 	}
 
+	/// <summary>
+	/// Stops the rigidbody's physics, or lets it move again with <c>false</c>.
+	/// </summary>
 	public void FreezeMotion( bool frozen = true )
 	{
 		if ( Rigidbody.IsValid() )

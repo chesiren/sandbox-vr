@@ -10,6 +10,9 @@ public sealed class MeleeImpact : Component, Component.ICollisionListener
 {
 	[Property] public GunplayInteractable Interactable { get; set; }
 
+	/// <summary>
+	/// The damage of a hit at <see cref="FullSpeed"/> or faster, less for a slower one.
+	/// </summary>
 	[Property] public float MaxDamage { get; set; } = 12f;
 
 	/// <summary>
@@ -22,6 +25,9 @@ public sealed class MeleeImpact : Component, Component.ICollisionListener
 	/// </summary>
 	[Property] public float FullSpeed { get; set; } = 400f;
 
+	/// <summary>
+	/// How hard a hit pushes what it hits.
+	/// </summary>
 	[Property] public float Force { get; set; } = 1000f;
 
 	/// <summary>

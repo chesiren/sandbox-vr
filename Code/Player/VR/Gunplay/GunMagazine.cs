@@ -10,6 +10,9 @@ public sealed class GunMagazine : RoundStore
 
 	[Property] public SkinnedModelRenderer Renderer { get; set; }
 
+	/// <summary>
+	/// The body group on <see cref="Renderer"/> that shows the rounds left.
+	/// </summary>
 	[Property] public int AmmoBodygroup { get; set; } = 0;
 
 	int _shownBodygroup = -1;

@@ -10,7 +10,7 @@ UISlider
 	cursor: pointer;
 	pointer-events: all;
 
-	// the buttons for VR
+	// The buttons for VR
 	.nudge
 	{
 		display: none;
@@ -152,7 +152,7 @@ UISlider
 		}
 	}
 
-	// a gradient's colours need a wide bar, the plain one's a line
+	// A gradient's colours need a wide bar, the plain one's a line
 	&.gradient .track .line
 	{
 		top: 54px;
@@ -160,7 +160,7 @@ UISlider
 		border-radius: 4px;
 	}
 
-	// the one the stick moves
+	// The one the stick moves
 	&:hover .track .line
 	{
 		background-color: $ui-blue;
@@ -191,7 +191,7 @@ UISlider
 	}
 }
 
-// in a sheet the number goes on the line of the name, which leaves the row to the bar
+// In a sheet the number goes on the line of the name, which leaves the row to the bar
 .vr UISheet .sheet-row.slider UISlider
 {
 	position: relative;

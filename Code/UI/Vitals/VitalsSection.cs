@@ -287,7 +287,8 @@ public sealed class VitalsSection : HudSection
 		{
 			var slot = new Rect( position + new Vector2( size.x * i, 0 ), size );
 			var background = _digitBackgrounds[counter.Variant( i )];
-			background.MarkUsed( (int)size.x ); // streaming only hears of what the engine draws itself
+			// Streaming only hears of what the engine draws itself
+			background.MarkUsed( (int)size.x );
 			painter.Texture( background, slot, tint );
 
 			if ( counter.Glyph( i ) is { } glyph ) painter.Text( glyph, slot );

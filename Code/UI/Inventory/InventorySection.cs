@@ -241,7 +241,7 @@ public sealed class InventorySection : HudSection
 			var fit = MathF.Min( area.x / icon.Width, area.y / icon.Height );
 			var size = new Vector2( icon.Width, icon.Height ) * fit;
 			var center = new Vector2( rect.Center.x, rect.Top + IconAreaHeight * scale * 0.5f );
-			// streaming only hears of what the engine draws itself, a painted texture would stay at its smallest
+			// Streaming only hears of what the engine draws itself, a painted texture would stay at its smallest
 			icon.MarkUsed( (int)size.x );
 			painter.Texture( icon, new Rect( center - size * 0.5f, size ), iconColor );
 		}

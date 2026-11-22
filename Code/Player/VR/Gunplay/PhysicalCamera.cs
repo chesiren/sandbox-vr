@@ -15,8 +15,14 @@ public sealed class PhysicalCamera : GunplayInteractable
 
 	[Property] public SoundEvent ShutterSound { get; set; }
 
+	/// <summary>
+	/// The lens' field of view in degrees, zoomed with the stick and synced so every peer's screen shows the same picture.
+	/// </summary>
 	[Property, Sync, Range( 10, 100 )] public float FieldOfView { get; set; } = 50f;
 
+	/// <summary>
+	/// How far the stick can zoom the field of view, in degrees.
+	/// </summary>
 	[Property] public RangedFloat Zoom { get; set; } = new( 15, 90 );
 
 	/// <summary>

@@ -25,6 +25,9 @@ public enum RoundCaliber
 /// </summary>
 public partial record Round
 {
+	/// <summary>
+	/// A body group and the value to set it to.
+	/// </summary>
 	public class BodyGroupKeyValue
 	{
 		[KeyProperty] public int Index { get; set; }

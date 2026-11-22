@@ -150,7 +150,7 @@ public class UISlider : BaseControl
 		}
 	}
 
-	// not the slider's own value: that's snapped to the step, and a slow push would never get to the next one
+	// Not the slider's own value: that's snapped to the step, and a slow push would never get to the next one
 	float? _stickValue;
 
 	/// <summary>

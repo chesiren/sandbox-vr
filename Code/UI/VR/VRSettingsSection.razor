@@ -19,7 +19,7 @@
     {
         base.OnAfterTreeRender( firstTime );
 
-        // built here rather than on first render so it comes back after a hotload
+        // Built here rather than on first render so it comes back after a hotload
         if ( SettingsBar.IsValid() && !SettingsBar.Children.Any() )
             SettingsBar.AddChild( ContextMenuHost.CreateMenuBar( Scene ) );
     }

@@ -181,7 +181,7 @@
 
     protected override async void OnClick( MousePanelEvent e )
     {
-        // the VR button for what the right click opens, on a tile that would otherwise spawn
+        // The VR button for what the right click opens, on a tile that would otherwise spawn
         if ( e.Target?.AncestorsAndSelf.Any( x => x.HasClass( "more" ) ) == true )
         {
             OpenMenu();

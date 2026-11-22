@@ -37,7 +37,7 @@ public static class SpawnMenuIconSizeExtensions
 		{
 			_current ??= Game.Cookies.Get( Cookie, SpawnMenuIconSize.Medium );
 
-			// small tiles have no names and are hard to point at, and there's no leaving a name to a tooltip in a headset
+			// Small tiles have no names and are hard to point at, and there's no leaving a name to a tooltip in a headset
 			return VRMode.IsActive && _current == SpawnMenuIconSize.Small ? SpawnMenuIconSize.Medium : _current.Value;
 		}
 		set

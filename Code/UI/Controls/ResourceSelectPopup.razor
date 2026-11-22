@@ -194,7 +194,7 @@
     /// </summary>
     SpawnMenuIconSize IconSize
     {
-        // small tiles leave the name to a tooltip, which a headset can't show
+        // Small tiles leave the name to a tooltip, which a headset can't show
         get => VRMode.IsActive && _iconSize == SpawnMenuIconSize.Small ? SpawnMenuIconSize.Medium : _iconSize;
         set
         {

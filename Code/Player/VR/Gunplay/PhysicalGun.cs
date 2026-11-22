@@ -32,6 +32,9 @@ public sealed class PhysicalGun : GunplayInteractable
 	/// </summary>
 	[Property, Group( "Stats" )] public bool Automatic { get; set; } = true;
 
+	/// <summary>
+	/// Damage dealt by each bullet.
+	/// </summary>
 	[Property, Group( "Stats" )] public float Damage { get; set; } = 12;
 
 	/// <summary>
@@ -39,6 +42,9 @@ public sealed class PhysicalGun : GunplayInteractable
 	/// </summary>
 	[Property, Group( "Stats" )] public float Force { get; set; } = 300;
 
+	/// <summary>
+	/// How far a bullet goes, in world units.
+	/// </summary>
 	[Property, Group( "Stats" )] public float MaxRange { get; set; } = 4096;
 
 	/// <summary>
@@ -98,6 +104,9 @@ public sealed class PhysicalGun : GunplayInteractable
 
 	[Property, Group( "Effects" )] public Color TracerColor { get; set; } = new Color( 1f, 0.85f, 0.6f, 0.5f );
 	[Property, Group( "Effects" )] public float TracerWidth { get; set; } = 0.15f;
+	/// <summary>
+	/// How long a tracer stays drawn, in seconds.
+	/// </summary>
 	[Property, Group( "Effects" )] public float TracerLifetime { get; set; } = 0.05f;
 
 	/// <summary>
@@ -129,6 +138,9 @@ public sealed class PhysicalGun : GunplayInteractable
 	/// </summary>
 	[Property, Group( "Projectile" )] public GameObject ProjectilePrefab { get; set; }
 
+	/// <summary>
+	/// How fast <see cref="ProjectilePrefab"/> flies, in world units a second.
+	/// </summary>
 	[Property, Group( "Projectile" )] public float ProjectileSpeed { get; set; } = 1024f;
 
 	/// <summary>

@@ -25,7 +25,7 @@ ContextMenuHost
 	}
 }
 
-// in VR the laser goes through to the world, only the windows on the panel catch it
+// In VR the laser goes through to the world, only the windows on the panel catch it
 ContextMenuHost.vr
 {
 	pointer-events: none;

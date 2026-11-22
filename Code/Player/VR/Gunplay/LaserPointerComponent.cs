@@ -17,6 +17,9 @@ public sealed class LaserPointerComponent : Component, Component.ExecuteInEditor
 	/// </summary>
 	[Property, Sync, Change( nameof( OnIsEnabledChanged ) )] public bool IsEnabled { get; set; } = true;
 
+	/// <summary>
+	/// The grab point whose hand toggles the laser with a stick click.
+	/// </summary>
 	[Property] public GrabPoint GrabPoint { get; set; }
 
 	TimeSince TimeSinceToggled { get; set; } = 1;
@@ -77,6 +80,9 @@ public sealed class LaserPointerComponent : Component, Component.ExecuteInEditor
 		}
 	}
 
+	/// <summary>
+	/// Builds the beam and dot, or removes them, on this machine only. <see cref="IsEnabled"/> is the synced state.
+	/// </summary>
 	public void SetEnabled( bool enabled )
 	{
 		LineRenderer?.Destroy();

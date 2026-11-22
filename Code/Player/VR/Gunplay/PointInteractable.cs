@@ -58,8 +58,14 @@ public sealed class PointInteractable : BaseGunplayInteractable
 
 	public GunplayHand Hand => HandleGrabPoint?.Hand;
 
+	/// <summary>
+	/// The moving bone's local transform at rest, read on start.
+	/// </summary>
 	public Transform InitialBoneLocalTransform { get; set; }
 
+	/// <summary>
+	/// How far the bone travels from rest to fully pulled, read on start.
+	/// </summary>
 	public float DistanceBetweenStartAndEnd { get; set; }
 
 	/// <summary>

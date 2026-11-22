@@ -68,9 +68,15 @@ public sealed class VRDamageSection : HudSection
 
 	readonly List<(Vector3 Source, Texture Icon, TimeSince Age)> _indicators = new();
 
+	/// <summary>
+	/// Shows the low health ring, see <see cref="VRDamagePanel.SetLowHealth"/>.
+	/// </summary>
 	public bool LowHealth { get; set; }
 	public Texture LowHealthIcon { get; set; }
 
+	/// <summary>
+	/// Adds an indicator pointing towards <paramref name="source"/>, which fades out over two seconds.
+	/// </summary>
 	public void Add( Vector3 source, Texture icon ) => _indicators.Add( (source, icon, 0f) );
 
 	public override void Tick() => _indicators.RemoveAll( x => x.Age >= Lifetime );
@@ -112,7 +118,8 @@ public sealed class VRDamageSection : HudSection
 		painter.Rotate( degrees );
 
 		var rect = new Rect( new Vector2( bounds.Width * EdgeDistance, -size.y / 2f ), size );
-		icon.MarkUsed( (int)size.x ); // streaming only hears of what the engine draws itself
+		// Streaming only hears of what the engine draws itself
+		icon.MarkUsed( (int)size.x );
 		painter.Texture( icon, rect, Color.Red.WithAlpha( alpha ) );
 	}
 }

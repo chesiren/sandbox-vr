@@ -31,7 +31,7 @@ SpawnMenuHost.open .menu-wrapper
 	pointer-events: all;
 }
 
-// inspecting in VR, the laser goes through to the world, only the windows on the panel catch it
+// Inspecting in VR, the laser goes through to the world, only the windows on the panel catch it
 SpawnMenuHost.open.laser-through .menu-wrapper
 {
 	pointer-events: none;

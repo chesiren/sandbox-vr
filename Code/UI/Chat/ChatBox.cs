@@ -126,7 +126,7 @@ public sealed class ChatBox : PanelComponent, IChatEvent
 		SetClass( "vr", VRMode.IsActive );
 		if ( !VRMode.IsActive )
 		{
-			// both sit above the vitals
+			// Both sit above the vitals
 			_box.Style.Bottom = Length.Pixels( Hud.StackBottom * _box.ScaleFromScreen );
 			_recent.Style.Bottom = Length.Pixels( Hud.StackBottom * _recent.ScaleFromScreen );
 

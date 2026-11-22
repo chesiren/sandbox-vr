@@ -23,7 +23,7 @@ public partial class ClientInputControl : BaseControl
 	{
 		if ( Property == null ) return;
 
-		// a keyboard key's picture means nothing in a headset, the label says which button
+		// A keyboard key's picture means nothing in a headset, the label says which button
 		_preview.SetClass( "hidden", VRMode.IsActive );
 
 		var action = Property.GetValue<ClientInput>().Action;

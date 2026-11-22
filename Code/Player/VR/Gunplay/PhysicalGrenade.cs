@@ -12,10 +12,16 @@ public sealed class PhysicalGrenade : GunplayInteractable
 	/// </summary>
 	[Property, Group( "Explosion" )] public float Fuse { get; set; } = 3f;
 
+	/// <summary>
+	/// How far the blast reaches, in world units.
+	/// </summary>
 	[Property, Group( "Explosion" )] public float Radius { get; set; } = 512f;
 
 	[Property, Group( "Explosion" )] public float Damage { get; set; } = 125f;
 
+	/// <summary>
+	/// The strength of the blast's physical push.
+	/// </summary>
 	[Property, Group( "Explosion" )] public float Force { get; set; } = 1f;
 
 	[Property, Group( "Sounds" )] public SoundEvent PinSound { get; set; }

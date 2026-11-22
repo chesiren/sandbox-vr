@@ -76,6 +76,9 @@ public sealed class RevolverCylinder : Component, IGunChamber, Component.ITrigge
 
 	public bool HasRound => !IsOpen && Get( Current + 1 ) == Load.Live;
 
+	/// <summary>
+	/// A revolver never holds a casing under the hammer, the spent ones stay in the cylinder.
+	/// </summary>
 	public bool HasSpentCasing => false;
 
 	public int LiveRounds => Enumerable.Range( 0, Chambers ).Count( i => Get( i ) == Load.Live );

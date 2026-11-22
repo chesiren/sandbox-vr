@@ -3,7 +3,7 @@
 // The spawn menu in a headset: one thing at a time, and big. The pages stay what they are on a screen, so anything that
 // adds one gets this too. Loaded on the root of the panel, 37px here is about 1 degree of view.
 
-// --- the shell --------------------------------------------------------------------------------
+// The shell
 
 // The spawn menu and the inspector share a button, this bar switches between them. Both menus hang under it on the
 // left, over the hint bar.
@@ -121,7 +121,7 @@ SpawnMenuHost .vr-nav
 	}
 }
 
-// --- what every page is made of ---------------------------------------------------------------
+// What every page is made of
 
 .vr VirtualGrid, .vr MixedVirtualGrid, .vr .treeview, .vr UIGroupedList .list, .vr UISettingsPane .settings-body
 {
@@ -192,7 +192,7 @@ SpawnMenuHost .vr-nav
 	font-size: $vr-font-small;
 }
 
-// --- categories -------------------------------------------------------------------------------
+// Categories
 
 .vr SpawnMenuPage > .left
 {
@@ -223,9 +223,9 @@ SpawnMenuHost .vr-nav
 	width: 100%;
 }
 
-// --- tiles ------------------------------------------------------------------------------------
+// Tiles
 
-// the name's always there, nothing can be hovered steadily enough to read it, and the thumbnail stops above it
+// The name's always there, nothing can be hovered steadily enough to read it, and the thumbnail stops above it
 .vr SpawnMenuIcon, .vr .size-large SpawnMenuIcon, .vr .size-small SpawnMenuIcon
 {
 	padding: 6px;
@@ -297,7 +297,7 @@ SpawnMenuHost .vr-nav
 	}
 }
 
-// --- the tool and utility lists ---------------------------------------------------------------
+// The tool and utility lists
 
 .vr UIGroupedList
 {
@@ -393,7 +393,7 @@ SpawnMenuHost .vr-nav
 	}
 }
 
-// --- the settings section: what's on the inspect menu's screen, its window and its bar --------
+// The settings section: what's on the inspect menu's screen, its window and its bar
 
 VRSettingsSection
 {
@@ -456,7 +456,7 @@ VRSettingsSection
 		min-height: 0px;
 		align-items: stretch;
 
-		// the spawn menu's own tabs have a look that reaches this far
+		// The spawn menu's own tabs have a look that reaches this far
 		> .tabs
 		{
 			align-self: stretch;
@@ -549,7 +549,7 @@ VRSettingsSection
 	}
 }
 
-// --- the resource picker: picked with the trigger, then Apply, where a screen has a double click ----
+// The resource picker: picked with the trigger, then Apply, where a screen has a double click
 
 .vr ResourceSelectPopup.popup .inner
 {
@@ -624,7 +624,7 @@ VRSettingsSection
 		}
 	}
 
-	// rows as tall as ForHeadset makes them, sounds' list
+	// Rows as tall as ForHeadset makes them, sounds' list
 	.grid.list-view .item
 	{
 		padding: 8px 18px;
@@ -643,7 +643,7 @@ VRSettingsSection
 	}
 }
 
-// --- tool presets: the bar over a tool's settings, its editor and the name prompt ---------------
+// Tool presets: the bar over a tool's settings, its editor and the name prompt
 
 .vr ToolPresetBar
 {
@@ -789,7 +789,7 @@ VRSettingsSection
 	}
 }
 
-// --- binding a contraption's input to a controller button --------------------------------------
+// Binding a contraption's input to a controller button
 
 .vr ClientInputControl
 {

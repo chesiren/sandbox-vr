@@ -100,8 +100,8 @@ public sealed partial class VRPlayer
 		RightGrip = HoldsGunplay( _rightGunplayHand ) ? _rightGunplayHand.CurrentGrabbable.GameObject : null;
 	}
 
-	// gunbuilder's hand model on a grab point: its hand bone, relative to the grab point it's set on. The body's hand bones
-	// lie the same way (fingers along x, thumb along y), so the body's hand goes where gunbuilder's did, around the grip.
+	// Where gunbuilder's hand model put its hand bone, relative to the grab point. The body's hand bones lie the same way
+	// (fingers along x, thumb along y), so the body's hand closes round the grip just like gunbuilder's did
 	static readonly Transform LeftGripBone = new( new Vector3( -2.541992f, 0.9680022f, -0.3415412f ), new Rotation( 0.726409f, -0.004804412f, 0.1322637f, 0.6743983f ) );
 	static readonly Transform RightGripBone = new( new Vector3( -2.542029f, -0.9679199f, -0.3414217f ), new Rotation( 0.6743067f, -0.1321493f, 0.004909032f, 0.7265142f ) );
 
@@ -114,18 +114,14 @@ public sealed partial class VRPlayer
 		var grip = left ? LeftGrip : RightGrip;
 		if ( !grip.IsValid() ) return null;
 
-		// On the grab point, turned like the real hand: gunbuilder's hand pose from the controller. On a gun's grip that's
-		// how the grab point's turned anyway, the gun's held that way. On the SG-5's front grip it isn't - the gun points
-		// along both hands, and the grab point's turn (set up for a right hand, palm down on top) put the left hand on
-		// upside down.
+		// On the grab point but turned like the controller. The grab point's own turn is set up for a right hand palm down,
+		// which would put the left hand upside down on the SG-5's front grip
 		var controller = left ? LeftHand : RightHand;
 		var bone = left ? LeftGripBone : RightGripBone;
 		var real = new Transform( grip.WorldPosition, controller.Rotation * GripHoldOffset ).ToWorld( bone );
 
-		// A supporting hand, like on the SG-5's front grip, holds the gun as gunbuilder showed it - along the barrel - but
-		// turned round the barrel so its palm faces where the real palm does. Taken as it is, the grab point's turn puts the
-		// palm up under the barrel, and the body's forearm twisted round to get there; turned like the controller instead,
-		// the hand lay across the barrel.
+		// A supporting hand lies along the barrel, rolled round it so its palm faces where the real palm does. The grab
+		// point's turn alone puts the palm up and twists the forearm, the controller's alone lays the hand across the barrel
 		if ( grip.GetComponent<GrabPoint>() is { IsSecondaryGrabPoint: true } support )
 		{
 			var held = grip.WorldTransform.WithScale( 1f ).ToWorld( bone );
@@ -151,7 +147,7 @@ public sealed partial class VRPlayer
 	static Vector3 Flatten( Vector3 v, Vector3 axis ) => (v - axis * Vector3.Dot( v, axis )).Normal;
 
 	/// <summary>
-	/// gunbuilder's hand model sat pitched 45 degrees down from the controller's grip, see <see cref="GunplayHand"/>.
+	/// The hand model in gunbuilder sat pitched 45 degrees down from the controller's grip, see <see cref="GunplayHand"/>.
 	/// </summary>
 	static readonly Rotation GripHoldOffset = new( 0f, 0.3826835f, 0f, 0.9238795f );
 

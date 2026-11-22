@@ -34,20 +34,32 @@ public class GunplayInteractable : BaseGunplayInteractable
 		return base.CanInteract( grabbable, hand );
 	}
 
+	/// <summary>
+	/// Puts <paramref name="attachable"/> into <paramref name="attachmentPoint"/>, like a magazine into this gun.
+	/// </summary>
 	public void Attach( Attachable attachable, AttachmentPoint attachmentPoint )
 	{
 		attachable.OnAttach( attachmentPoint );
 		OnAttachableAdded( attachable, attachmentPoint );
 	}
 
+	/// <summary>
+	/// Takes <paramref name="attachable"/> out of <paramref name="attachmentPoint"/>.
+	/// </summary>
 	public void Detach( Attachable attachable, AttachmentPoint attachmentPoint )
 	{
 		attachable.OnDetach( attachmentPoint );
 		OnAttachableRemoved( attachable, attachmentPoint );
 	}
 
+	/// <summary>
+	/// Something came out of one of our attachment points.
+	/// </summary>
 	protected virtual void OnAttachableRemoved( Attachable attachable, AttachmentPoint attachmentPoint ) { }
 
+	/// <summary>
+	/// Something went into one of our attachment points.
+	/// </summary>
 	protected virtual void OnAttachableAdded( Attachable attachable, AttachmentPoint attachmentPoint ) { }
 
 	protected override void OnInteract( IGrabbable grabbable, GunplayHand hand )
@@ -82,10 +94,8 @@ public class GunplayInteractable : BaseGunplayInteractable
 		var primary = PrimaryGrabPoint;
 		var targetRotation = primary.Hand.HoldRotation;
 
-		// Held by both hands: swing it, from how the first hand holds it, so the line between its grab points runs between
-		// the hands. The roll stays the first hand's: the second one only supports, palm under the barrel or round a
-		// front grip alike. Taking its roll from the second hand's turn (gunbuilder's way) rolled the gun over unless that
-		// hand held it like a vertical grip.
+		// Held by both hands, swing it so its grab points line up with the hands. The roll stays the first hand's: taking
+		// it from the second hand, as gunbuilder did, rolls the gun over unless that hand holds a vertical grip
 		if ( SecondaryGrabPoint is { } secondary && secondary.Hand.IsValid() )
 		{
 			var between = WorldRotation.Inverse * (secondary.GameObject.WorldPosition - primary.GameObject.WorldPosition);
@@ -104,6 +114,9 @@ public class GunplayInteractable : BaseGunplayInteractable
 	/// </summary>
 	protected virtual Vector3 GetHoldOffset() => Vector3.Zero;
 
+	/// <summary>
+	/// Pulls the rigidbody towards the holding hand, its grab point onto the hand, slower the heavier it is.
+	/// </summary>
 	protected void PositionInteractable()
 	{
 		var primary = PrimaryGrabPoint;
