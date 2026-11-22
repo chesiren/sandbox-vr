@@ -6,9 +6,9 @@ public sealed class SlideSlappingSystem : Component, Component.ITriggerListener
 	[Property] public PointInteractable PointInteractable { get; set; }
 
 	/// <summary>
-	/// The trigger the hand slaps.
+	/// How fast the hand has to be going along the slide, relative to the gun, in units a second.
 	/// </summary>
-	[Property] public Collider Slapper { get; set; }
+	[Property] public float MinSpeed { get; set; } = 80f;
 
 	/// <summary>
 	/// The hand near the slide, if any.
@@ -17,11 +17,22 @@ public sealed class SlideSlappingSystem : Component, Component.ITriggerListener
 
 	public bool IsPulled => PointInteractable.CompletionValue.AlmostEqual( 1f );
 
+	Vector3 _previousPosition;
+
+	protected override void OnEnabled()
+	{
+		_previousPosition = WorldPosition;
+	}
+
 	protected override void OnUpdate()
 	{
+		// The gun moves with the hand holding it: only the slapping hand's movement against it counts
+		var movement = WorldPosition - _previousPosition;
+		_previousPosition = WorldPosition;
+
 		if ( IsProxy || !Hand.IsValid() ) return;
 
-		if ( IsPulled && IsCorrectDirectionAndSpeed() )
+		if ( IsPulled && IsSlap( Hand.Velocity - movement ) )
 		{
 			PointInteractable.CompletionValue = 0f;
 			Hand = null;
@@ -33,16 +44,15 @@ public sealed class SlideSlappingSystem : Component, Component.ITriggerListener
 	}
 
 	/// <summary>
-	/// Hard enough, and along the slide.
+	/// Hard enough, and mostly along the slide towards the muzzle. Takes the hand's movement this frame.
 	/// </summary>
-	bool IsCorrectDirectionAndSpeed()
+	bool IsSlap( Vector3 movement )
 	{
-		var velocity = Hand.Velocity;
-		var relativeDir = (WorldRotation.Inverse * velocity).Normal;
-		var howForward = relativeDir.Dot( WorldRotation.Forward );
+		if ( movement.Length < MinSpeed * Time.Delta ) return false;
 
-		if ( velocity.Length < 1.2f ) return false;
-		return howForward > 0.25f && howForward < 0.75f;
+		// Against the slide's own axes, so it doesn't matter where the gun's pointing
+		var local = (WorldRotation.Inverse * movement).Normal;
+		return local.x > 0.5f;
 	}
 
 	void ITriggerListener.OnTriggerEnter( Collider other )

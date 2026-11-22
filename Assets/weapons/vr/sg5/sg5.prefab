@@ -1375,12 +1375,6 @@
               "component_id": "38b11f4f-ae6e-4d06-97ef-67157069e91a",
               "go": "fb2c8129-c0b3-499f-93af-11d3d16c133d",
               "component_type": "PointInteractable"
-            },
-            "Slapper": {
-              "_type": "component",
-              "component_id": "f335f657-01ec-46c4-abd8-27c904408fd3",
-              "go": "72441c46-ba12-46fe-81d2-63b924ff6568",
-              "component_type": "SphereCollider"
             }
           },
           {
