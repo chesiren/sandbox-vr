@@ -20,6 +20,10 @@
         "__guid": "486e3e5d-39d0-4c8e-bc61-0b4c868daf87",
         "__enabled": true,
         "Flags": 0,
+        "MagazinePrefab": {
+          "_type": "gameobject",
+          "prefab": "weapons/vr/rpg/rpg_rocket.prefab"
+        },
         "Automatic": false,
         "KickBack": 1.2,
         "KickRecovery": 8,

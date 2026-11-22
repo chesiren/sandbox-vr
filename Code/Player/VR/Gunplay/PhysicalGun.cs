@@ -22,6 +22,11 @@ public sealed class PhysicalGun : GunplayInteractable
 	[Property, Group( "Setup" )] public GameObject RoundPrefab { get; set; }
 
 	/// <summary>
+	/// The magazine the gun spawns with, already in its magazine well. None for a gun loaded some other way.
+	/// </summary>
+	[Property, Group( "Setup" )] public GameObject MagazinePrefab { get; set; }
+
+	/// <summary>
 	/// Rounds per minute.
 	/// </summary>
 	[Property, Group( "Stats" )] public float RPM { get; set; } = 600;
@@ -223,6 +228,60 @@ public sealed class PhysicalGun : GunplayInteractable
 		// Only a magazine of our caliber goes in the magazine well
 		if ( attachable.GetComponent<GunMagazine>() is not { } magazine ) return false;
 		return RoundTemplate is not { } round || magazine.Caliber == round.Caliber;
+	}
+
+	protected override void OnStart()
+	{
+		base.OnStart();
+
+		if ( Game.IsPlaying && !IsProxy )
+			_ = SpawnReady();
+	}
+
+	/// <summary>
+	/// Spawns ready to fire: its magazine in, a round chambered with the slide, pump or bolt home, and whatever feeds the
+	/// chamber topped back up so nothing's missing. Owner only.
+	/// </summary>
+	async Task SpawnReady()
+	{
+		// The gun's parts and the magazine's rounds are set in their own start, which may come after ours
+		await Task.Frame();
+		if ( !this.IsValid() || IsProxy ) return;
+
+		// Only the host can make networked objects
+		var well = GetComponentsInChildren<AttachmentPoint>().FirstOrDefault( x => x.Interactable == this );
+		if ( MagazinePrefab is not null && !Magazine.IsValid() && well.IsValid() && (!Networking.IsActive || Networking.IsHost) )
+		{
+			var magazine = MagazinePrefab.Clone( new Transform( well.WorldPosition, well.WorldRotation ) );
+			magazine.Tags.Add( "removable" );
+			magazine.NetworkSpawn( true, null );
+
+			// Straight in, before the well's trigger takes it with the click of a magazine pushed in by hand
+			var attachable = magazine.GetComponent<Attachable>();
+			if ( attachable is null || !well.TryAttach( attachable, playSound: false ) )
+			{
+				await Task.Frame();
+				if ( !this.IsValid() || !magazine.IsValid() ) return;
+
+				if ( attachable?.CurrentAttachmentPoint != well )
+				{
+					magazine.Destroy();
+					return;
+				}
+			}
+
+			// The magazine's rounds are counted in its own start
+			await Task.Frame();
+			if ( !this.IsValid() ) return;
+		}
+
+		// Filled first: a rocket launcher tried to chamber its rocket as it went in, before the rocket had counted itself
+		AmmoSource?.Refill();
+		TryFeedFromMagazine();
+
+		// A rocket's tube is what's fired, there's never a second one in it
+		if ( !ConsumesEmptyMagazine )
+			AmmoSource?.Refill();
 	}
 
 	protected override void OnAttachableAdded( Attachable attachable, AttachmentPoint attachmentPoint )

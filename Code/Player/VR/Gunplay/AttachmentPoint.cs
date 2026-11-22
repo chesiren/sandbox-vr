@@ -77,7 +77,7 @@ public sealed class AttachmentPoint : Component, Component.ExecuteInEditor, Comp
 	/// <summary>
 	/// Puts <paramref name="attachable"/> in here. Owner of the gun only.
 	/// </summary>
-	public bool TryAttach( Attachable attachable )
+	public bool TryAttach( Attachable attachable, bool playSound = true )
 	{
 		if ( IsProxy || !CanAttach( attachable ) ) return false;
 
@@ -90,7 +90,7 @@ public sealed class AttachmentPoint : Component, Component.ExecuteInEditor, Comp
 		AttachedObject = attachable.GameObject;
 		TimeSinceAttachChanged = 0;
 
-		Interactable.Attach( attachable, this );
+		Interactable.Attach( attachable, this, playSound );
 		return true;
 	}
 

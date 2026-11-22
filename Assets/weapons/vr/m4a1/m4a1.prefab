@@ -20,6 +20,10 @@
         "__guid": "7aabe7a8-e1cc-4a42-9b57-1f746c868f90",
         "__enabled": true,
         "Flags": 0,
+        "MagazinePrefab": {
+          "_type": "gameobject",
+          "prefab": "weapons/vr/m4a1/m4a1_magazine.prefab"
+        },
         "Automatic": true,
         "KickBack": 0.3,
         "KickRecovery": 16,

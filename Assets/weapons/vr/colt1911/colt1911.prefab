@@ -20,6 +20,10 @@
         "__guid": "a05c2f07-1bc8-4cbb-b880-171e79d52189",
         "__enabled": true,
         "Flags": 0,
+        "MagazinePrefab": {
+          "_type": "gameobject",
+          "prefab": "weapons/vr/colt1911/colt1911_magazine.prefab"
+        },
         "Automatic": false,
         "KickBack": 0.6,
         "KickRecovery": 12,

@@ -68,6 +68,14 @@ public abstract class RoundStore : Component, IAmmoSource, Component.ITriggerLis
 	}
 
 	/// <summary>
+	/// Fills it to <see cref="BulletCapacity"/>. Owner only.
+	/// </summary>
+	public void Refill()
+	{
+		if ( !IsProxy ) BulletCount = BulletCapacity;
+	}
+
+	/// <summary>
 	/// Takes rounds out from the top. Owner only.
 	/// </summary>
 	public IEnumerable<Round> Pop( int amount = 1 )

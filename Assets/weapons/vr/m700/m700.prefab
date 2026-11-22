@@ -20,6 +20,10 @@
         "__guid": "33e076bb-0b94-4a4e-b260-6382cb7b7876",
         "__enabled": true,
         "Flags": 0,
+        "MagazinePrefab": {
+          "_type": "gameobject",
+          "prefab": "weapons/vr/m700/m700_magazine.prefab"
+        },
         "Automatic": false,
         "KickBack": 0.8,
         "KickRecovery": 10,

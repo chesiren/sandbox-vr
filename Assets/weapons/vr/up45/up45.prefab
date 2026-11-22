@@ -11,6 +11,10 @@
       {
         "__type": "PhysicalGun",
         "__guid": "7a311c43-0ba7-4c3a-a814-3d50f162db14",
+        "MagazinePrefab": {
+          "_type": "gameobject",
+          "prefab": "weapons/vr/up45/up45_magazine.prefab"
+        },
         "KickBack": 0.6,
         "KickRecovery": 12,
         "BulletSize": 1,

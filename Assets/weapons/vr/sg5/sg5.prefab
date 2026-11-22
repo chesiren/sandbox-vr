@@ -11,6 +11,10 @@
       {
         "__type": "PhysicalGun",
         "__guid": "a55f4947-1612-4f52-9bb0-7e954737d158",
+        "MagazinePrefab": {
+          "_type": "gameobject",
+          "prefab": "weapons/vr/sg5/sg5_magazine.prefab"
+        },
         "KickBack": 0.25,
         "KickRecovery": 16,
         "BulletSize": 1,

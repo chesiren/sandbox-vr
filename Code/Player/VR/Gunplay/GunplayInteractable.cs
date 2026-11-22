@@ -37,9 +37,9 @@ public class GunplayInteractable : BaseGunplayInteractable
 	/// <summary>
 	/// Puts <paramref name="attachable"/> into <paramref name="attachmentPoint"/>, like a magazine into this gun.
 	/// </summary>
-	public void Attach( Attachable attachable, AttachmentPoint attachmentPoint )
+	public void Attach( Attachable attachable, AttachmentPoint attachmentPoint, bool playSound = true )
 	{
-		attachable.OnAttach( attachmentPoint );
+		attachable.OnAttach( attachmentPoint, playSound );
 		OnAttachableAdded( attachable, attachmentPoint );
 	}
 
