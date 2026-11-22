@@ -162,7 +162,20 @@ public sealed class RevolverCylinder : Component, IGunChamber, Component.ITrigge
 		}
 
 		GunplaySounds.Play( EmptySound, WorldPosition );
+		_sinceEmptied = 0;
 		ThrowOut( live, spent );
+	}
+
+	/// <summary>
+	/// The rounds start inside the gun's colliders, so they ignore the gun until they're well clear of it.
+	/// </summary>
+	void PassThroughGun( GameObject go )
+	{
+		if ( !Gun.IsValid() ) return;
+
+		var filter = new GameObject( go, true, "no collide" ).AddComponent<PhysicsFilter>();
+		filter.Body = Gun.GameObject;
+		filter.AddComponent<TemporaryEffect>().DestroyAfterSeconds = 1f;
 	}
 
 	/// <summary>
@@ -176,7 +189,10 @@ public sealed class RevolverCylinder : Component, IGunChamber, Component.ITrigge
 
 		for ( var i = 0; i < spent; i++ )
 		{
-			if ( round?.CreateCasing( WorldPosition + Vector3.Random * 0.4f, Rotation.LookAt( back ) )?.GetComponent<Rigidbody>() is { } body )
+			if ( round?.CreateCasing( WorldPosition + Vector3.Random * 0.4f, Rotation.LookAt( back ) ) is not { } casing ) continue;
+
+			PassThroughGun( casing );
+			if ( casing.GetComponent<Rigidbody>() is { } body )
 				body.Velocity = back * 40f + Vector3.Random * 20f;
 		}
 
@@ -188,6 +204,7 @@ public sealed class RevolverCylinder : Component, IGunChamber, Component.ITrigge
 		{
 			var go = prefab.Clone( new Transform( WorldPosition + Vector3.Random * 0.4f, Rotation.LookAt( back ) ) );
 			go.Tags.Add( "removable" );
+			PassThroughGun( go );
 			go.NetworkSpawn( true, null );
 
 			if ( go.GetComponent<Rigidbody>() is { } body )
@@ -196,6 +213,7 @@ public sealed class RevolverCylinder : Component, IGunChamber, Component.ITrigge
 	}
 
 	TimeSince _sinceToggle = 1;
+	TimeSince _sinceEmptied = 1;
 	Rotation _lastRotation;
 	bool _aWasDown;
 	bool _bWasDown;
@@ -246,6 +264,10 @@ public sealed class RevolverCylinder : Component, IGunChamber, Component.ITrigge
 	void ITriggerListener.OnTriggerEnter( Collider other )
 	{
 		if ( IsProxy || !IsOpen ) return;
+
+		// The rounds it just threw out spawn inside this trigger. Taking them back would empty it again every frame
+		// while the muzzle's up
+		if ( _sinceEmptied < 0.5f ) return;
 
 		// Ours or another player's round, see RoundStore
 		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round ) return;
