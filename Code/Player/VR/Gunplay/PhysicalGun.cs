@@ -284,6 +284,15 @@ public sealed class PhysicalGun : GunplayInteractable
 			AmmoSource?.Refill();
 	}
 
+	protected override void OnDestroy()
+	{
+		// Left behind, the magazine would hang frozen where the gun was. The host can remove it whoever owns it.
+		if ( Game.IsPlaying && (!Networking.IsActive || Networking.IsHost) && Magazine.IsValid() )
+			Magazine.GameObject.Destroy();
+
+		base.OnDestroy();
+	}
+
 	protected override void OnAttachableAdded( Attachable attachable, AttachmentPoint attachmentPoint )
 	{
 		if ( attachable.GetComponent<GunMagazine>() is { } magazine )
