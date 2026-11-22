@@ -8,22 +8,19 @@ public sealed partial class VRPlayer
 	public bool PointingAtUI => IsLocalVR && (VRHud.IsPointing || SpawnMenuHost.IsOpen || VRKeyboard.IsOpen);
 
 	/// <summary>
-	/// The weapon wheel is open, see <see cref="VRWeaponWheel"/>. The stick's picking a weapon rather than turning and jumping.
+	/// The weapon wheel is open, see <see cref="VRWeaponWheel"/>. The stick neither turns nor jumps while the hand picks.
 	/// </summary>
 	public bool WheelOpen { get; set; }
 
 	/// <summary>
-	/// The stick was clicked this frame, on its own: clicking both sticks together is noclip.
+	/// The dominant stick is held down, which holds the weapon wheel open.
 	/// </summary>
-	public bool WheelClicked { get; private set; }
+	public bool WheelHeld { get; private set; }
 
 	/// <summary>
-	/// Where the stick is pushed, for picking a weapon.
+	/// The other stick was clicked during this hold of <see cref="WheelHeld"/>: both together are noclip, so the wheel stays shut.
 	/// </summary>
-	public Vector2 WheelStick { get; private set; }
-
-	bool _stickClickDown;
-	bool _stickClickSpoiled;
+	public bool WheelCancelled { get; private set; }
 
 	bool _triggerDown;
 	bool _offTriggerDown;
@@ -33,7 +30,7 @@ public sealed partial class VRPlayer
 	/// use/press all work in VR without knowing about it.
 	/// <list type="bullet">
 	/// <item>Dominant hand: trigger fires (attack1), B is attack2, A reloads, grip uses/carries (held to carry,
-	/// letting go throws with the swing; B turns what's carried with the wrist), stick click opens the weapon
+	/// letting go throws with the swing; B turns what's carried with the wrist), stick held down opens the weapon
 	/// wheel, stick turns, up jumps, down crouches.</item>
 	/// <item>Off hand: stick moves (or aims teleport/shift), stick click runs, A holds the spawn menu or the inspect
 	/// menu, whichever was up last, B holds voice chat, trigger undoes. Both stick clicks together toggle noclip.</item>
@@ -86,8 +83,7 @@ public sealed partial class VRPlayer
 		Press( "use", (main.Grip.Value > 0.6f && !GripTakenByGunplay( DominantGunplayHand ))
 			|| (off.Grip.Value > 0.6f && !GripTakenByGunplay( OffGunplayHand )) );
 
-		UpdateWheelClick( main.JoystickPress.IsPressed && !HoldsGun( DominantGunplayHand ), off.JoystickPress.IsPressed );
-		WheelStick = main.Joystick.Value;
+		UpdateWheelHold( main.JoystickPress.IsPressed && !HoldsGun( DominantGunplayHand ), off.JoystickPress.IsPressed );
 
 		Press( "run", off.JoystickPress.IsPressed && !main.JoystickPress.IsPressed && !offGun );
 		// The spawn menu and the inspector share A, each has a button over to the other - see SpawnMenuHost.ShowVRMenu
@@ -107,7 +103,7 @@ public sealed partial class VRPlayer
 		Press( "view", false );
 		Press( "duck", false );
 
-		// The wheel picks with the stick and a menu scrolls with it, see WorldInput, rather than turning and jumping
+		// The stick held down for the wheel shouldn't turn or jump, and a menu scrolls with it, see WorldInput
 		var stick = WheelOpen || SpawnMenuHost.IsOpen || VRKeyboard.IsOpen ? Vector2.Zero : main.Joystick.Value;
 
 		// Up and down choose a wire's port rather than jumping and crouching, see WireTool
@@ -142,16 +138,15 @@ public sealed partial class VRPlayer
 	}
 
 	/// <summary>
-	/// A click counts when it's let go, by then we know the other stick wasn't clicked with it for noclip.
+	/// Once the other stick's been clicked the hold is spoiled until the stick's let go, and letting go after a noclip
+	/// never picks a weapon, whichever stick comes up first.
 	/// </summary>
-	void UpdateWheelClick( bool down, bool otherDown )
+	void UpdateWheelHold( bool down, bool otherDown )
 	{
-		WheelClicked = _stickClickDown && !down && !_stickClickSpoiled;
+		WheelHeld = down;
 
-		if ( !down ) _stickClickSpoiled = false;
-		else if ( otherDown ) _stickClickSpoiled = true;
-
-		_stickClickDown = down;
+		if ( !down ) WheelCancelled = false;
+		else if ( otherDown ) WheelCancelled = true;
 	}
 
 	static bool Hysteresis( bool down, float value ) => down ? value > 0.4f : value > 0.6f;

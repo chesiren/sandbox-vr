@@ -219,7 +219,7 @@ public sealed class InventorySection : HudSection
 			var boxSize = MathF.Round( IndexBoxSize * scale );
 			var box = new Rect( rect.Left + inset, rect.Top + inset, boxSize, boxSize );
 
-			var em = IndexDigitSize / 1.25f * ScaleToScreen;
+			var em = IndexDigitSize / 1.25f * scale;
 			var indexColor = highlighted ? Glowing( Tinted( Color.White ) ) : Shade( Tinted( Color.White ) );
 			painter.TextStyle = new TextStyle( IndexFont, em, indexColor ) { Alignment = TextFlag.Center };
 			painter.Text( IndexLabel( index ), new Rect( box.Left + em * 0.125f, box.Top, box.Width, box.Height ) );
@@ -246,7 +246,7 @@ public sealed class InventorySection : HudSection
 			painter.Texture( icon, new Rect( center - size * 0.5f, size ), iconColor );
 		}
 
-		painter.TextStyle = new TextStyle( HudStyle.Font, NameFontSize * ScaleToScreen, nameColor ) { FontWeight = 700, LetterSpacing = NameFontSize * NameLetterSpacing * ScaleToScreen, Alignment = TextFlag.CenterHorizontally | TextFlag.Bottom };
+		painter.TextStyle = new TextStyle( HudStyle.Font, NameFontSize * scale, nameColor ) { FontWeight = 700, LetterSpacing = NameFontSize * NameLetterSpacing * scale, Alignment = TextFlag.CenterHorizontally | TextFlag.Bottom };
 		painter.Text( NameLabel( weapon ), new Rect( rect.Left, rect.Top, rect.Width, rect.Height - MathF.Round( NameBottom * scale ) ) );
 	}
 
