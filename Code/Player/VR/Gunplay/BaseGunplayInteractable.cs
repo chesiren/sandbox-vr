@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 /// state, and everyone else follows. What another player holds can't be taken out of their hand. Only VR hands hold these: the carry (use) never picks them up, so a desktop player
 /// can't take or equip one.</para>
 /// </summary>
-public class BaseGunplayInteractable : Component, ICarryEvent
+public class BaseGunplayInteractable : Component, ICarryEvent, IPhysgunEvent, IToolgunEvent
 {
 	[Property] public Rigidbody Rigidbody { get; set; }
 
@@ -36,15 +36,18 @@ public class BaseGunplayInteractable : Component, ICarryEvent
 	[Sync] public bool HeldByOwner { get; private set; }
 
 	/// <summary>
-	/// Is another player's hand holding this, or any other part of the same object, like the gun a slide's on?
+	/// Is a hand holding this, or any other part of the same object, like the gun a slide's on? On every machine.
 	/// </summary>
-	public bool IsHeldByOther()
+	public bool IsHeldByAnyone()
 	{
-		if ( !IsProxy ) return false;
-
-		var root = GameObject.Network.RootGameObject;
+		var root = GameObject.Network.RootGameObject ?? GameObject.Root;
 		return root.IsValid() && root.GetComponentsInChildren<BaseGunplayInteractable>().Any( x => x.HeldByOwner );
 	}
+
+	/// <summary>
+	/// Is another player's hand holding this, or any other part of the same object?
+	/// </summary>
+	public bool IsHeldByOther() => IsProxy && IsHeldByAnyone();
 
 	/// <summary>
 	/// The grab point that isn't tagged secondary.
@@ -186,4 +189,18 @@ public class BaseGunplayInteractable : Component, ICarryEvent
 
 	// The hands hold these, never the carry: a desktop player can't pick one up, and a VR player's grip goes to the hand
 	void ICarryEvent.OnCarryGrab( PlayerCarryEvent e ) => e.Cancelled = true;
+
+	// Not out of a hand, nor out of a gun: the physgun freezing or moving it fought the hand or the gun holding it
+	void IPhysgunEvent.OnPhysgunGrab( IPhysgunEvent.GrabEvent e )
+	{
+		if ( IsHeldByAnyone() || GetComponent<Attachable>() is { IsAttached: true } )
+			e.Cancelled = true;
+	}
+
+	// Nobody welds or removes what a VR player's holding
+	void IToolgunEvent.OnToolgunSelect( IToolgunEvent.SelectEvent e )
+	{
+		if ( IsHeldByAnyone() )
+			e.Cancelled = true;
+	}
 }
