@@ -1123,6 +1123,12 @@
           {
             "__type": "LaserPointerComponent",
             "__guid": "3ee19cc4-6a65-4c28-b142-87c5b9bd0dec",
+            "GrabPoint": {
+              "_type": "component",
+              "component_id": "0d7f26fd-4286-483e-8f7b-a28e2e6c0ecb",
+              "go": "ba86cc5a-6f17-44a7-af6e-a64dd06c67d2",
+              "component_type": "GrabPoint"
+            },
             "IsEnabled": false,
             "LaserColor": "0.06667,1,0,1"
           }

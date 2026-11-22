@@ -1974,7 +1974,12 @@
             "__enabled": true,
             "Flags": 0,
             "DotSize": 0.6,
-            "GrabPoint": null,
+            "GrabPoint": {
+              "_type": "component",
+              "component_id": "1bd6604a-fc9a-4df5-b384-376736cc82b4",
+              "go": "ead47f53-cdcf-43c0-b040-4bf035ef2d15",
+              "component_type": "GrabPoint"
+            },
             "IsEnabled": false,
             "LaserColor": "0.06667,1,0,1",
             "LineWidth": 0.05,
