@@ -137,9 +137,14 @@ public sealed class PhysicalGun : GunplayInteractable
 	[Property, Group( "Projectile" )] public bool ConsumesEmptyMagazine { get; set; }
 
 	/// <summary>
-	/// The last rocket fired, steered at what the muzzle points at while the trigger stays down.
+	/// The last rocket fired, steered at what the muzzle points at while guided.
 	/// </summary>
 	[Sync( SyncFlags.FromHost )] RpgProjectile Projectile { get; set; }
+
+	/// <summary>
+	/// Rockets follow what the muzzle points at until they hit something. Toggled by clicking the grip hand's stick.
+	/// </summary>
+	[Property, Sync, Group( "Projectile" )] public bool IsGuided { get; set; }
 
 	/// <summary>
 	/// A shot throws its casing out of the ejection port: not when it's worked by hand, not from a revolver's cylinder,
@@ -189,6 +194,7 @@ public sealed class PhysicalGun : GunplayInteractable
 	/// The grip hand's trigger was down last frame, for a fresh pull on a gun that isn't <see cref="Automatic"/>.
 	/// </summary>
 	bool _triggerWasDown;
+	bool _stickWasDown;
 
 	/// <summary>
 	/// The hand on the grip, on the holder's machine.
@@ -339,6 +345,7 @@ public sealed class PhysicalGun : GunplayInteractable
 		if ( IsProxy || GripHand is not { } hand || hand.Controller is not { } controller )
 		{
 			_triggerWasDown = false;
+			_stickWasDown = false;
 			return;
 		}
 
@@ -352,8 +359,17 @@ public sealed class PhysicalGun : GunplayInteractable
 		if ( Automatic ? triggerDown : pulled )
 			TryShoot();
 
-		if ( triggerDown && ProjectilePrefab is not null )
-			GuideProjectile();
+		if ( ProjectilePrefab is not null )
+		{
+			var stickDown = controller.JoystickPress.IsPressed;
+			if ( stickDown && !_stickWasDown )
+				ToggleGuidance();
+			_stickWasDown = stickDown;
+
+			// Like the RPG it's modelled on, the rocket follows the muzzle all the way, not just while the trigger's held
+			if ( IsGuided )
+				GuideProjectile();
+		}
 
 		if ( controller.ButtonB.IsPressed )
 			TryDetachMagazine();
@@ -470,7 +486,16 @@ public sealed class PhysicalGun : GunplayInteractable
 	}
 
 	/// <summary>
-	/// While the trigger stays down after a rocket's fired, it flies at what the muzzle points at. Owner only.
+	/// Switches guidance on or off, with a buzz to tell which: a long one for on, a short one for off. Owner only.
+	/// </summary>
+	void ToggleGuidance()
+	{
+		IsGuided = !IsGuided;
+		VRMode.Pulse( GripHand?.Controller, 0.5f, IsGuided ? 0.3f : 0.1f );
+	}
+
+	/// <summary>
+	/// Steers the last rocket fired at what the muzzle points at, until it hits something. Owner only.
 	/// </summary>
 	void GuideProjectile()
 	{
