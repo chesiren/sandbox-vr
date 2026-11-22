@@ -1,6 +1,7 @@
 /// <summary>
-/// Rounds of one caliber held together: a magazine that goes in a gun, or one built into it like a shotgun's tube. Every
-/// round in it is the same, so only how many there are is kept, synced by the owner.
+/// Rounds of one caliber held together: a magazine that goes in a gun, one built into it like a shotgun's tube, or a
+/// speedloader or speed strip (see <see cref="AmmoClip"/>). Every round in it is the same, so only how many there are
+/// is kept, synced by the owner.
 /// </summary>
 public abstract class RoundStore : Component, IAmmoSource, Component.ITriggerListener
 {
@@ -92,23 +93,57 @@ public abstract class RoundStore : Component, IAmmoSource, Component.ITriggerLis
 	/// </summary>
 	protected virtual bool CanLoadByHand => true;
 
+	/// <summary>
+	/// Takes every round of an <see cref="AmmoClip"/> pushed into it, like a shotgun's tube from a speed strip.
+	/// </summary>
+	protected virtual bool AcceptsClips => false;
+
 	void ITriggerListener.OnTriggerEnter( Collider other )
 	{
-		if ( IsProxy || !CanLoadByHand ) return;
+		if ( CanLoadByHand )
+			LoadByHand( other );
+	}
 
-		// A round pushed in by a hand, ours or another player's, like the owner of a gun takes a magazine handed into it
-		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round ) return;
-		if ( IsFull || !IsCompatibleBullet( round.Bullet ) ) return;
+	/// <summary>
+	/// Loads what a hand pushed into it: a loose round, or the rounds of a clip if it takes them. Owner only.
+	/// </summary>
+	/// <returns>How many rounds went in.</returns>
+	public int LoadByHand( Collider other )
+	{
+		if ( IsProxy || IsFull || !other.IsValid() ) return 0;
 
-		if ( Push( round.Pop().ToArray() ) <= 0 ) return;
+		var root = other.GameObject.Root;
+		var pushed = 0;
 
-		round.GetComponent<GunplayInteractable>()?.ClearAllInteractions();
+		// Ours or another player's, like the owner of a gun takes a magazine handed into it
+		if ( root.GetComponent<LooseRound>() is { Consumed: false } round )
+		{
+			if ( !IsCompatibleBullet( round.Bullet ) ) return 0;
+
+			pushed = Push( round.Pop().ToArray() );
+			if ( pushed <= 0 ) return 0;
+
+			round.GetComponent<GunplayInteractable>()?.ClearAllInteractions();
+			round.Remove();
+		}
+		// The clip's rounds can only be taken by whoever holds it, it stays in their hand
+		else if ( AcceptsClips && root.GetComponent<AmmoClip>() is { } clip && clip != this && !clip.IsProxy )
+		{
+			if ( !clip.HasAmmo || clip.Caliber != Caliber ) return 0;
+
+			pushed = Push( clip.Pop( BulletCapacity - BulletCount ).ToArray() );
+			if ( pushed <= 0 ) return 0;
+		}
+		else
+		{
+			return 0;
+		}
 
 		if ( OnChamberSound is not null )
 			GunplaySounds.Play( OnChamberSound, WorldPosition );
 
 		OnLoadedByHand();
-		round.Remove();
+		return pushed;
 	}
 
 	/// <summary>

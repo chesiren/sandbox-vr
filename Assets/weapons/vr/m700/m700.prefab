@@ -44,12 +44,7 @@
         },
         "Force": 800,
         "KickYaw": "-1 1",
-        "InternalMagazine": {
-          "_type": "component",
-          "component_id": "84ca8db7-1549-4ae6-af02-2d289d143f4b",
-          "go": "07a1d95f-a3fb-4e07-9d61-a41e75307b73",
-          "component_type": "InternalMagazine"
-        },
+        "InternalMagazine": null,
         "ManualAction": true,
         "MassScale": 1.4,
         "MaxRange": 8192,
@@ -189,7 +184,7 @@
               "Id": "cac56fc9-32ba-4781-93f2-b5138bfae5e1",
               "Path": "weapons/vr/empty.vanmgrph"
             },
-            "BodyGroups": 83,
+            "BodyGroups": 89,
             "BoneMergeTarget": null,
             "CreateAttachments": false,
             "CreateBoneObjects": true,
@@ -2196,6 +2191,71 @@
         "Children": []
       },
       {
+        "__guid": "f771dc16-07a2-4a2d-aa6b-91bb6567edd2",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "m700 Magazine Attachment",
+        "Position": "-1.5157,0,3.3",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "trigger",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "AttachmentPoint",
+            "__guid": "1b3f716f-c107-474c-a181-cc2575b1ed39",
+            "__enabled": true,
+            "Flags": 0,
+            "AcceptedTags": "magazine",
+            "GuideModel": null,
+            "Interactable": {
+              "_type": "component",
+              "component_id": "33e076bb-0b94-4a4e-b260-6382cb7b7876",
+              "go": "f4abe013-2f0e-4b3e-89cf-734971754623",
+              "component_type": "PhysicalGun"
+            },
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null
+          },
+          {
+            "__type": "Sandbox.BoxCollider",
+            "__guid": "8b911144-325f-4079-8ac1-1d67a99a2d3a",
+            "__enabled": true,
+            "Flags": 0,
+            "Center": "0,0,0.8",
+            "ColliderFlags": 0,
+            "Elasticity": null,
+            "Friction": null,
+            "IsTrigger": true,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "OnObjectTriggerEnter": null,
+            "OnObjectTriggerExit": null,
+            "OnTriggerEnter": null,
+            "OnTriggerExit": null,
+            "RollingResistance": null,
+            "Scale": "2,2,2",
+            "Static": false,
+            "Surface": null,
+            "SurfaceVelocity": "0,0,0"
+          }
+        ],
+        "Children": []
+      },
+      {
         "__guid": "07a1d95f-a3fb-4e07-9d61-a41e75307b73",
         "__version": 2,
         "Flags": 0,
@@ -2238,36 +2298,21 @@
             "SurfaceVelocity": "0,0,0"
           },
           {
-            "__type": "InternalMagazine",
+            "__type": "MagazineLoadingPort",
             "__guid": "84ca8db7-1549-4ae6-af02-2d289d143f4b",
             "__enabled": true,
             "Flags": 0,
-            "BulletCapacity": 5,
-            "BulletCount": 0,
-            "BulletPrefab": {
-              "IsSpent": false,
-              "Caliber": "SevenSixTwo",
-              "SpentCasingBodygroup": {
-                "Index": 0,
-                "Value": 1
-              },
-              "Prefab": {
-                "_type": "gameobject",
-                "prefab": "weapons/vr/ammo/round_762.prefab"
-              }
+            "Gun": {
+              "_type": "component",
+              "component_id": "33e076bb-0b94-4a4e-b260-6382cb7b7876",
+              "go": "f4abe013-2f0e-4b3e-89cf-734971754623",
+              "component_type": "PhysicalGun"
             },
-            "Caliber": "SevenSixTwo",
-            "DefaultBulletCapacity": 5,
-            "IsInfiniteAmmo": false,
             "LoadGate": {
               "_type": "component",
               "component_id": "ae6896be-35d8-4f22-99f0-f571eaca9bbd",
               "go": "225ed366-8520-484f-afa9-a2fefd20efcf",
               "component_type": "PointInteractable"
-            },
-            "OnChamberSound": {
-              "Id": "69d9b947-9dbe-47b8-aa58-4f75bb35dd34",
-              "Path": "weapons/sniper/sounds/sniper_mag_in.sound"
             },
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,

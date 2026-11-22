@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/m700/m700_magazine.prefab",
+  "Title": "M700 Magazine",
+  "Description": "Five 7.62mm rounds. Push it into the M700. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

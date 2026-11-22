@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/revolver/speedloader_357.prefab",
+  "Title": "Ironwood .357 Speedloader",
+  "Description": "Six .357 rounds. Push it into the Ironwood's open cylinder to fill it. Push loose rounds into it to refill it. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

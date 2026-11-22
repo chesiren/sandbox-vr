@@ -1,0 +1,11 @@
+{
+  "Prefab": "weapons/vr/spaghellim4/speedstrip_12g.prefab",
+  "Title": "Spaghelli M4 Speed Strip",
+  "Description": "Six 12ga shells. Push it into the Spaghelli M4's loading port to fill the tube. Push loose shells into it to refill it. VR only.",
+  "Category": "Weapon/VR",
+  "IncludeCode": false,
+  "Developer": false,
+  "VROnly": true,
+  "__references": [],
+  "__version": 0
+}

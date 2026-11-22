@@ -1,6 +1,6 @@
 /// <summary>
-/// A magazine built into a gun, like a shotgun's tube or a bolt-action rifle's box: it doesn't come out, it's loaded a
-/// round at a time by pushing loose rounds into its trigger. Kept by the gun's owner.
+/// A magazine built into a gun, like a shotgun's tube: it doesn't come out, it's loaded by pushing loose rounds into its
+/// trigger one at a time, or a whole <see cref="AmmoClip"/> at once. Kept by the gun's owner.
 /// </summary>
 public sealed class InternalMagazine : RoundStore
 {
@@ -11,6 +11,8 @@ public sealed class InternalMagazine : RoundStore
 	[Property] public PointInteractable LoadGate { get; set; }
 
 	protected override bool CanLoadByHand => !LoadGate.IsValid() || LoadGate.CompletionValue.AlmostEqual( 1f );
+
+	protected override bool AcceptsClips => true;
 
 	protected override void OnLoadedByHand()
 	{

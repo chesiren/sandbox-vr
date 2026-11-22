@@ -1,8 +1,8 @@
 /// <summary>
 /// A revolver's cylinder, its chambers in place of a magazine and a chamber. Each pull of the trigger turns it a chamber
 /// on and fires the one under the hammer, double action. A on the grip hand swings it out, or back in, as does a flick
-/// of the wrist; out, B or the muzzle pointed at the sky throws everything in it out, and loose rounds pushed into it
-/// go in the next empty chambers.
+/// of the wrist; out, B or the muzzle pointed at the sky throws everything in it out, loose rounds pushed into it go in
+/// the next empty chambers, and a speedloader (see <see cref="AmmoClip"/>) fills them all.
 /// <para>The gun's owner keeps it. What's in each chamber, which one's up and whether it's out are synced, and every
 /// machine swings and turns the model's cylinder from them.</para>
 /// </summary>
@@ -269,9 +269,24 @@ public sealed class RevolverCylinder : Component, IGunChamber, Component.ITrigge
 		// while the muzzle's up
 		if ( _sinceEmptied < 0.5f ) return;
 
+		if ( Gun?.RoundTemplate is not { } template ) return;
+		var root = other.GameObject.Root;
+
+		// A speedloader fills every empty chamber at once, if it's held by us and goes in lined up with the cylinder
+		if ( root.GetComponent<AmmoClip>() is { } clip )
+		{
+			if ( clip.IsProxy || !clip.HasAmmo || clip.Caliber != template.Caliber ) return;
+			if ( clip.WorldRotation.Forward.Dot( Gun.WorldRotation.Forward ) < 0.7f ) return;
+			if ( Feed( clip ) <= 0 ) return;
+
+			GunplaySounds.Play( InsertSound, WorldPosition );
+			VRMode.Pulse( clip.Interactable?.PrimaryGrabPoint?.Hand?.Controller, 0.3f, 0.2f );
+			return;
+		}
+
 		// Ours or another player's round, see RoundStore
-		if ( other.GameObject.Root.GetComponent<LooseRound>() is not { Consumed: false } round ) return;
-		if ( Gun?.RoundTemplate is not { } template || round.Bullet.Caliber != template.Caliber ) return;
+		if ( root.GetComponent<LooseRound>() is not { Consumed: false } round ) return;
+		if ( round.Bullet.Caliber != template.Caliber ) return;
 
 		round.GetComponent<GunplayInteractable>()?.ClearAllInteractions();
 		if ( Feed( round ) <= 0 ) return;
