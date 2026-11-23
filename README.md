@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/Facepunch/sandbox">
+  <a href="https://github.com/Facepunch/sbox-public/tree/master/game/addons/sandbox">
     <img src="https://cdn.sbox.game/org/facepunch/sandbox/thumb/8d0a5169-0ce3-4520-b9e7-23bcafddf7fc.png" alt="Logo" width="450">
   </a>
 
